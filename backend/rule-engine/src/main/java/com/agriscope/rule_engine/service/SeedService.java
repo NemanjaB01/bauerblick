@@ -1,0 +1,180 @@
+package com.agriscope.rule_engine.service;
+
+import com.agriscope.rule_engine.domain.enums.SeedType;
+import com.agriscope.rule_engine.domain.model.Seed;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@Service
+public class SeedService {
+
+    private Map<SeedType, Seed> seedDatabase = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        log.info("Initializing seed database");
+
+        seedDatabase.put(SeedType.WHEAT, createWheatSeed());
+        seedDatabase.put(SeedType.CORN, createCornSeed());
+        seedDatabase.put(SeedType.BARLEY, createBarleySeed());
+        seedDatabase.put(SeedType.PUMPKIN, createPumpkinSeed());
+        seedDatabase.put(SeedType.BLACK_GRAPES, createBlackGrapesSeed());
+        seedDatabase.put(SeedType.WHITE_GRAPES, createWhiteGrapesSeed());
+    }
+
+    private Seed createWheatSeed() {
+        Seed wheat = new Seed();
+        wheat.setSeedType(SeedType.WHEAT);
+        wheat.setDisplayName("Wheat");
+        wheat.setScientificName("Triticum aestivum");
+
+        wheat.setMinTemperature(3.0);
+        wheat.setOptimalTemperature(15.0);
+        wheat.setMaxTemperature(30.0);
+
+        wheat.setMinSoilMoisture(0.3);
+        wheat.setOptimalSoilMoisture(0.5);
+        wheat.setMaxSoilMoisture(0.8);
+
+        wheat.setWaterRequirement(5.0);
+
+        wheat.setFrostRiskTemperature(2.0);
+        wheat.setHeatStressTemperature(30.0);
+        wheat.setHeavyRainThreshold(10.0);
+
+        return wheat;
+    }
+
+    private Seed createCornSeed() {
+        Seed corn = new Seed();
+        corn.setSeedType(SeedType.CORN);
+        corn.setDisplayName("Corn");
+        corn.setScientificName("Zea mays");
+
+        corn.setMinTemperature(10.0);
+        corn.setOptimalTemperature(25.0);
+        corn.setMaxTemperature(35.0);
+
+        corn.setMinSoilMoisture(0.4);
+        corn.setOptimalSoilMoisture(0.6);
+        corn.setMaxSoilMoisture(0.8);
+
+        corn.setWaterRequirement(8.0);
+
+        corn.setFrostRiskTemperature(2.0);
+        corn.setHeatStressTemperature(35.0);
+        corn.setHeavyRainThreshold(15.0);
+
+        return corn;
+    }
+
+    private Seed createBarleySeed() {
+        Seed barley = new Seed();
+        barley.setSeedType(SeedType.PUMPKIN);
+        barley.setDisplayName("Barley");
+        barley.setScientificName("Hordeum vulgare");
+
+        barley.setMinTemperature(2.0);
+        barley.setOptimalTemperature(18.0);
+        barley.setMaxTemperature(28.0);
+
+        barley.setMinSoilMoisture(0.3);
+        barley.setOptimalSoilMoisture(0.5);
+        barley.setMaxSoilMoisture(0.7);
+
+        barley.setWaterRequirement(4.5);
+
+        barley.setFrostRiskTemperature(1.0);
+        barley.setHeatStressTemperature(28.0);
+        barley.setHeavyRainThreshold(12.0);
+
+        return barley;
+    }
+
+    private Seed createPumpkinSeed() {
+        Seed pumpkin = new Seed();
+        pumpkin.setSeedType(SeedType.PUMPKIN);
+        pumpkin.setDisplayName("Pumpkin");
+        pumpkin.setScientificName("Cucurbita pepo");
+
+        pumpkin.setMinTemperature(15.0);
+        pumpkin.setOptimalTemperature(24.0);
+        pumpkin.setMaxTemperature(32.0);
+
+        pumpkin.setMinSoilMoisture(0.4);
+        pumpkin.setOptimalSoilMoisture(0.6);
+        pumpkin.setMaxSoilMoisture(0.8);
+
+        pumpkin.setWaterRequirement(7.0);
+
+        pumpkin.setFrostRiskTemperature(4.0);
+        pumpkin.setHeatStressTemperature(32.0);
+        pumpkin.setHeavyRainThreshold(20.0);
+
+        return pumpkin;
+    }
+
+    private Seed createBlackGrapesSeed() {
+        Seed grapes = new Seed();
+        grapes.setSeedType(SeedType.BLACK_GRAPES);
+        grapes.setDisplayName("Black Grapes");
+        grapes.setScientificName("Vitis vinifera");
+
+        grapes.setMinTemperature(12.0);
+        grapes.setOptimalTemperature(25.0);
+        grapes.setMaxTemperature(35.0);
+
+        grapes.setMinSoilMoisture(0.3);
+        grapes.setOptimalSoilMoisture(0.5);
+        grapes.setMaxSoilMoisture(0.7);
+
+        grapes.setWaterRequirement(6.0);
+
+        grapes.setFrostRiskTemperature(2.0);
+        grapes.setHeatStressTemperature(35.0);
+        grapes.setHeavyRainThreshold(15.0);
+
+        return grapes;
+    }
+
+    private Seed createWhiteGrapesSeed() {
+        Seed grapes = new Seed();
+        grapes.setSeedType(SeedType.WHITE_GRAPES);
+        grapes.setDisplayName("White Grapes");
+        grapes.setScientificName("Vitis vinifera");
+
+        grapes.setMinTemperature(10.0);
+        grapes.setOptimalTemperature(22.0);
+        grapes.setMaxTemperature(32.0);
+
+        grapes.setMinSoilMoisture(0.3);
+        grapes.setOptimalSoilMoisture(0.5);
+        grapes.setMaxSoilMoisture(0.7);
+
+        grapes.setWaterRequirement(5.5);
+
+        grapes.setFrostRiskTemperature(1.0);
+        grapes.setHeatStressTemperature(32.0);
+        grapes.setHeavyRainThreshold(15.0);
+
+        return grapes;
+    }
+
+    @Cacheable(value="seeds", key="#seedType.name()")
+    public Seed getSeed(SeedType seedType) {
+        log.info("Loading seed configuration from DB/memory for type: {}", seedType);
+        Seed seed = seedDatabase.get(seedType);
+        if (seed == null) {
+            log.error("Seed not configured for type: {}, returning wheat as default", seedType);
+            return seedDatabase.get(SeedType.WHEAT);
+        }
+        return seed;
+    }
+
+}

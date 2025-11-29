@@ -1,0 +1,99 @@
+<div class="page-container">
+  <div class="topbar-container">
+    <div class="topbar-left">
+      <img src="assets/icons/logo.svg" class="topbar-icon logo-icon" />
+    </div>
+    <div class="topbar-right">
+      <img src="assets/icons/notification.svg" class="topbar-icon" />
+      <div class="menu-wrapper">
+        <img src="assets/icons/menu.svg" class="topbar-icon" (click)="toggleMenu()" />
+
+        <div class="wooden-dropdown" *ngIf="isMenuOpen">
+          <div class="dropdown-item" (click)="goToProfile()">
+            <img src="assets/icons/my_profile.svg" class="dropdown-icon" />
+            <span>My Profile</span>
+          </div>
+          <div class="dropdown-item" (click)="logout()">
+            <img src="assets/icons/logout.svg" class="dropdown-icon" />
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <div class="left-content">
+        <!-- <app-field-grid></app-field-grid> -->
+    </div>
+
+    <div class="right-content">
+      <div class="login-card">
+
+        <h1 class="login-title">
+          Add New Farm <img src="" class="login-icon">
+        </h1>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+    <div *ngIf="errorMessage" style="color:red">
+        {{ errorMessage }}
+    </div>
+    <label>Name</label>
+    <input type="text"
+            name="farmName"
+            [(ngModel)]="farm.name"
+            
+            placeholder="Enter farm name">
+
+    <div class="form-group mt-3">
+        <label for="soilType">Soil Type</label>
+        <select id="soilType"
+                name="soilType"
+                class="form-control"
+                [(ngModel)]="selectedSoil"
+                required>
+        <option value="" disabled selected>Select soil type...</option>
+        <option *ngFor="let s of soilTypes" [value]="s.id">
+            {{ s.name }}
+        </option>
+        </select>
+    </div>
+
+    <label>Location</label>
+    <!-- <div class="address-search-container">
+        <input type="text"
+            name="address"
+            class="form-control"
+            placeholder="Start typing address..."
+            (input)="onSearch($event)">
+
+        <ul *ngIf="results.length" class="autocomplete-dropdown">
+        <li *ngFor="let r of results" (click)="selectAddress(r.raw)">
+            {{ r.short }}
+        </li>
+        </ul>
+    </div>
+    <label>Or Select a Place on the Map</label> -->
+    <div class="map-card">
+        <app-map [externalCoords]="selectedCoords" 
+                (locationSelected)="onLocationSelected($event)">
+        </app-map>
+    </div>
+
+    <button type="submit" 
+            [disabled]="loginForm.invalid" 
+            class="signin-btn" 
+            (click)="addNewFarm()">
+        Add Farm
+    </button>
+
+    </form>
+
+      </div>
+    </div>
+  </div>
+
+
+
+</div>

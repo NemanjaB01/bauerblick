@@ -1,0 +1,100 @@
+/* ============================================
+   SIDEBAR CONTAINER
+   ============================================ */
+
+.sidebar-container {
+  width: 320px;
+  height: 100vh;
+  position: fixed;
+  top: 70px;
+  left: 0;
+  z-index: 10;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(22px);
+
+  border-radius: 0 35px 35px 0;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================
+   SIDEBAR HEADER
+   User svatar + username
+   ============================================ */
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 45px;
+}
+
+.sidebar-header .avatar {
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sidebar-header .username {
+  margin-top: 10px;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* ============================================
+   MENU ITEMS
+   ============================================ */
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 80px 13px 28px;
+
+  border-radius: 18px;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.menu-item img {
+  width: 56px;
+  height: 56px;
+  margin-left: 18px;
+  transition: transform 0.2s ease;
+}
+
+.menu-item span {
+  margin-left: 4px;
+  transition: transform 0.2s ease;
+}
+
+/* ============================================
+   Hover and active state animations
+   ============================================ */
+
+.menu-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+  transform: translateX(8px);
+}
+
+.menu-item:hover img {
+  transform: scale(1.15);
+}
+
+.menu-item:hover span {
+  transform: translateX(3px);
+}
+
+.menu-item:active {
+  transform: translateX(4px) scale(0.98);
+}

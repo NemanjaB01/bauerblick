@@ -1,0 +1,42 @@
+<div class="page-container">
+
+  <div class="topbar-container">
+    <div class="topbar-left">
+      <img src="/assets/icons/logo.svg" class="topbar-icon logo-icon" />
+    </div>
+    <div class="topbar-right">
+      <img src="/assets/icons/notification.svg" class="topbar-icon" />
+      <div class="menu-wrapper">
+        <img src="/assets/icons/menu.svg" class="topbar-icon" (click)="toggleMenu()" />
+
+        <div class="wooden-dropdown" *ngIf="isMenuOpen">
+          <div class="dropdown-item" (click)="goToProfile()">
+            <img src="/assets/icons/my_profile.svg" class="dropdown-icon" />
+            <span>My Profile</span>
+          </div>
+          <div class="dropdown-item" (click)="logout()">
+            <img src="/assets/icons/logout_app.svg" class="dropdown-icon" />
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="body-container">
+
+    <app-sidebar class="sidebar"></app-sidebar>
+
+    <div class="content-area">
+
+      <div class="left-content">
+        <app-field-grid></app-field-grid>
+      </div>
+
+      <div class="right-content">
+        <app-weather-widget></app-weather-widget>
+        <app-recommendations></app-recommendations>
+      </div>
+    </div>
+  </div>
+</div>

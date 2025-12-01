@@ -23,7 +23,7 @@ public class RabbitMQConfig {
 
     @Bean
     public TopicExchange alertExchange() {
-        return new TopicExchange(ALERT_EXCHANGE, false, false);
+        return new TopicExchange(ALERT_EXCHANGE, true, false);
     }
 
     @Bean
@@ -38,7 +38,7 @@ public class RabbitMQConfig {
 
     @Bean
     public TopicExchange weatherExchange() {
-        return new TopicExchange(WEATHER_EXCHANGE, false, false);
+        return new TopicExchange(WEATHER_EXCHANGE, true, false);
     }
 
     @Bean

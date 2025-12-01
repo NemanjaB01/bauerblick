@@ -15,7 +15,7 @@ logger = setup_logger(name="weather_client")
 
 class WeatherClient:
     def __init__(self):
-        session = requests_cache.CachedSession('.cache', expire_after=3600)
+        session = requests.Session()
 
         retry_strategy = Retry(
             total=Config.WEATHER_MAX_RETRIES,

@@ -1,0 +1,203 @@
+package rules.irrigation;
+
+import com.agriscope.rule_engine.domain.model.Seed;
+import com.agriscope.rule_engine.domain.model.FarmDetails;
+import com.agriscope.rule_engine.domain.model.Recommendation;
+import com.agriscope.rule_engine.domain.dto.DailyAnalysis;
+import com.agriscope.rule_engine.domain.enums.SeedType;
+import com.agriscope.rule_engine.domain.enums.SoilType;
+import com.agriscope.rule_engine.domain.enums.RecommendationType;
+
+global java.util.List recommendations;
+
+declare WaterDeficitResult
+    seed : Seed
+    deficit : double
+    effectiveRain : double
+    plantDemand : double
+end
+
+function double getSoilEfficiency(SoilType type) {
+    if (type == SoilType.CLAY) return 0.95;
+    if (type == SoilType.LOAM) return 0.85;
+    if (type == SoilType.SILT) return 0.80;
+    if (type == SoilType.PEAT) return 0.80;
+    if (type == SoilType.CHALKY) return 0.70;
+    return 0.80;
+}
+
+rule "Calculate Water Deficit Generic"
+    salience 100
+    when
+        $farm     : FarmDetails($soil : soilType)
+        $analysis : DailyAnalysis()
+        $seed     : Seed($kc : seedCoefficient)
+    then
+        double demand = $analysis.getTotalEt0() * $kc;
+
+        double effRain = $analysis.getTotalRain() * getSoilEfficiency($soil);
+
+        double result = demand - effRain;
+
+        WaterDeficitResult calc = new WaterDeficitResult();
+        calc.setSeed($seed);
+        calc.setDeficit(result);
+        calc.setEffectiveRain(effRain);
+        calc.setPlantDemand(demand);
+        insert(calc);
+end
+
+rule "Irrigation - BARLEY Dynamic"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.BARLEY)
+        $calc : WaterDeficitResult(seed == $seed, deficit > $seed.allowedWaterDeficit)
+        $analysis : DailyAnalysis(currentSoilMoisture < $seed.minSoilMoisture)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.BARLEY);
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate Barley: " + String.format("%.1f", $calc.getDeficit()) + " L/m2 needed");
+        String reason = String.format(
+            "Soil moisture is low (%.1f%%). Forecasted rain (%.1f mm) on %s soil is not enough to cover daily crop demand (%.1f mm).",
+            $analysis.getCurrentSoilMoisture() * 100,
+            $analysis.getTotalRain(),
+            $soil,
+            $calc.getPlantDemand()
+        );
+        rec.setReasoning(reason);
+
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_type", $soil);
+        recommendations.add(rec);
+end
+
+
+rule "Irrigation - BLACK GRAPES Dynamic"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.BLACK_GRAPES )
+        $calc : WaterDeficitResult(seed == $seed, deficit > $seed.allowedWaterDeficit)
+        $analysis : DailyAnalysis(currentSoilMoisture < $seed.minSoilMoisture)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed($seed.getSeedType());
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate Black grapes: " + String.format("%.1f", $calc.getDeficit()) + " L/m2 needed");
+        String reason = String.format(
+            "Soil moisture is low (%.1f%%). Forecasted rain (%.1f mm) on %s soil is not enough to cover daily crop demand (%.1f mm).",
+            $analysis.getCurrentSoilMoisture() * 100,
+            $analysis.getTotalRain(),
+            $soil,
+            $calc.getPlantDemand()
+        );
+        rec.setReasoning(reason);
+
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_type", $soil);
+        recommendations.add(rec);
+end
+
+
+rule "Irrigation - CORN Dynamic"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.CORN)
+        $calc : WaterDeficitResult(seed == $seed, deficit > $seed.allowedWaterDeficit)
+        $analysis : DailyAnalysis(currentSoilMoisture < $seed.minSoilMoisture)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.CORN);
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate Corn: " + String.format("%.1f", $calc.getDeficit()) + " L/m2 needed");
+
+        String reason = String.format(
+            "Soil moisture is low (%.1f%%). Forecasted rain (%.1f mm) on %s soil is not enough to cover daily crop demand (%.1f mm).",
+            $analysis.getCurrentSoilMoisture() * 100,
+            $analysis.getTotalRain(),
+            $soil,
+            $calc.getPlantDemand()
+        );
+        rec.setReasoning(reason);
+
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_type", $soil);
+        recommendations.add(rec);
+end
+
+rule "Irrigation - PUMPKIN Dynamic"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.PUMPKIN)
+        $calc : WaterDeficitResult(seed == $seed, deficit > $seed.allowedWaterDeficit)
+        $analysis : DailyAnalysis(currentSoilMoisture < $seed.minSoilMoisture)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.PUMPKIN);
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate Pumpkin: " + String.format("%.1f", $calc.getDeficit()) + " L/m2 needed");
+        String reason = String.format(
+            "Soil moisture is low (%.1f%%). Forecasted rain (%.1f mm) on %s soil is not enough to cover daily crop demand (%.1f mm).",
+            $analysis.getCurrentSoilMoisture() * 100,
+            $analysis.getTotalRain(),
+            $soil,
+            $calc.getPlantDemand()
+        );
+        rec.setReasoning(reason);
+
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_type", $soil);
+        recommendations.add(rec);
+end
+
+
+rule "Irrigation - WHEAT Dynamic"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.WHEAT)
+        $calc : WaterDeficitResult(seed == $seed, deficit > $seed.allowedWaterDeficit)
+        $analysis : DailyAnalysis(currentSoilMoisture < $seed.minSoilMoisture)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHEAT);
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate Wheat: " + String.format("%.1f", $calc.getDeficit()) + " L/m2 needed");
+        String reason = String.format(
+            "Soil moisture is low (%.1f%%). Forecasted rain (%.1f mm) on %s soil is not enough to cover daily crop demand (%.1f mm).",
+            $analysis.getCurrentSoilMoisture() * 100,
+            $analysis.getTotalRain(),
+            $soil,
+            $calc.getPlantDemand()
+        );
+        rec.setReasoning(reason);
+
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_type", $soil);
+        recommendations.add(rec);
+end
+
+
+rule "Irrigation - WHITE GRAPES Dynamic"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $calc : WaterDeficitResult(seed == $seed, deficit > $seed.allowedWaterDeficit)
+        $analysis : DailyAnalysis(currentSoilMoisture < $seed.minSoilMoisture)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed($seed.getSeedType());
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate White grapes: " + String.format("%.1f", $calc.getDeficit()) + " L/m2 needed");
+        String reason = String.format(
+            "Soil moisture is low (%.1f%%). Forecasted rain (%.1f mm) on %s soil is not enough to cover daily crop demand (%.1f mm).",
+            $analysis.getCurrentSoilMoisture() * 100,
+            $analysis.getTotalRain(),
+            $soil,
+            $calc.getPlantDemand()
+        );
+        rec.setReasoning(reason);
+
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_type", $soil);
+        recommendations.add(rec);
+end

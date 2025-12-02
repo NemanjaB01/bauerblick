@@ -17,7 +17,8 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class DroolsConfig {
 
-    private static final String RULES_SEED_PATH = "rules/current/";
+    private static final String RULES_SEED_PATH = "rules/safety/";
+    private static final String RULES_IRRIGATION_PATH = "rules/irrigation/";
     private KieServices kieServices = KieServices.Factory.get();
 
     @Bean
@@ -31,6 +32,8 @@ public class DroolsConfig {
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "pumpkin.drl"));
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "black_grapes.drl"));
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "white_grapes.drl"));
+
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "irrigation.drl"));
 
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
         kieBuilder.buildAll();

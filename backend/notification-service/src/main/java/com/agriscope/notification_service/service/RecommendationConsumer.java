@@ -21,6 +21,11 @@ public class RecommendationConsumer {
                 recommendation.getFarmId(),
                 recommendation.getRecommendationType());
 
-        alertService.processIncomingAlert(recommendation);
+        try {
+            alertService.processIncomingAlert(recommendation);
+        } catch (Exception e) {
+            log.error("Failed to process recommendation type {}. Data: {}",
+                    recommendation.getRecommendationType(), recommendation, e);
+        }
     }
 }

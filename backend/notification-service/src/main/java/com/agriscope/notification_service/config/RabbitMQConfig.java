@@ -14,6 +14,7 @@ public class RabbitMQConfig {
 
     public static final String WEATHER_EXCHANGE = "weather_exchange";
     public static final String NOTIFICATION_WEATHER_QUEUE = "weather_notification_queue";
+    public static final String WEATHER_ROUTING_KEY = "weather.current";
 
 
     @Bean
@@ -47,10 +48,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding notificationWeatherBinding(Queue notificationWeatherQueue,
-                                              TopicExchange weatherExchange) {
-        return BindingBuilder.bind(notificationWeatherQueue)
-                .to(weatherExchange)
-                .with("weather.current");
+    public Binding notificationWeatherBinding(Queue notificationWeatherQueue, TopicExchange weatherExchange) {
+        return BindingBuilder.bind(notificationWeatherQueue).to(weatherExchange).with(WEATHER_ROUTING_KEY);
     }
 }

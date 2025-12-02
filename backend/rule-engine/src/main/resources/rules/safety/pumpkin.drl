@@ -1,4 +1,4 @@
-package rules.current;
+package rules.safety;
 
 import com.agriscope.rule_engine.domain.model.CurrentWeatherData
 import com.agriscope.rule_engine.domain.model.Seed

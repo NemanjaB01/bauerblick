@@ -4,7 +4,10 @@ import com.agriscope.rule_engine.config.RabbitMQConfig;
 import com.agriscope.rule_engine.domain.dto.WeatherForecastDTO;
 import com.agriscope.rule_engine.domain.dto.WeatherMessageDTO;
 import com.agriscope.rule_engine.domain.enums.ForecastType;
+import com.agriscope.rule_engine.domain.enums.SoilType;
 import com.agriscope.rule_engine.domain.model.CurrentWeatherData;
+import com.agriscope.rule_engine.domain.model.FarmDetails;
+import com.agriscope.rule_engine.domain.model.HourlyWeatherData;
 import com.agriscope.rule_engine.service.RuleEvaluationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -58,7 +62,7 @@ public class WeatherMessageListener {
                 processCurrentForecast(forecastData, userId, farmId, crops);
                 break;
             case "HOURLY":
-//                processHourlyForecast(forecastData, userId, farmId);   // TODO
+                processHourlyForecast(forecastData, userId, farmId, crops);
                 break;
             case "DAILY":
 //                processDailyForecast(forecastData, userId, farmId);    // TODO
@@ -88,7 +92,50 @@ public class WeatherMessageListener {
                 weatherData.getRain(),
                 weatherData.getWind_speed_10m());
 
-        ruleEvaluationService.evaluateCurrentRules(weatherData, crops);
+        ruleEvaluationService.evaluateCurrentSafetyRules(weatherData, crops);
+    }
+
+    private void processHourlyForecast(List<WeatherForecastDTO> forecastData, String userId, String farmId, List<String> crops) {
+        List<HourlyWeatherData> hourlyList = new ArrayList<>();
+
+        for (WeatherForecastDTO dto : forecastData) {
+            hourlyList.add(convertToHourlyWeatherData(dto, userId, farmId));
+        }
+
+        FarmDetails farm = new FarmDetails();
+        farm.setFarmId(farmId);
+        farm.setSoilType(SoilType.LOAM); // Default for now
+        farm.setHasIrrigationSystem(true);
+
+        log.info("Processing Daily Irrigation logic for {} hours of data", hourlyList.size());
+
+        ruleEvaluationService.evaluateDailyIrrigation(hourlyList, farm, crops);
+    }
+
+    private HourlyWeatherData convertToHourlyWeatherData(WeatherForecastDTO dto, String userId, String farmId) {
+        HourlyWeatherData data = new HourlyWeatherData();
+        data.setUserId(userId);
+        data.setFarmId(farmId);
+        data.setForecastType(ForecastType.HOURLY);
+
+        data.setTemperature_2m(dto.getTemperature2m());
+        data.setRain(dto.getRain());
+        data.setPrecipitation(dto.getPrecipitation());
+        data.setPrecipitation_probability(dto.getPrecipitationProbability());
+        data.setWind_speed_10m_max(dto.getWindSpeed10m());
+
+        data.setSoil_moisture_0_to_1cm(dto.getSoilMoisture0to1cm());
+        data.setSoil_moisture_1_to_3cm(dto.getSoilMoisture1to3cm());
+        data.setSoil_moisture_3_to_9cm(dto.getSoilMoisture3to9cm());
+        data.setSoil_moisture_9_to_27cm(dto.getSoilMoisture9to27cm());
+
+        data.setEt0_fao_evapotranspiration(dto.getEt0FaoEvapotranspiration());
+
+        if (dto.getTime() != null) {
+            data.setDate(parseDateTime(dto.getTime()));
+        }
+
+        return data;
     }
 
     private CurrentWeatherData convertToCurrentWeatherData(WeatherForecastDTO dto,

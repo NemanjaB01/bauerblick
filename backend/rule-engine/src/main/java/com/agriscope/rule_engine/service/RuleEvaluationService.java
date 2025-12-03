@@ -30,7 +30,7 @@ public class RuleEvaluationService {
     @Autowired
     private RecommendationProducer recommendationProducer;
 
-    public void evaluateCurrentSafetyRules(CurrentWeatherData weatherData, List<String> crops) {
+    public void evaluateCurrentDataForFarm(CurrentWeatherData weatherData, List<String>  seeds) {
         log.info("Evaluating CURRENT rules for user {}, farm {}",
                 weatherData.getUserId(), weatherData.getFarmId());
 
@@ -41,19 +41,19 @@ public class RuleEvaluationService {
             kieSession.setGlobal("recommendations", recommendations);
             kieSession.insert(weatherData);
 
-            if (crops == null || crops.isEmpty()) {
-                log.warn("No crops defined for farm {}, skipping seed insertion", weatherData.getFarmId());
+            if (seeds == null || seeds.isEmpty()) {
+                log.warn("No seeds defined for farm {}, skipping seed insertion", weatherData.getFarmId());
             } else {
-                for (String cropName : crops) {
+                for (String seedName : seeds) {
                     try {
-                        SeedType type = SeedType.valueOf(cropName.toUpperCase());
+                        SeedType type = SeedType.valueOf(seedName.toUpperCase());
                         Seed seed = seedService.getSeed(type);
                         if (seed != null) {
                             kieSession.insert(seed);
                             log.debug("Inserted seed: {}", type);
                         }
                     } catch (IllegalArgumentException e) {
-                        log.warn("Unknown crop type received: {}", cropName);
+                        log.warn("Unknown seed type received: {}", seedName);
                     }
                 }
             }
@@ -68,7 +68,7 @@ public class RuleEvaluationService {
         }
     }
 
-    public void evaluateDailyIrrigation(List<HourlyWeatherData> hourlyData, FarmDetails farm, List<String> crops) {
+    public void evaluateHourlDataForFarm(List<HourlyWeatherData> hourlyData, FarmDetails farm, List<String> seeds) {
         if (hourlyData == null || hourlyData.isEmpty()) return;
 
         double sumEt0 = hourlyData.stream()
@@ -101,14 +101,20 @@ public class RuleEvaluationService {
             kieSession.insert(farm);
             kieSession.insert(analysis);
 
-            if (crops != null) {
-                for (String cropName : crops) {
+            int safetyCheckLimit = Math.min(hourlyData.size(), 3);
+
+            for (int i = 0; i < safetyCheckLimit; i++) {
+                kieSession.insert(hourlyData.get(i));
+            }
+            log.info("Inserted {} hours of forecast for General Safety evaluation.", safetyCheckLimit);
+            if (seeds != null) {
+                for (String seedName : seeds) {
                     try {
-                        SeedType type = SeedType.valueOf(cropName.toUpperCase());
+                        SeedType type = SeedType.valueOf(seedName.toUpperCase());
                         Seed seed = seedService.getSeed(type);
                         if (seed != null) kieSession.insert(seed);
                     } catch (Exception e) {
-                        log.warn("Invalid crop name: {}", cropName);
+                        log.warn("Invalid seed name: {}", seedName);
                     }
                 }
             }
@@ -150,7 +156,6 @@ public class RuleEvaluationService {
             log.info("No recommendations - conditions are normal");
             return;
         }
-
 
         LocalDateTime now = LocalDateTime.now();
 

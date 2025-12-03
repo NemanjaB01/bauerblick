@@ -1,0 +1,27 @@
+package rules.irrigation;
+
+import com.agriscope.rule_engine.domain.model.Seed;
+import com.agriscope.rule_engine.domain.model.FarmDetails;
+import com.agriscope.rule_engine.domain.model.Recommendation;
+import com.agriscope.rule_engine.domain.dto.DailyAnalysis;
+import com.agriscope.rule_engine.domain.enums.SeedType;
+import com.agriscope.rule_engine.domain.enums.SoilType;
+import com.agriscope.rule_engine.domain.enums.RecommendationType;
+
+global java.util.List recommendations;
+
+rule "Irrigation - BLACK GRAPES Dynamic"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.BLACK_GRAPES)
+        $calc : WaterDeficitResult(seed == $seed, deficit > $seed.allowedWaterDeficit)
+        $analysis : DailyAnalysis(currentSoilMoisture < $seed.minSoilMoisture)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate Black grapes: " + String.format("%.1f", $calc.getDeficit()) + " L/m2 needed");
+        rec.setReasoning("Black grapes moisture critical on " + $soil + " soil.");
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        recommendations.add(rec);
+end

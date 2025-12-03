@@ -92,7 +92,7 @@ public class WeatherMessageListener {
                 weatherData.getRain(),
                 weatherData.getWind_speed_10m());
 
-        ruleEvaluationService.evaluateCurrentSafetyRules(weatherData, crops);
+        ruleEvaluationService.evaluateCurrentDataForFarm(weatherData, crops);
     }
 
     private void processHourlyForecast(List<WeatherForecastDTO> forecastData, String userId, String farmId, List<String> crops) {
@@ -107,9 +107,9 @@ public class WeatherMessageListener {
         farm.setSoilType(SoilType.LOAM); // Default for now
         farm.setHasIrrigationSystem(true);
 
-        log.info("Processing Daily Irrigation logic for {} hours of data", hourlyList.size());
+        log.info("Processing Irrigation logic for {} hours of data", hourlyList.size());
 
-        ruleEvaluationService.evaluateDailyIrrigation(hourlyList, farm, crops);
+        ruleEvaluationService.evaluateHourlDataForFarm(hourlyList, farm, crops);
     }
 
     private HourlyWeatherData convertToHourlyWeatherData(WeatherForecastDTO dto, String userId, String farmId) {

@@ -33,7 +33,13 @@ public class DroolsConfig {
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "black_grapes.drl"));
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "white_grapes.drl"));
 
-        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "irrigation.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "irrigation_common.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "wheat.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "corn.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "barley.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "pumpkin.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "black_grapes.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "white_grapes.drl"));
 
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
         kieBuilder.buildAll();

@@ -73,7 +73,6 @@ rule "Monitor Conditions - All Crops"
             );
         }
 
-        // Ažurirani reasoning
         rec.setReasoning("Conditions optimal. " + action);
 
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());

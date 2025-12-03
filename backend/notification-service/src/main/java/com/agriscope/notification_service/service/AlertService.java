@@ -26,6 +26,8 @@ public class AlertService {
 
     private static final double TEMP_CHANGE_THRESHOLD = 2.0;
 
+    private static final double DEFICIT_CHANGE_THRESHOLD = 2.0;
+
     public void processIncomingAlert(Recommendation newRec) {
         String farmId = newRec.getFarmId();
         if (farmId == null) {
@@ -46,7 +48,7 @@ public class AlertService {
         }
 
         if (isSignificantChange(lastRec, newRec)) {
-            log.info("Significant temp change detected, sending update.");
+            log.info("Significant change detected, sending update for {}.", newRec.getRecommendationType());
             sendAndCacheAlert(uniqueKey, newRec);
         } else {
             log.info("Duplicate alert suppressed (insignificant change).");
@@ -62,19 +64,47 @@ public class AlertService {
     }
 
     private boolean isSignificantChange(Recommendation oldRec, Recommendation newRec) {
-        double oldTemp = getTempFromMetrics(oldRec);
-        double newTemp = getTempFromMetrics(newRec);
+        String type = newRec.getRecommendationType();
 
-        double diff = Math.abs(newTemp - oldTemp);
+        if (type.equals("MONITOR_CONDITIONS") || type.equals("CONTINUE_NORMAL")) {
+            return false;
+        }
 
-        return diff >= TEMP_CHANGE_THRESHOLD;
+        double oldValue = getRelevantMetricValue(oldRec, type);
+        double newValue = getRelevantMetricValue(newRec, type);
+
+        double diff = Math.abs(newValue - oldValue);
+
+        if (type.equals("FROST_ALERT") || type.equals("HEAT_ALERT")) {
+            return diff >= TEMP_CHANGE_THRESHOLD;
+        }
+
+        if (type.equals("IRRIGATE_NOW")) {
+            return diff >= DEFICIT_CHANGE_THRESHOLD;
+        }
+
+        return true;
     }
 
-    private double getTempFromMetrics(Recommendation rec) {
-        if (rec.getMetrics() != null && rec.getMetrics().containsKey("temperature")) {
-            Object tempObj = rec.getMetrics().get("temperature");
-            if (tempObj instanceof Number) {
-                return ((Number) tempObj).doubleValue();
+    private double getRelevantMetricValue(Recommendation rec, String type) {
+        if (rec.getMetrics() == null) return 0.0;
+
+        if (type.equals("FROST_ALERT") || type.equals("HEAT_ALERT")) {
+            return getMetricValue(rec, "temperature");
+        }
+
+        if (type.equals("IRRIGATE_NOW")) {
+            return getMetricValue(rec, "deficit_amount");
+        }
+
+        return 0.0;
+    }
+
+    private double getMetricValue(Recommendation rec, String key) {
+        if (rec.getMetrics().containsKey(key)) {
+            Object obj = rec.getMetrics().get(key);
+            if (obj instanceof Number) {
+                return ((Number) obj).doubleValue();
             }
         }
         return 0.0;

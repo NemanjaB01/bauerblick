@@ -7,6 +7,9 @@ public enum RecommendationType {
     DROUGHT_ALERT,
     DISEASE_RISK_ALERT,
 
+    SAFETY_ALERT,
+    DELAY_OPERATIONS,
+
     PLANT_NOW,
     DELAY_PLANTING,
 

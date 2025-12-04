@@ -1,22 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RecommendationsWebSocketService, RecommendationData, ConnectionStatus } from '../../services/websocket-service/recommendations-websocket.service';
+import {Subscription} from 'rxjs';
 
-export interface RecommendationData {
-  id: string;
-  userId: string;
-  farmId: string;
-  recommendedSeed: string;
-  recommendationType: string;
-  advice: string;
-  reasoning: string;
-  weatherTimestamp: string;
-  metrics: {
-    temperature?: number;
-    deficit_amount?: number;
-    [key: string]: any;
-  };
-  receivedAt?: Date;
-}
 
 interface RecommendationTypeInfo {
   icon: string;
@@ -36,114 +22,101 @@ export class Recommendations implements OnInit, OnDestroy {
   currentRecommendationIndex = 0;
   isModalOpen = false;
 
-  ngOnInit() {
-    // Load mock data for testing
-    this.loadMockData();
+  connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
-    // TODO: For WebSocket, uncomment this and inject the service:
-    // constructor(private recommendationsService: RecommendationsWebSocketService) {}
-    //
-    // this.recommendationsSubscription = this.recommendationsService.getRecommendationUpdates().subscribe({
-    //   next: (data: RecommendationData) => {
-    //     console.log('New recommendation received:', data);
-    //   }
-    // });
-    //
-    // this.listSubscription = this.recommendationsService.getAllRecommendations().subscribe({
-    //   next: (recommendations: RecommendationData[]) => {
-    //     this.recommendations = recommendations;
-    //   }
-    // });
+  private userId: string = 'user-1';
+  private farmId: string = 'farm-1-b';
+
+
+  private recommendationsSubscription?: Subscription;
+  private listSubscription?: Subscription;
+  private statusSubscription?: Subscription;
+
+  constructor(private recommendationsService: RecommendationsWebSocketService) {}
+
+  ngOnInit() {
+    this.setupWebSocketSubscriptions();
+    this.connectWebSocket();
   }
 
   ngOnDestroy() {
-    // TODO: Add WebSocket cleanup when implemented
-    // if (this.recommendationsSubscription) {
-    //   this.recommendationsSubscription.unsubscribe();
-    // }
-    // if (this.listSubscription) {
-    //   this.listSubscription.unsubscribe();
-    // }
+    this.cleanupSubscriptions();
   }
 
-  /**
-   * Load mock recommendations for testing
-   * Remove this method when switching to WebSocket
-   */
-  private loadMockData(): void {
-    const mockRecommendations: RecommendationData[] = [
-      {
-        id: "51284550-09c9-49b3-a792-13bab24db584",
-        userId: "user-3",
-        farmId: "farm-3-a",
-        recommendedSeed: "CORN",
-        recommendationType: "FROST_ALERT",
-        advice: "CHECK_GROWING_POINT_RECOVERY",
-        reasoning: "Temperature (1.95°C) below frost risk threshold (2.0°C)",
-        weatherTimestamp: "2025-12-03T15:45:00",
-        metrics: {
-          temperature: 1.95
-        },
-        receivedAt: new Date(Date.now() - 10 * 60000) // 10 minutes ago
+  private setupWebSocketSubscriptions(): void {
+    this.recommendationsSubscription = this.recommendationsService.getRecommendationUpdates().subscribe({
+      next: (data: RecommendationData) => {
+        console.log('New recommendation received:', data);
       },
-      {
-        id: "df02c534-94eb-4199-9e61-2daea87831da",
-        userId: "user-1",
-        farmId: "farm-1-a",
-        recommendedSeed: "WHEAT",
-        recommendationType: "MONITOR_CONDITIONS",
-        advice: "No Irrigation Needed for Wheat",
-        reasoning: "Conditions optimal. Water Surplus. Forecasted rain exceeds crop needs by 6.8 mm. Moisture: 26.2%",
-        weatherTimestamp: "2025-12-03T16:45:59.365024398",
-        metrics: {
-          temperature: 6.5193140123571665,
-          deficit_amount: -6.753635313364793
-        },
-        receivedAt: new Date(Date.now() - 5 * 60000) // 5 minutes ago
-      },
-      {
-        id: "abc2c534-94eb-4199-9e61-2daea87831da",
-        userId: "user-1",
-        farmId: "farm-1-a",
-        recommendedSeed: "RED_GRAPE",
-        recommendationType: "IRRIGATE_NOW",
-        advice: "Irrigation Needed for the Red Grape",
-        reasoning: "To sunny today. Water Surplus. Forecasted rain decreased crop needs by 6.8 mm. Moisture: 26.2%",
-        weatherTimestamp: "2025-12-03T16:45:59.365024398",
-        metrics: {
-          temperature: 6.5193140123571665,
-          deficit_amount: -6.753635313364793
-        },
-        receivedAt: new Date(Date.now() - 5 * 60000) // 5 minutes ago
+      error: (error) => {
+        console.error('Error in recommendation updates:', error);
       }
-    ];
+    });
 
-    this.recommendations = mockRecommendations;
-  }
+    this.listSubscription = this.recommendationsService.getAllRecommendations().subscribe({
+      next: (recommendations: RecommendationData[]) => {
+        console.log('Recommendations list updated:', recommendations.length);
+        this.recommendations = recommendations;
 
-  /**
-   * Add a new recommendation (for testing)
-   * This simulates receiving data from WebSocket
-   */
-  addTestRecommendation(): void {
-    const newRec: RecommendationData = {
-      id: 'test-' + Date.now(),
-      userId: 'user-1',
-      farmId: 'farm-1-b',
-      recommendedSeed: 'BARLEY',
-      recommendationType: 'IRRIGATION_NEEDED',
-      advice: 'Immediate Irrigation Required',
-      reasoning: 'Soil moisture critically low. Temperature rising. Water deficit detected.',
-      weatherTimestamp: new Date().toISOString(),
-      metrics: {
-        temperature: 28.5,
-        deficit_amount: 15.2
+        if (this.isModalOpen && this.currentRecommendationIndex >= this.recommendations.length) {
+          this.currentRecommendationIndex = Math.max(0, this.recommendations.length - 1);
+        }
       },
-      receivedAt: new Date()
-    };
+      error: (error) => {
+        console.error('Error in recommendations list:', error);
+      }
+    });
 
-    this.recommendations.push(newRec);
+    this.statusSubscription = this.recommendationsService.getConnectionStatus().subscribe({
+      next: (status: ConnectionStatus) => {
+        this.connectionStatus = status;
+        console.log('Recommendations connection status:', status);
+
+        if (status === ConnectionStatus.DISCONNECTED) {
+          setTimeout(() => {
+            if (this.connectionStatus === ConnectionStatus.DISCONNECTED) {
+              this.reconnectWebSocket();
+            }
+          }, 5000);
+        }
+      },
+      error: (error) => {
+        console.error('Error in connection status:', error);
+      }
+    });
   }
+
+  private connectWebSocket(): void {
+    console.log(`Connecting recommendations for user ${this.userId}, farm ${this.farmId}`);
+
+    try {
+      this.recommendationsService.setFarmForUser(this.userId, this.farmId);
+    } catch (error) {
+      console.error('Error connecting recommendations WebSocket:', error);
+    }
+  }
+
+  private reconnectWebSocket(): void {
+    console.log('Reconnecting recommendations WebSocket...');
+    this.recommendationsService.reconnect();
+  }
+
+  private cleanupSubscriptions(): void {
+    if (this.recommendationsSubscription) {
+      this.recommendationsSubscription.unsubscribe();
+    }
+    if (this.listSubscription) {
+      this.listSubscription.unsubscribe();
+    }
+    if (this.statusSubscription) {
+      this.statusSubscription.unsubscribe();
+    }
+  }
+
+  isConnected(): boolean {
+    return this.connectionStatus === ConnectionStatus.CONNECTED;
+  }
+
 
   /**
    * Format seed name: remove underscores and capitalize properly
@@ -338,7 +311,6 @@ export class Recommendations implements OnInit, OnDestroy {
       'RAIN_ALERT': 'assets/icons/rainy_farmer.svg',
     };
 
-    // Default to safety alert icon if icon not found
     return iconMap[type] || 'assets/icons/alert_farmer.svg';
   }
 
@@ -388,11 +360,9 @@ export class Recommendations implements OnInit, OnDestroy {
    * Clear all recommendations
    */
   clearAllRecommendations(): void {
+    this.recommendationsService.clearRecommendations();
     this.recommendations = [];
     this.closeModal();
-
-    // TODO: When using WebSocket service:
-    // this.recommendationsService.clearRecommendations();
   }
 
   /**
@@ -401,6 +371,8 @@ export class Recommendations implements OnInit, OnDestroy {
   deleteCurrentRecommendation(): void {
     const current = this.getCurrentRecommendation();
     if (current) {
+      this.recommendationsService.removeRecommendation(current.id);
+
       this.recommendations = this.recommendations.filter(r => r.id !== current.id);
 
       if (this.currentRecommendationIndex >= this.recommendations.length && this.recommendations.length > 0) {
@@ -410,9 +382,6 @@ export class Recommendations implements OnInit, OnDestroy {
       if (this.recommendations.length === 0) {
         this.closeModal();
       }
-
-      // TODO: When using WebSocket service:
-      // this.recommendationsService.removeRecommendation(current.id);
     }
   }
 }

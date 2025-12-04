@@ -1,5 +1,8 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { Client } from '@stomp/stompjs';
+
+declare var SockJS: any;
 
 export interface WeatherData {
   user_id: string;
@@ -21,203 +24,142 @@ export enum ConnectionStatus {
 @Injectable({
   providedIn: 'root'
 })
-export class WeatherWebSocketService implements OnDestroy {
-  private socket: WebSocket | null = null;
+export class WeatherWebSocketService {
+  private serverUrl = 'http://localhost:8081/ws-alerts';
+  private isConnecting = false;
+  private stompClient: Client | null = null;
   private weatherSubject = new Subject<WeatherData>();
   private connectionStatusSubject = new BehaviorSubject<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
 
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 10;
-  private reconnectInterval = 5000;
-  private reconnectTimer?: any;
+  constructor() {}
 
-  // CHANGE LINK TO BACKEND URL
-  private wsUrl = 'ws://localhost:8080/weather';
+  setUserId(userId: string): void {
+    console.log(`User ID set: ${userId} - Connecting to WebSocket`);
+    this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
+    this.connectToWebSocket(userId);
+  }
 
-  private heartbeatInterval?: any;
-  private heartbeatTimeout = 30000;
+  private connectToWebSocket(userId: string): void {
+    if (this.isConnecting || this.stompClient?.connected) {
+      console.log('Already connecting or connected');
+      return;
+    }
 
-  constructor() {
-    // Auto-connect on service initialization
-    this.connect();
+    try {
+      this.isConnecting = true;
+
+      if (typeof SockJS === 'undefined') {
+        throw new Error('SockJS is not loaded');
+      }
+
+      const socket = new SockJS(this.serverUrl);
+
+      this.stompClient = new Client({
+        webSocketFactory: () => socket,
+        debug: (str) => {
+          console.log('STOMP Debug:', str);
+        },
+        reconnectDelay: 5000,
+        onConnect: () => {
+          console.log('Connected to WebSocket server via SockJS');
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.CONNECTED);
+          this.subscribeToWeather(userId);
+        },
+        onStompError: (frame) => {
+          console.error('STOMP Error:', frame);
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.ERROR);
+        },
+        onWebSocketError: (event) => {
+          console.error('WebSocket Error:', event);
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.ERROR);
+        },
+        onDisconnect: () => {
+          console.log('Disconnected from WebSocket');
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
+        }
+      });
+
+      this.stompClient.activate();
+
+    } catch (error) {
+      console.error('Failed to connect:', error);
+      this.isConnecting = false;
+      this.connectionStatusSubject.next(ConnectionStatus.ERROR);
+    }
   }
 
   /**
-   * Get observable stream of weather updates
+   * Subscribe to weather topic
+   */
+  private subscribeToWeather(userId: string): void {
+    if (!this.stompClient || !this.stompClient.connected) {
+      console.error('Cannot subscribe: not connected');
+      return;
+    }
+
+    const topic = `/topic/weather/${userId}`;
+    console.log(`Subscribing to: ${topic}`);
+
+    this.stompClient.subscribe(topic, (message) => {
+      try {
+        const weatherData: WeatherData = JSON.parse(message.body);
+        console.log('Received REAL weather data:', weatherData);
+        this.weatherSubject.next(weatherData);
+      } catch (error) {
+        console.error('Error parsing weather data:', error);
+      }
+    });
+  }
+
+  /**
+   * Get weather updates observable
    */
   getWeatherUpdates(): Observable<WeatherData> {
     return this.weatherSubject.asObservable();
   }
 
   /**
-   * Get observable stream of connection status
+   * Get connection status observable
    */
   getConnectionStatus(): Observable<ConnectionStatus> {
     return this.connectionStatusSubject.asObservable();
   }
 
   /**
-   * Connect to WebSocket server
+   * Reconnect manually
    */
-  connect(): void {
-    // Don't connect if already connected or connecting
-    if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
-      console.log('WebSocket already connected or connecting');
-      return;
-    }
+  reconnect(): void {
+    console.log('Manual reconnect');
 
-    try {
-      console.log(`Connecting to WebSocket at ${this.wsUrl}...`);
-      this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
-
-      this.socket = new WebSocket(this.wsUrl);
-
-      this.socket.onopen = () => {
-        console.log('✅ WebSocket connected successfully');
-        this.connectionStatusSubject.next(ConnectionStatus.CONNECTED);
-        this.reconnectAttempts = 0;
-
-        this.startHeartbeat();
-
-      };
-
-      this.socket.onmessage = (event) => {
-        try {
-          const data: WeatherData = JSON.parse(event.data);
-          console.log('📦 Weather data received:', data);
-          this.weatherSubject.next(data);
-        } catch (error) {
-          console.error('❌ Error parsing weather data:', error);
-        }
-      };
-
-      this.socket.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
-        this.connectionStatusSubject.next(ConnectionStatus.ERROR);
-      };
-
-      this.socket.onclose = (event) => {
-        console.log('🔌 WebSocket closed:', event.code, event.reason);
-        this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
-        this.socket = null;
-        this.stopHeartbeat();
-
-        this.attemptReconnect();
-      };
-
-    } catch (error) {
-      console.error('❌ Failed to create WebSocket:', error);
-      this.connectionStatusSubject.next(ConnectionStatus.ERROR);
-      this.attemptReconnect();
-    }
-  }
-
-  /**
-   * Attempt to reconnect to WebSocket
-   */
-  private attemptReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error(`Max reconnection attempts (${this.maxReconnectAttempts}) reached. Giving up.`);
-      this.weatherSubject.error(new Error('WebSocket connection failed after maximum retry attempts'));
-      return;
-    }
-
-    this.reconnectAttempts++;
-    const delay = this.reconnectInterval * Math.min(this.reconnectAttempts, 3); // Exponential backoff (capped at 3x)
-
-    console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${delay}ms...`);
-
-    this.reconnectTimer = setTimeout(() => {
-      this.connect();
-    }, delay);
-  }
-
-  /**
-   * Send a message to the WebSocket server
-   */
-  send(message: any): void {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(message));
-      console.log('Message sent:', message);
-    } else {
-      console.warn('WebSocket is not connected. Cannot send message.');
-    }
-  }
-
-  /**
-   * Manually disconnect from WebSocket
-   */
-  disconnect(): void {
-    console.log('Manually disconnecting WebSocket...');
-
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = undefined;
-    }
-
-    this.stopHeartbeat();
-
-    if (this.socket) {
-      this.socket.close(1000, 'Manual disconnect');
-      this.socket = null;
+    if (this.stompClient) {
+      this.stompClient.deactivate();
+      this.stompClient = null;
     }
 
     this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
   }
 
   /**
-   * Manually reconnect (useful for refresh button)
+   * Disconnect
    */
-  reconnect(): void {
-    console.log('Manual reconnect requested...');
-    this.disconnect();
-    this.reconnectAttempts = 0; // Reset attempts
-    setTimeout(() => this.connect(), 100);
-  }
+  public disconnect(): void {
+    console.log('Disconnecting WebSocket service');
 
-  /**
-   * Check if WebSocket is connected
-   */
-  isConnected(): boolean {
-    return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
-  }
-
-  /**
-   * Get current connection status
-   */
-  getCurrentStatus(): ConnectionStatus {
-    return this.connectionStatusSubject.value;
-  }
-
-  /**
-   * Start heartbeat to keep connection alive
-   */
-  private startHeartbeat(): void {
-    this.stopHeartbeat();
-
-    this.heartbeatInterval = setInterval(() => {
-      if (this.isConnected()) {
-        this.send({ type: 'ping' });
+    if (this.stompClient) {
+      try {
+        this.stompClient.deactivate();
+        console.log('WebSocket deactivated');
+      } catch (error) {
+        console.error('Error deactivating STOMP client:', error);
       }
-    }, this.heartbeatTimeout);
-  }
-
-  /**
-   * Stop heartbeat
-   */
-  private stopHeartbeat(): void {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = undefined;
+      this.stompClient = null;
     }
-  }
 
-  /**
-   * Clean up on service destroy
-   */
-  ngOnDestroy(): void {
-    this.disconnect();
-    this.weatherSubject.complete();
-    this.connectionStatusSubject.complete();
+    this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
+    this.isConnecting = false;
   }
 }

@@ -20,6 +20,16 @@ public class WeatherNotificationListener {
 
     @RabbitListener(queues = NOTIFICATION_WEATHER_QUEUE)
     public void handleWeather(WeatherUpdateDTO weatherData) {
+
+        log.info("=== WEATHER RECEIVED ===");
+        log.info("User: {}, Farm: {}, Type: {}",
+                weatherData.getUserId(),
+                weatherData.getFarmId(),
+                weatherData.getType());
+        log.info("Has forecast: {}, Size: {}",
+                weatherData.getForecast() != null,
+                weatherData.getForecast() != null ? weatherData.getForecast().size() : 0);
+        log.info("========================");
         if (!"current".equalsIgnoreCase(weatherData.getType())) {
             return;
         }
@@ -41,7 +51,7 @@ public class WeatherNotificationListener {
             simplifiedPayload.put("weather_code", currentForecast.getWeatherCode());
             simplifiedPayload.put("temp", currentForecast.getTemperature());
 
-            webSocketService.sendWeatherToUser(weatherData.getUserId(), simplifiedPayload);
+            webSocketService.sendWeatherToUser(weatherData.getFarmId(), simplifiedPayload);
         } else {
             log.warn("Received weather payload without forecast: {}", weatherData);
         }

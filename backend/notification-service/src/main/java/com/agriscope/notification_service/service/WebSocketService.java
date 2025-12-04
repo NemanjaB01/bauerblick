@@ -24,13 +24,13 @@ public class WebSocketService {
         }
     }
 
-    public void sendWeatherToUser(String userId, Object payload) {
+    public void sendWeatherToUser(String farmId, Object payload) {
         try {
-            String destination = "/topic/weather/" + userId;
+            String destination = "/topic/weather/" + farmId;
             messagingTemplate.convertAndSend(destination, payload);
-            log.info("Sent WebSocket weather to user: {}", userId);
+            log.info("Sent WebSocket weather to farm: {}", farmId);
         } catch (Exception e) {
-            log.error("Failed to send WebSocket weather to user: {}", userId, e);
+            log.error("Failed to send WebSocket weather to farm: {}", farmId, e);
         }
     }
 }

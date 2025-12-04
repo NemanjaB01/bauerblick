@@ -11,7 +11,7 @@ global java.util.List recommendations;
 rule "Corn - Frost Alert"
 when
     $seed: Seed(seedType == SeedType.CORN)
-    $weather: CurrentWeatherData(temperature_2m < $seed.frostRiskTemperature)
+    $weather: CurrentWeatherData(temperature_2m < $seed.minTemperature)
 then
     Recommendation rec = new Recommendation();
     rec.setUserId($weather.getUserId());
@@ -42,8 +42,7 @@ rule "Corn - Optimal Conditions"
 when
     $seed: Seed(seedType == SeedType.CORN)
     $weather: CurrentWeatherData(
-        temperature_2m >= $seed.minTemperature && temperature_2m <= $seed.maxTemperature,
-        rain < $seed.heavyRainThreshold
+        temperature_2m >= $seed.minTemperature && temperature_2m <= $seed.maxTemperature
     )
 then
     Recommendation rec = new Recommendation();

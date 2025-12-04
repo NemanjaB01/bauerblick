@@ -31,15 +31,33 @@ export class WeatherWebSocketService {
   private weatherSubject = new Subject<WeatherData>();
   private connectionStatusSubject = new BehaviorSubject<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
 
+  private currentUserId: string | null = null;
+  private currentFarmId: string | null = null;
+
   constructor() {}
 
-  setUserId(userId: string): void {
-    console.log(`User ID set: ${userId} - Connecting to WebSocket`);
+  setFarmForUser(userId: string, farmId: string): void {
+    console.log(`Setting user ${userId}, farm ${farmId} - Connecting to WebSocket`);
+    this.currentUserId = userId;
+    this.currentFarmId = farmId;
     this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
-    this.connectToWebSocket(userId);
+    this.connectToWebSocket(farmId);
   }
 
-  private connectToWebSocket(userId: string): void {
+  setUserId(userId: string): void {
+    console.warn('setUserId is deprecated. Use setFarmForUser(userId, farmId) instead.');
+  }
+
+  setFarmId(farmId: string): void {
+    console.log(`Setting farm ${farmId} (assuming userId is known from context)`);
+    if (!this.currentUserId) {
+      console.error('Cannot set farmId without userId. Call setFarmForUser first.');
+      return;
+    }
+    this.setFarmForUser(this.currentUserId, farmId);
+  }
+
+  private connectToWebSocket(farmId: string): void {
     if (this.isConnecting || this.stompClient?.connected) {
       console.log('Already connecting or connected');
       return;
@@ -61,10 +79,10 @@ export class WeatherWebSocketService {
         },
         reconnectDelay: 5000,
         onConnect: () => {
-          console.log('Connected to WebSocket server via SockJS');
+          console.log('Connected to Weather WebSocket server via SockJS');
           this.isConnecting = false;
           this.connectionStatusSubject.next(ConnectionStatus.CONNECTED);
-          this.subscribeToWeather(userId);
+          this.subscribeToWeather(farmId);
         },
         onStompError: (frame) => {
           console.error('STOMP Error:', frame);
@@ -92,23 +110,24 @@ export class WeatherWebSocketService {
     }
   }
 
-  /**
-   * Subscribe to weather topic
-   */
-  private subscribeToWeather(userId: string): void {
+
+  private subscribeToWeather(farmId: string): void {
     if (!this.stompClient || !this.stompClient.connected) {
       console.error('Cannot subscribe: not connected');
       return;
     }
 
-    const topic = `/topic/weather/${userId}`;
-    console.log(`Subscribing to: ${topic}`);
+    const topic = `/topic/weather/${farmId}`;
+    console.log(`Subscribing to weather for farm: ${topic}`);
 
     this.stompClient.subscribe(topic, (message) => {
       try {
         const weatherData: WeatherData = JSON.parse(message.body);
-        console.log('Received REAL weather data:', weatherData);
-        this.weatherSubject.next(weatherData);
+        console.log('Received weather data:', weatherData);
+
+        if (weatherData.farm_id === this.currentFarmId) {
+          this.weatherSubject.next(weatherData);
+        }
       } catch (error) {
         console.error('Error parsing weather data:', error);
       }
@@ -130,6 +149,20 @@ export class WeatherWebSocketService {
   }
 
   /**
+   * Get current user ID
+   */
+  getCurrentUserId(): string | null {
+    return this.currentUserId;
+  }
+
+  /**
+   * Get current farm ID
+   */
+  getCurrentFarmId(): string | null {
+    return this.currentFarmId;
+  }
+
+  /**
    * Reconnect manually
    */
   reconnect(): void {
@@ -141,6 +174,12 @@ export class WeatherWebSocketService {
     }
 
     this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
+
+    if (this.currentFarmId && this.currentUserId) {
+      setTimeout(() => {
+        this.connectToWebSocket(this.currentFarmId!);
+      }, 1000);
+    }
   }
 
   /**

@@ -1,5 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { Client } from '@stomp/stompjs';
+
+declare var SockJS: any;
 
 export interface RecommendationData {
   id: string;
@@ -29,26 +32,107 @@ export enum ConnectionStatus {
   providedIn: 'root'
 })
 export class RecommendationsWebSocketService implements OnDestroy {
-  private socket: WebSocket | null = null;
+  private serverUrl = 'http://localhost:8081/ws-alerts';
+  private isConnecting = false;
+  private stompClient: Client | null = null;
   private recommendationsSubject = new Subject<RecommendationData>();
   private connectionStatusSubject = new BehaviorSubject<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
 
   private allRecommendations: RecommendationData[] = [];
   private recommendationsListSubject = new BehaviorSubject<RecommendationData[]>([]);
 
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 10;
-  private reconnectInterval = 5000;
-  private reconnectTimer?: any;
+  private currentUserId: string | null = null;
+  private currentFarmId: string | null = null;
 
-  // WebSocket URL - CHANGE THIS!!!!
-  private wsUrl = 'ws://localhost:8080/recommendations';
+  constructor() {}
 
-  private heartbeatInterval?: any;
-  private heartbeatTimeout = 30000;
+  setFarmForUser(userId: string, farmId: string): void {
+    console.log(`Recommendations: Setting user ${userId}, farm ${farmId} - Connecting to WebSocket`);
+    this.currentUserId = userId;
+    this.currentFarmId = farmId;
+    this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
+    this.connectToWebSocket(farmId);
+  }
 
-  constructor() {
-    this.connect();
+  private connectToWebSocket(farmId: string): void {
+    if (this.isConnecting || this.stompClient?.connected) {
+      console.log('Already connecting or connected');
+      return;
+    }
+
+    try {
+      this.isConnecting = true;
+
+      if (typeof SockJS === 'undefined') {
+        throw new Error('SockJS is not loaded');
+      }
+
+      const socket = new SockJS(this.serverUrl);
+
+      this.stompClient = new Client({
+        webSocketFactory: () => socket,
+        debug: (str) => {
+          console.log('STOMP Debug (Recommendations):', str);
+        },
+        reconnectDelay: 5000,
+        onConnect: () => {
+          console.log('Connected to Recommendations WebSocket server via SockJS');
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.CONNECTED);
+          this.subscribeToRecommendations(farmId);
+        },
+        onStompError: (frame) => {
+          console.error('STOMP Error (Recommendations):', frame);
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.ERROR);
+        },
+        onWebSocketError: (event) => {
+          console.error('WebSocket Error (Recommendations):', event);
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.ERROR);
+        },
+        onDisconnect: () => {
+          console.log('Disconnected from Recommendations WebSocket');
+          this.isConnecting = false;
+          this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
+        }
+      });
+
+      this.stompClient.activate();
+
+    } catch (error) {
+      console.error('Failed to connect to Recommendations WebSocket:', error);
+      this.isConnecting = false;
+      this.connectionStatusSubject.next(ConnectionStatus.ERROR);
+    }
+  }
+
+  private subscribeToRecommendations(farmId: string): void {
+    if (!this.stompClient || !this.stompClient.connected) {
+      console.error('Cannot subscribe: not connected');
+      return;
+    }
+
+    const topic = `/topic/alerts/${farmId}`;
+    console.log(`Subscribing to recommendations for farm: ${topic}`);
+
+    this.stompClient.subscribe(topic, (message) => {
+      try {
+        const recommendation: RecommendationData = JSON.parse(message.body);
+        recommendation.receivedAt = new Date();
+
+        console.log('Recommendation received:', recommendation);
+
+        // Proveri da li je za našu farmu
+        if (recommendation.farmId === this.currentFarmId) {
+          this.allRecommendations.push(recommendation);
+          this.recommendationsListSubject.next([...this.allRecommendations]);
+          this.recommendationsSubject.next(recommendation);
+        }
+      } catch (error) {
+        console.error('Error parsing recommendation:', error);
+      }
+    });
   }
 
   getRecommendationUpdates(): Observable<RecommendationData> {
@@ -81,127 +165,42 @@ export class RecommendationsWebSocketService implements OnDestroy {
     this.recommendationsListSubject.next([...this.allRecommendations]);
   }
 
-  connect(): void {
-    if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
-      console.log('Recommendations WebSocket already connected');
-      return;
+  reconnect(): void {
+    console.log('Manual reconnect for Recommendations');
+
+    if (this.stompClient) {
+      this.stompClient.deactivate();
+      this.stompClient = null;
     }
 
-    try {
-      console.log(`Connecting to ${this.wsUrl}...`);
-      this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
+    this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
 
-      this.socket = new WebSocket(this.wsUrl);
-
-      this.socket.onopen = () => {
-        console.log('Recommendations WebSocket connected');
-        this.connectionStatusSubject.next(ConnectionStatus.CONNECTED);
-        this.reconnectAttempts = 0;
-        this.startHeartbeat();
-      };
-
-      this.socket.onmessage = (event) => {
-        try {
-          let jsonData: string = event.data;
-
-          if (jsonData.includes('ALERT [')) {
-            const jsonStart = jsonData.indexOf('{');
-            if (jsonStart !== -1) {
-              jsonData = jsonData.substring(jsonStart);
-            }
-          }
-
-          const data: RecommendationData = JSON.parse(jsonData);
-          data.receivedAt = new Date();
-
-          console.log(' Recommendation received:', data);
-
-          this.allRecommendations.push(data);
-          this.recommendationsListSubject.next([...this.allRecommendations]);
-          this.recommendationsSubject.next(data);
-
-        } catch (error) {
-          console.error(' Error parsing recommendation:', error);
-        }
-      };
-
-      this.socket.onerror = (error) => {
-        console.error(' WebSocket error:', error);
-        this.connectionStatusSubject.next(ConnectionStatus.ERROR);
-      };
-
-      this.socket.onclose = (event) => {
-        console.log(' WebSocket closed:', event.code);
-        this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
-        this.socket = null;
-        this.stopHeartbeat();
-        this.attemptReconnect();
-      };
-
-    } catch (error) {
-      console.error(' Failed to create WebSocket:', error);
-      this.connectionStatusSubject.next(ConnectionStatus.ERROR);
-      this.attemptReconnect();
-    }
-  }
-
-  private attemptReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error(` Max reconnection attempts reached`);
-      return;
-    }
-
-    this.reconnectAttempts++;
-    const delay = this.reconnectInterval * Math.min(this.reconnectAttempts, 3);
-
-    console.log(` Reconnecting (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${delay}ms...`);
-
-    this.reconnectTimer = setTimeout(() => {
-      this.connect();
-    }, delay);
-  }
-
-  send(message: any): void {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(message));
+    if (this.currentFarmId && this.currentUserId) {
+      setTimeout(() => {
+        this.connectToWebSocket(this.currentFarmId!);
+      }, 1000);
     }
   }
 
   disconnect(): void {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-    }
-    this.stopHeartbeat();
-    if (this.socket) {
-      this.socket.close(1000);
-      this.socket = null;
-    }
-    this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
-  }
+    console.log('Disconnecting Recommendations WebSocket service');
 
-  reconnect(): void {
-    this.disconnect();
-    this.reconnectAttempts = 0;
-    setTimeout(() => this.connect(), 100);
+    if (this.stompClient) {
+      try {
+        this.stompClient.deactivate();
+        console.log('Recommendations WebSocket deactivated');
+      } catch (error) {
+        console.error('Error deactivating STOMP client:', error);
+      }
+      this.stompClient = null;
+    }
+
+    this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
+    this.isConnecting = false;
   }
 
   isConnected(): boolean {
-    return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
-  }
-
-  private startHeartbeat(): void {
-    this.stopHeartbeat();
-    this.heartbeatInterval = setInterval(() => {
-      if (this.isConnected()) {
-        this.send({ type: 'ping' });
-      }
-    }, this.heartbeatTimeout);
-  }
-
-  private stopHeartbeat(): void {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-    }
+    return this.stompClient?.connected || false;
   }
 
   ngOnDestroy(): void {

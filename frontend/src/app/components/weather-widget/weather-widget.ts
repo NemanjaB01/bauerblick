@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { WeatherWebSocketService, WeatherData, ConnectionStatus } from '../../services/websocket-service/weather-websocket.service';
@@ -27,11 +27,13 @@ export class WeatherWidget implements OnInit, OnDestroy {
   private wsSubscription?: Subscription;
   private statusSubscription?: Subscription;
   private dateInterval?: any;
-  private userId: string = 'user-2';
-  private currentFarmId: string = 'farm-2-a';
+
+
+  private userId: string = 'user-1';
+  private farmId: string = 'farm-1-b';
 
   private getCacheKey(): string {
-    return `weather_cache_${this.userId}_${this.currentFarmId}`;
+    return `weather_cache_${this.userId}_${this.farmId}`;
   }
 
   private readonly MAX_CACHE_AGE = 10 * 60 * 1000;
@@ -39,7 +41,7 @@ export class WeatherWidget implements OnInit, OnDestroy {
   constructor(private weatherService: WeatherWebSocketService) {}
 
   ngOnInit() {
-    this.loadCachedDataForCurrentFarm();
+    this.loadCachedData();
 
     this.dateInterval = setInterval(() => {
       this.currentDate = new Date();
@@ -66,7 +68,7 @@ export class WeatherWidget implements OnInit, OnDestroy {
       next: (data: WeatherData) => {
         console.log('Received weather update:', data);
 
-        if (data.farm_id === this.currentFarmId) {
+        if (data.farm_id === this.farmId && data.user_id === this.userId) {
           this.handleWeatherData(data);
         } else {
           this.cacheOtherFarmData(data);
@@ -74,12 +76,10 @@ export class WeatherWidget implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error receiving weather updates:', error);
-      },
-      complete: () => {}
+      }
     });
 
     this.connectWebSocket();
-
   }
 
   ngOnDestroy() {
@@ -96,7 +96,7 @@ export class WeatherWidget implements OnInit, OnDestroy {
     }
   }
 
-  private loadCachedDataForCurrentFarm(): void {
+  private loadCachedData(): void {
     try {
       const cached = localStorage.getItem(this.getCacheKey());
       if (cached) {
@@ -106,7 +106,6 @@ export class WeatherWidget implements OnInit, OnDestroy {
         const age = now.getTime() - cacheTime.getTime();
 
         if (age < this.MAX_CACHE_AGE) {
-
           this.weatherData = cacheData.weatherData;
           this.lastUpdated = cacheTime;
           this.weatherInfo = cacheData.weatherInfo;
@@ -117,17 +116,16 @@ export class WeatherWidget implements OnInit, OnDestroy {
             this.reverseGeocode(this.weatherData.lat, this.weatherData.lon);
           }
 
-          console.log(`Loaded cached weather data for farm: ${this.currentFarmId}`);
+          console.log(`Loaded cached weather data for user ${this.userId}, farm ${this.farmId}`);
         } else {
           localStorage.removeItem(this.getCacheKey());
         }
       }
     } catch (error) {
-      console.error(`Error loading cache for farm ${this.currentFarmId}:`, error);
+      console.error(`Error loading cache for user ${this.userId}, farm ${this.farmId}:`, error);
       localStorage.removeItem(this.getCacheKey());
     }
   }
-
 
   private saveToCache(data: WeatherData, locationName?: string, weatherInfo?: WeatherInfo): void {
     try {
@@ -136,30 +134,26 @@ export class WeatherWidget implements OnInit, OnDestroy {
         weatherInfo: weatherInfo,
         locationName: locationName,
         timestamp: new Date().toISOString(),
-        farmId: this.currentFarmId
+        userId: this.userId,
+        farmId: this.farmId
       };
 
       localStorage.setItem(this.getCacheKey(), JSON.stringify(cacheData));
     } catch (error) {
-      console.error(`Error saving cache for farm ${this.currentFarmId}:`, error);
+      console.error(`Error saving cache for user ${this.userId}, farm ${this.farmId}:`, error);
     }
   }
 
 
-
-  /**
-   * Connect to WebSocket with current user ID
-   */
   private connectWebSocket(): void {
-    console.log('Connecting WebSocket for user:', this.userId);
+    console.log(`Connecting WebSocket for user ${this.userId}, farm ${this.farmId}`);
 
     try {
-      this.weatherService.setUserId(this.userId);
+      this.weatherService.setFarmForUser(this.userId, this.farmId);
     } catch (error) {
       console.error('Error connecting WebSocket:', error);
     }
   }
-
 
   private disconnectWebSocket(): void {
     console.log('Disconnecting from WebSocket');
@@ -180,9 +174,6 @@ export class WeatherWidget implements OnInit, OnDestroy {
 
     try {
       this.weatherService.reconnect();
-      setTimeout(() => {
-        this.connectWebSocket();
-      }, 1000);
     } catch (error) {
       console.error('Error reconnecting WebSocket:', error);
     }
@@ -190,21 +181,26 @@ export class WeatherWidget implements OnInit, OnDestroy {
 
   private cacheOtherFarmData(data: WeatherData): void {
     try {
-      const otherFarmCacheKey = `weather_cache_${data.user_id}_${data.farm_id}`;
-      const cacheData = {
-        weatherData: data,
-        timestamp: new Date().toISOString(),
-        farmId: data.farm_id
-      };
+      if (data.user_id === this.userId) {
+        const otherFarmCacheKey = `weather_cache_${data.user_id}_${data.farm_id}`;
+        const cacheData = {
+          weatherData: data,
+          timestamp: new Date().toISOString(),
+          userId: data.user_id,
+          farmId: data.farm_id
+        };
 
-      localStorage.setItem(otherFarmCacheKey, JSON.stringify(cacheData));
+        localStorage.setItem(otherFarmCacheKey, JSON.stringify(cacheData));
+        console.log(`Cached weather data for user ${data.user_id}, farm ${data.farm_id}`);
+      }
     } catch (error) {
       console.error(`Error caching data for farm ${data.farm_id}:`, error);
     }
   }
 
   handleWeatherData(data: WeatherData) {
-    if (data.farm_id !== this.currentFarmId) {
+    if (data.farm_id !== this.farmId || data.user_id !== this.userId) {
+      console.log(`Ignoring weather data for user ${data.user_id}, farm ${data.farm_id}`);
       return;
     }
 

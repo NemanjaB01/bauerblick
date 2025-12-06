@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -7,5 +8,9 @@ import { Component } from '@angular/core';
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
+  constructor( private router: Router) { }
 
+  addNewFarm() {
+    this.router.navigate(["new-farm"])
+  }
 }

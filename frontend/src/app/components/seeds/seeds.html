@@ -1,0 +1,83 @@
+<div class="page-container">
+
+  <div class="topbar-container">
+    <div class="topbar-left">
+      <img src="assets/icons/logo.svg" class="topbar-icon logo-icon" />
+    </div>
+    <div class="topbar-right">
+      <img src="assets/icons/notification.svg" class="topbar-icon" />
+      <div class="menu-wrapper">
+        <img src="assets/icons/menu.svg" class="topbar-icon" (click)="toggleMenu()" />
+
+        <div class="wooden-dropdown" *ngIf="isMenuOpen">
+          <div class="dropdown-item" (click)="goToProfile()">
+            <img src="assets/icons/my_profile.svg" class="dropdown-icon" />
+            <span>My Profile</span>
+          </div>
+          <div class="dropdown-item" (click)="logout()">
+            <img src="assets/icons/logout_app.svg" class="dropdown-icon" />
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="body-container">
+
+    <app-sidebar class="sidebar"></app-sidebar>
+
+    <div class="content-area">
+            <div class="seeds-grid">
+            <div class="content-wrapper">
+
+                <div class="seed-container">
+                <div *ngFor="let seed of seeds" class="seed-card">
+                    <div class="seed-header">
+                    <img class="seed-icon" [src]="getSeedIcon(seed.seedType)" alt="{{ seed.displayName }}" />
+                    <div class="seed-name">{{ seed.displayName }}</div>
+                    </div>
+
+                    <div class="seed-info">
+                    <strong>Temperature Range:</strong>
+                    <span class="info-value">{{ seed.minTemperature }} - {{ seed.maxTemperature }} °C</span>
+                    </div>
+
+                    <div class="seed-info">
+                    <strong>Soil Moisture Range:</strong>
+                    <span class="info-value">{{ seed.minSoilMoisture }} - {{ seed.maxSoilMoisture }}%</span>
+                    </div>
+
+                    <div class="seed-info">
+                    <strong>Water Requirement:</strong>
+                    <span class="info-value">{{ seed.waterRequirement }} l/m²</span>
+                    </div>
+
+                    <button class="details-btn">Details</button>
+                </div>
+                </div>
+
+                <!-- <div class="seed-card">
+                    <div class="seed-header">
+                        <div class="seed-icon">🍇</div>
+                        <div class="seed-name">Grape seed</div>
+                    </div>
+                    <div class="seed-info">
+                        <strong>Plant Height / Spread:</strong> <span class="info-value">123</span>
+                    </div>
+                    <div class="seed-info">
+                        <strong>Seeding Rate:</strong> <span class="info-value">80%</span>
+                    </div>
+                    <div class="seed-info">
+                        <strong>Temperature Range:</strong> <span class="info-value">10 - 40 C</span>
+                    </div>
+                    <div class="seed-info">
+                        <strong>Water Requirement:</strong> <span class="info-value">1 l/m"</span>
+                    </div>
+                    <button class="details-btn">Details</button>
+                </div> -->
+            </div>
+            </div>
+        </div>
+    </div>
+</div>

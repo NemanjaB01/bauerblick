@@ -1,4 +1,4 @@
-package ase_pr_inso_01.farm_service.models;
+package ase_pr_inso_01.farm_service.models.enums;
 
 import lombok.Getter;
 

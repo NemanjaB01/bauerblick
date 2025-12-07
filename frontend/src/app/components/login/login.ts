@@ -21,8 +21,9 @@ export class Login{
 
 
   onSubmit() {
-    this.auth.loginUser(new AuthRequest(this.email, this.password)).subscribe({
-      next: () => this.router.navigate(['/home']),
+    this.auth.loginUser(new AuthRequest(this.email, this.password))
+      .subscribe({
+      next: () => this.router.navigate(['/signup']),
       error: err => this.errorMessage = 'Invalid email or password'
     });
   }

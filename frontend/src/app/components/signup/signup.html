@@ -26,6 +26,9 @@
           <label>Address</label>
           <input type="text" name="address" [(ngModel)]="signupData.address" required placeholder="Street, House number, ZIP, City/Town, State">
 
+          <label>Date of Birth</label>
+          <input type="date" name="dateOfBirth" lang="en-GB" onkeydown="return false" onclick="this.showPicker()" [(ngModel)]="signupData.dateOfBirth" required placeholder="DD.MM.YYYY">
+
           <label>Password</label>
           <input type="password" name="password" [(ngModel)]="signupData.password" required placeholder="Password">
 

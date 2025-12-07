@@ -4,14 +4,16 @@
 .page-container {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh; /* Allows scrolling on small screens */
 
   background-image: url('/assets/images/login_background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
 
   display: flex;
+  overflow-x: hidden;
 }
 
 /* Soft glow on the right side */
@@ -26,6 +28,7 @@
     rgba(255, 255, 255, 0.55) 100%
   );
   z-index: 0;
+  pointer-events: none;
 }
 
 
@@ -38,30 +41,32 @@
   flex-direction: row;
   position: relative;
   z-index: 2;
+  width: 100%;
 }
 
-/* Left half (barn + landscape visible) */
 .left-content {
   flex: 1;
   padding-left: 6vw;
 }
 
-/* Right half (signup card centered) */
 .right-content {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   padding-right: 6vw;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 
 /* -------------------------------------------------------
-   SIGNUP CARD (glass effect)
+   SIGNUP CARD
 -------------------------------------------------------- */
 .signup-card {
-  width: 480px;
-  padding: 40px;
+  width: 420px;  /* Reduced width */
+  max-width: 90%;
+  padding: 30px; /* Reduced padding */
   border-radius: 25px;
 
   background: rgba(255, 255, 255, 0.40);
@@ -80,13 +85,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .signup-icon {
-  width: 70px;
+  width: 60px;
   height: auto;
 }
 
@@ -95,20 +100,68 @@
    INPUT LABELS + FIELDS
 -------------------------------------------------------- */
 label {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: block;
 }
 
 input {
   width: 100%;
-  padding: 14px;
-  font-size: 16px;
+  padding: 12px;
+  font-size: 15px;
   border-radius: 10px;
-  border: none;
-  margin-bottom: 20px;
+  border: 1px solid transparent; /* Prepare for focus state */
+  margin-bottom: 15px;
   background: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+  transition: box-shadow 0.2s, border 0.2s; /* Smooth selection animation */
+}
+
+/* NEW: THE "SELECTION" LOOK
+   Replaces the default blue browser outline with your theme's orange
+*/
+input:focus {
+  outline: none;
+  border-color: #e46b2b;
+  box-shadow: 0 0 0 3px rgba(228, 107, 43, 0.25); /* Soft orange glow */
+  background: #ffffff;
+}
+
+
+/* -------------------------------------------------------
+   NEW: DATE INPUT STYLING
+-------------------------------------------------------- */
+input[type="date"] {
+  position: relative;
+  color: #333;
+}
+
+/* 1. Placeholder Logic:
+   If the date is empty (invalid) and not being clicked,
+   hide the ugly "mm/dd/yyyy" mask and show the nice text instead.
+*/
+input[type="date"]:required:invalid::-webkit-datetime-edit {
+  color: transparent;
+}
+input[type="date"]:required:invalid::before {
+  content: attr(placeholder); /* Shows "DD.MM.YYYY" */
+  color: #757575; /* Standard placeholder gray */
+  position: absolute;
+  left: 12px; /* Matches input padding */
+}
+
+/* 2. Calendar Icon Styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.2s;
+  /* Pushes icon slightly away from the edge */
+  margin-right: 5px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.1); /* Subtle zoom effect */
 }
 
 
@@ -125,7 +178,8 @@ input {
   color: white;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 5px;
+  transition: background-color 0.2s;
 }
 
 .signup-btn:hover {
@@ -138,7 +192,7 @@ input {
 -------------------------------------------------------- */
 .signin-row {
   text-align: center;
-  margin-top: 25px;
+  margin-top: 20px;
   font-size: 15px;
 }
 
@@ -147,4 +201,83 @@ input {
   color: #b54f23;
   cursor: pointer;
   text-decoration: none;
+}
+
+/* -------------------------------------------------------
+   DATE INPUT STYLING (The "Opacity" Fix)
+-------------------------------------------------------- */
+input[type="date"] {
+  position: relative;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* 1. HIDE THE NATIVE MASK (tt.mm.jjjj)
+*/
+input[type="date"]:invalid::-webkit-datetime-edit {
+  opacity: 0;
+  visibility: hidden; /* Extra safety to ensure it's gone */
+}
+
+/* 2. SHOW THE CUSTOM PLACEHOLDER (DD.MM.YYYY)
+   We position this exactly where the text would be.
+*/
+input[type="date"]:invalid::before {
+  content: "DD.MM.YYYY";
+  color: #999;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 400;
+  pointer-events: none; /* Clicks pass through to the input */
+}
+
+/* 3. SUCCESS STATE (When date is selected)
+   When valid, reset opacity so the real date shows up.
+*/
+input[type="date"]:valid {
+  color: #333;
+}
+input[type="date"]:valid::-webkit-datetime-edit {
+  opacity: 1;
+  visibility: visible;
+}
+input[type="date"]:valid::before {
+  display: none;
+}
+
+
+/* 4. CALENDAR ICON STYLING */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.5;
+  transition: 0.2s;
+  margin-right: 5px;
+  filter: invert(0.2);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* -------------------------------------------------------
+   MEDIA QUERIES (RESPONSIVE)
+-------------------------------------------------------- */
+@media (max-width: 900px) {
+  .left-content {
+    display: none;
+  }
+  .right-content {
+    padding-right: 0;
+    justify-content: center;
+  }
+  .page-container::after {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.4) 100%
+    );
+  }
 }

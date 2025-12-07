@@ -37,9 +37,6 @@ public class UserServiceImpl implements UserService {
   @Override
   public User createUser(UserCreateDto dto) throws ValidationException, ConflictException{
 
-    if (userRepository.existsByEmail(dto.getEmail())) {
-      throw new RuntimeException("Email already registered");
-    }
     userValidator.validateForSignUp(dto);
 
     User user = new User();

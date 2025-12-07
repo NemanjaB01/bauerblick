@@ -40,7 +40,7 @@ public class UserValidator {
     List<String> conflictErrors = new ArrayList<>();
     if (toCreate.getEmail().isEmpty()) {
       validationErrors.add("No email given");
-    } else if (userRepository.findByEmail(toCreate.getEmail()) != null) {
+    } else if (userRepository.existsByEmail(toCreate.getEmail())) {
       conflictErrors.add("User with the given email already exists");
     }
     if (toCreate.getLastName().isEmpty()) {
@@ -53,8 +53,6 @@ public class UserValidator {
       validationErrors.add("No date of birth given");
     } else if (toCreate.getDateOfBirth().isAfter(LocalDate.now())) {
       validationErrors.add("The date of the birth can not be in the future");
-    } else if (toCreate.getDateOfBirth().isAfter(LocalDate.now().minusYears(18))) {
-      validationErrors.add("The user must be at least 18 years old");
     }
     if (new String(toCreate.getPassword()).isEmpty()) {
       validationErrors.add("No password given");

@@ -1,12 +1,74 @@
-
+@import 'ngx-toastr/toastr';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 * {
   font-family: 'Poppins', sans-serif;
 }
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
   overflow: hidden;
+}
+
+/* 1. Base Toast Style (Glass Effect) */
+#toast-container > div {
+  opacity: 1; /* Force visibility */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 12px; /* Rounded corners like your card */
+  padding: 15px 15px 15px 50px; /* Space for text */
+  width: 350px;
+  backdrop-filter: blur(10px); /* The glass blur */
+  background-image: none !important; /* Remove default background image */
+  color: #333 !important; /* Dark text for readability */
+}
+
+/* 2. Success Message (Green-ish Glass) */
+.toast-success {
+  background-color: rgba(220, 255, 220, 0.9) !important;
+  border-left: 5px solid #2ecc71; /* Green accent on left */
+}
+/* Optional: Add a custom icon using a pseudo-element if you want */
+.toast-success::before {
+  content: "✓";
+  position: absolute;
+  left: 15px;
+  top: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #2ecc71;
+}
+
+/* 3. Error Message (Red-ish Glass) */
+.toast-error {
+  background-color: rgba(255, 235, 235, 0.9) !important;
+  border-left: 5px solid #e74c3c; /* Red accent on left */
+}
+.toast-error::before {
+  content: "!";
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+/* 4. Text Styling */
+.toast-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.toast-message {
+  font-size: 14px;
+  color: #555;
+}
+
+/* 5. Hover Effect */
+#toast-container > div:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
 }

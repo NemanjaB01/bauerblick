@@ -5,9 +5,10 @@ import {AuthGuard} from './guard/auth-guard';
 import {NoAuthGuard} from './guard/no-auth-guard';
 import {HomeComponent} from './components/home/home';
 import {NewFarmComponent} from './components/new-farm-component/new-farm-component';
+import { LandingPageComponent } from './components/landing-page/landing-page';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard]},
   { path: 'login', component: Login, canActivate: [NoAuthGuard]},
   { path: 'signup', component: Signup, canActivate: [NoAuthGuard]},
   { path: 'home', component: HomeComponent, canActivate: [NoAuthGuard]},

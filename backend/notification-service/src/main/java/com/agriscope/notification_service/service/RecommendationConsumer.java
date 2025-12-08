@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RecommendationConsumer {
 
-    private final AlertService alertService;
+    private final NotificationService notificationService;
 
     @RabbitListener(queues = RabbitMQConfig.ALERT_QUEUE)
     public void handleRecommendation(Recommendation recommendation) {
@@ -22,7 +22,7 @@ public class RecommendationConsumer {
                 recommendation.getRecommendationType());
 
         try {
-            alertService.processIncomingAlert(recommendation);
+            notificationService.processIncomingRecommendation(recommendation);
         } catch (Exception e) {
             log.error("Failed to process recommendation type {}. Data: {}",
                     recommendation.getRecommendationType(), recommendation, e);

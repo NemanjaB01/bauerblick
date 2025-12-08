@@ -44,37 +44,3 @@ rule "Calculate Water Deficit Generic"
         calc.setPlantDemand(demand);
         insert(calc);
 end
-
-rule "Monitor Conditions - All Crops"
-    salience 10
-    when
-        $seed : Seed()
-        $calc : WaterDeficitResult(seed == $seed, deficit <= $seed.allowedWaterDeficit)
-        $analysis : DailyAnalysis(currentSoilMoisture >= $seed.minSoilMoisture)
-    then
-        Recommendation rec = new Recommendation();
-        rec.setRecommendedSeed($seed.getSeedType());
-        rec.setRecommendationType(RecommendationType.MONITOR_CONDITIONS);
-        rec.setAdvice("No Irrigation Needed for " + $seed.getDisplayName());
-
-        String action;
-        if ($calc.getDeficit() <= 0.0) {
-             action = String.format(
-                 "Water Surplus. Forecasted rain exceeds crop needs by %.1f mm. Moisture: %.1f%%",
-                 Math.abs($calc.getDeficit()),
-                 $analysis.getCurrentSoilMoisture() * 100
-             );
-        } else {
-             action = String.format(
-                "Deficit (%.1f mm) is minor and within tolerance (%.1f mm). Moisture: %.1f%%",
-                $calc.getDeficit(),
-                $seed.getAllowedWaterDeficit(),
-                $analysis.getCurrentSoilMoisture() * 100
-            );
-        }
-
-        rec.setReasoning("Conditions optimal. " + action);
-
-        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
-        recommendations.add(rec);
-end

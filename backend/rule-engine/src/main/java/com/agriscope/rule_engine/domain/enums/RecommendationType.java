@@ -14,6 +14,7 @@ public enum RecommendationType {
     DELAY_PLANTING,
 
     IRRIGATE_NOW,
+    IRRIGATE_SOON,
     DELAY_IRRIGATION,
 
     CONTINUE_NORMAL,

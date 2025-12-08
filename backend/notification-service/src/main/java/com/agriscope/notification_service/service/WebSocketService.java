@@ -18,9 +18,19 @@ public class WebSocketService {
         try {
             String destination = "/topic/alerts/" + farmId;
             messagingTemplate.convertAndSend(destination, recommendation);
-            log.info("Sent WebSocket alert to farm: {}", farmId);
+            log.info("Sent WebSocket ALERT to farm: {}", farmId);
         } catch (Exception e) {
             log.error("Failed to send WebSocket alert to farm: {}", farmId, e);
+        }
+    }
+
+    public void sendRecommendationToFarm(String farmId, Recommendation recommendation) {
+        try {
+            String destination = "/topic/recommendations/" + farmId;
+            messagingTemplate.convertAndSend(destination, recommendation);
+            log.info("Sent WebSocket RECOMMENDATION to farm: {}", farmId);
+        } catch (Exception e) {
+            log.error("Failed to send WebSocket recommendation to farm: {}", farmId, e);
         }
     }
 
@@ -28,7 +38,7 @@ public class WebSocketService {
         try {
             String destination = "/topic/weather/" + farmId;
             messagingTemplate.convertAndSend(destination, payload);
-            log.info("Sent WebSocket weather to farm: {}", farmId);
+            log.info("Sent WebSocket WEATHER to farm: {}", farmId);
         } catch (Exception e) {
             log.error("Failed to send WebSocket weather to farm: {}", farmId, e);
         }

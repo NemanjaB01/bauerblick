@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AlertService {
+public class NotificationService {
 
     private final WebSocketService webSocketService;
 
@@ -29,7 +29,8 @@ public class AlertService {
             "HEAT_ALERT",
             "STORM_ALERT",
             "FLOOD_ALERT",
-            "DROUGHT_ALERT"
+            "DROUGHT_ALERT",
+            "CONTINUE_NORMAL"
     };
 
     private static final String[] RECOMMENDATION_TYPES = {
@@ -37,10 +38,12 @@ public class AlertService {
             "IRRIGATE_SOON",
             "DELAY_IRRIGATION",
             "MONITOR_CONDITIONS",
-            "CONTINUE_NORMAL"
+            "CONTINUE_NORMAL",
+            "SAFETY_ALERT",
+            "DELAY_OPERATIONS"
     };
 
-    public void processIncomingAlert(Recommendation newRec) {
+    public void processIncomingRecommendation(Recommendation newRec) {
         String farmId = newRec.getFarmId();
         if (farmId == null) {
             log.warn("Received recommendation without farmId");
@@ -79,7 +82,7 @@ public class AlertService {
             webSocketService.sendRecommendationToFarm(rec.getFarmId(), rec);
         }
 
-        lastSentCache.put(key, rec);
+//        lastSentCache.put(key, rec);
     }
 
     private boolean isAlertType(String type) {
@@ -116,7 +119,7 @@ public class AlertService {
             return diff >= TEMP_CHANGE_THRESHOLD;
         }
 
-        if (type.equals("IRRIGATE_NOW")) {
+        if (type.equals("IRRIGATE_NOW") || type.equals("IRRIGATE_SOON")) {
             return diff >= DEFICIT_CHANGE_THRESHOLD;
         }
 
@@ -130,7 +133,7 @@ public class AlertService {
             return getMetricValue(rec, "temperature");
         }
 
-        if (type.equals("IRRIGATE_NOW")) {
+        if (type.equals("IRRIGATE_NOW") || type.equals("IRRIGATE_SOON") || type.equals("DELAY_IRRIGATION")) {
             return getMetricValue(rec, "deficit_amount");
         }
 

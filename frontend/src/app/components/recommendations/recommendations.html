@@ -107,16 +107,9 @@
           <p class="advice-reasoning">{{ rec.reasoning }}</p>
 
           <!-- Current Conditions -->
-          <div class="metrics-section" *ngIf="rec.metrics && (rec.metrics.temperature !== undefined || rec.metrics.deficit_amount !== undefined)">
+          <div class="metrics-section" *ngIf="rec.metrics &&  rec.metrics.deficit_amount !== undefined">
             <h4 class="metrics-title">Current Conditions</h4>
             <div class="metrics-grid">
-              <div class="metric-item" *ngIf="rec.metrics.temperature !== undefined">
-                <span class="metric-icon">🌡️</span>
-                <div class="metric-info">
-                  <span class="metric-label">Temperature</span>
-                  <span class="metric-value">{{ formatTemperature(rec.metrics.temperature) }}</span>
-                </div>
-              </div>
               <div class="metric-item" *ngIf="rec.metrics.deficit_amount !== undefined">
                 <span class="metric-icon">💧</span>
                 <div class="metric-info">

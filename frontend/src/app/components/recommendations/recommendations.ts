@@ -25,7 +25,7 @@ export class Recommendations implements OnInit, OnDestroy {
   connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
   private userId: string = 'user-1';
-  private farmId: string = 'farm-1-b';
+  private farmId: string = 'farm-1-a';
 
 
   private recommendationsSubscription?: Subscription;
@@ -226,11 +226,7 @@ export class Recommendations implements OnInit, OnDestroy {
    */
   getRecommendationTypeInfo(type: string): RecommendationTypeInfo {
     const typeMap: { [key: string]: RecommendationTypeInfo } = {
-      'FROST_ALERT': {
-        icon: '❄️',
-        color: '#3B82F6',
-        label: 'Frost Alert'
-      },
+
       'MONITOR_CONDITIONS': {
         icon: '👁️',
         color: '#10B981',
@@ -245,26 +241,6 @@ export class Recommendations implements OnInit, OnDestroy {
         icon: '💧',
         color: '#0EA5E9',
         label: 'Irrigate Now'
-      },
-      'HARVEST_READY': {
-        icon: '🌾',
-        color: '#F59E0B',
-        label: 'Harvest Ready'
-      },
-      'PEST_WARNING': {
-        icon: '🐛',
-        color: '#EF4444',
-        label: 'Pest Warning'
-      },
-      'FERTILIZER_RECOMMENDATION': {
-        icon: '🌱',
-        color: '#22C55E',
-        label: 'Fertilizer Recommendation'
-      },
-      'WEATHER_WARNING': {
-        icon: '⚠️',
-        color: '#F97316',
-        label: 'Weather Warning'
       },
       'HEAT_ALERT': {
         icon: '🌡️',
@@ -346,14 +322,6 @@ export class Recommendations implements OnInit, OnDestroy {
     if (diffMins < 60) return `${diffMins} min ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  }
-
-  /**
-   * Format temperature if available
-   */
-  formatTemperature(temp?: number): string {
-    if (temp === undefined) return 'N/A';
-    return `${temp.toFixed(1)}°C`;
   }
 
   /**

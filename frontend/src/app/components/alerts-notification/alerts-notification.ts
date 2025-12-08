@@ -1,23 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-
-export interface AlertData {
-  id: string;
-  userId: string;
-  farmId: string;
-  recommendedSeed: string;
-  recommendationType: string;
-  advice: string;
-  reasoning: string;
-  weatherTimestamp: string;
-  metrics: {
-    temperature?: number;
-    deficit_amount?: number;
-    [key: string]: any;
-  };
-  receivedAt?: Date;
-}
+import { AlertsWebSocketService, AlertData, ConnectionStatus } from '../../services/websocket-service/ alert-websocket.service';
 
 interface AlertTypeInfo {
   icon: string;
@@ -35,71 +19,85 @@ interface AlertTypeInfo {
 export class AlertsNotification implements OnInit, OnDestroy {
   alerts: AlertData[] = [];
   isDropdownOpen = false;
+  connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
-  // For WebSocket integration
-  // private alertsSubscription?: Subscription;
-  // private listSubscription?: Subscription;
+  private userId: string = 'user-1';
+  private farmId: string = 'farm-1-b';
+
+  private alertsSubscription?: Subscription;
+  private listSubscription?: Subscription;
+  private statusSubscription?: Subscription;
+
+  constructor(private alertsService: AlertsWebSocketService) {}
 
   ngOnInit() {
-    // Load mock data for testing
-    this.loadMockData();
-
-    // TODO: For WebSocket, uncomment:
-    // constructor(private alertsService: AlertsWebSocketService) {}
-    //
-    // this.listSubscription = this.alertsService.getAllAlerts().subscribe({
-    //   next: (alerts) => {
-    //     this.alerts = alerts;
-    //   }
-    // });
+    this.setupWebSocketSubscriptions();
+    this.connectWebSocket();
   }
 
   ngOnDestroy() {
-    // TODO: Cleanup WebSocket subscriptions
-    // if (this.alertsSubscription) {
-    //   this.alertsSubscription.unsubscribe();
-    // }
-    // if (this.listSubscription) {
-    //   this.listSubscription.unsubscribe();
-    // }
+    this.cleanupSubscriptions();
+    this.disconnectWebSocket();
   }
 
-  /**
-   * Load mock alerts for testing
-   */
-  private loadMockData(): void {
-    const mockAlerts: AlertData[] = [
-      {
-        id: "alert-1",
-        userId: "user-1",
-        farmId: "farm-1-a",
-        recommendedSeed: "WHEAT",
-        recommendationType: "FROST_ALERT",
-        advice: "PROTECT_CROPS_FROM_FROST",
-        reasoning: "Temperature dropping below 0°C tonight. Immediate action required.",
-        weatherTimestamp: "2025-12-04T20:00:00",
-        metrics: {
-          temperature: -2.5
-        },
-        receivedAt: new Date(Date.now() - 2 * 60000)
+  private setupWebSocketSubscriptions(): void {
+    this.alertsSubscription = this.alertsService.getAlertUpdates().subscribe({
+      next: (alert: AlertData) => {
+        console.log('New alert received:', alert);
       },
-      {
-        id: "alert-2",
-        userId: "user-1",
-        farmId: "farm-2-b",
-        recommendedSeed: "CORN",
-        recommendationType: "WEATHER_WARNING",
-        advice: "HEAVY_RAIN_EXPECTED",
-        reasoning: "Heavy rainfall forecasted. Check drainage systems.",
-        weatherTimestamp: "2025-12-04T18:30:00",
-        metrics: {
-          temperature: 8.2
-        },
-        receivedAt: new Date(Date.now() - 30 * 60000)
+      error: (error) => {
+        console.error('Error in alert updates:', error);
       }
-    ];
+    });
 
-    this.alerts = mockAlerts;
+    this.listSubscription = this.alertsService.getAllAlerts().subscribe({
+      next: (alerts: AlertData[]) => {
+        console.log('Alerts list updated:', alerts.length);
+        this.alerts = alerts;
+      },
+      error: (error) => {
+        console.error('Error in alerts list:', error);
+      }
+    });
+
+    this.statusSubscription = this.alertsService.getConnectionStatus().subscribe({
+      next: (status: ConnectionStatus) => {
+        this.connectionStatus = status;
+        console.log('Alerts connection status:', status);
+
+        if (status === ConnectionStatus.DISCONNECTED) {
+          setTimeout(() => {
+            if (this.connectionStatus === ConnectionStatus.DISCONNECTED) {
+              this.reconnectWebSocket();
+            }
+          }, 5000);
+        }
+      },
+      error: (error) => {
+        console.error('Error in connection status:', error);
+      }
+    });
+  }
+
+  private connectWebSocket(): void {
+    console.log(`Connecting alerts for user ${this.userId}, farm ${this.farmId}`);
+    this.alertsService.setFarmForUser(this.userId, this.farmId);
+  }
+
+  private reconnectWebSocket(): void {
+    console.log('Reconnecting alerts WebSocket...');
+    this.alertsService.reconnect();
+  }
+
+  private disconnectWebSocket(): void {
+    console.log('Disconnecting alerts WebSocket...');
+    this.alertsService.disconnect();
+  }
+
+  private cleanupSubscriptions(): void {
+    if (this.alertsSubscription) this.alertsSubscription.unsubscribe();
+    if (this.listSubscription) this.listSubscription.unsubscribe();
+    if (this.statusSubscription) this.statusSubscription.unsubscribe();
   }
 
   getAlertsCount(): number {
@@ -166,6 +164,11 @@ export class AlertsNotification implements OnInit, OnDestroy {
         icon: '⚠️',
         color: '#EF4444',
         label: 'Safety Alert'
+      },
+      'CONTINUE_NORMAL': {
+        icon: '✅',
+        color: '#10B981',
+        label: 'Continue Normal'
       }
     };
 
@@ -215,17 +218,15 @@ export class AlertsNotification implements OnInit, OnDestroy {
   }
 
   dismissAlert(alertId: string): void {
-    this.alerts = this.alerts.filter(a => a.id !== alertId);
-
-    // TODO: When using WebSocket:
-    // this.alertsService.removeAlert(alertId);
+    this.alertsService.removeAlert(alertId);
   }
 
   clearAllAlerts(): void {
-    this.alerts = [];
+    this.alertsService.clearAlerts();
     this.closeDropdown();
+  }
 
-    // TODO: When using WebSocket:
-    // this.alertsService.clearAlerts();
+  isConnected(): boolean {
+    return this.connectionStatus === ConnectionStatus.CONNECTED;
   }
 }

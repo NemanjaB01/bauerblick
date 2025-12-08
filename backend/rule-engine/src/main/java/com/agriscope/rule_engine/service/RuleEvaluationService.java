@@ -166,7 +166,7 @@ public class RuleEvaluationService {
 
             rec.getMetrics().put("temperature", avgTemperature);
 
-            log.info("Sending Irrigation Alert: User={}, Advice={}", userId, rec.getAdvice());
+            log.info("Sending Recommendation: User={}, Advice={}", userId, rec.getAdvice());
             recommendationProducer.sendRecommendation(rec);
         }
     }

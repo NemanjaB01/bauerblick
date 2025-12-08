@@ -14,9 +14,7 @@ export interface RecommendationData {
   reasoning: string;
   weatherTimestamp: string;
   metrics: {
-    temperature?: number;
     deficit_amount?: number;
-    [key: string]: any;
   };
   receivedAt?: Date;
 }
@@ -113,7 +111,7 @@ export class RecommendationsWebSocketService implements OnDestroy {
       return;
     }
 
-    const topic = `/topic/alerts/${farmId}`;
+    const topic = `/topic/recommendations/${farmId}`;
     console.log(`Subscribing to recommendations for farm: ${topic}`);
 
     this.stompClient.subscribe(topic, (message) => {
@@ -123,7 +121,6 @@ export class RecommendationsWebSocketService implements OnDestroy {
 
         console.log('Recommendation received:', recommendation);
 
-        // Proveri da li je za našu farmu
         if (recommendation.farmId === this.currentFarmId) {
           this.allRecommendations.push(recommendation);
           this.recommendationsListSubject.next([...this.allRecommendations]);
@@ -143,13 +140,6 @@ export class RecommendationsWebSocketService implements OnDestroy {
     return this.recommendationsListSubject.asObservable();
   }
 
-  getCurrentRecommendations(): RecommendationData[] {
-    return this.allRecommendations;
-  }
-
-  getRecommendationsCount(): number {
-    return this.allRecommendations.length;
-  }
 
   getConnectionStatus(): Observable<ConnectionStatus> {
     return this.connectionStatusSubject.asObservable();

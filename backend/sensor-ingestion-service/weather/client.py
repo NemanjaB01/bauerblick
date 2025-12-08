@@ -17,13 +17,7 @@ class WeatherClient:
     def __init__(self):
         session = requests.Session()
 
-        retry_strategy = Retry(
-            total=Config.WEATHER_MAX_RETRIES,
-            backoff_factor=0.3,
-            status_forcelist=[500, 502, 503, 504]
-        )
-
-        adapter = HTTPAdapter(max_retries=retry_strategy)
+        adapter = HTTPAdapter()
         session.mount("http://", adapter)
         session.mount("https://", adapter)
 

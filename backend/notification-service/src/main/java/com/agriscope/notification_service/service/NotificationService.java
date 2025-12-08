@@ -7,9 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -25,8 +22,23 @@ public class AlertService {
             .build();
 
     private static final double TEMP_CHANGE_THRESHOLD = 2.0;
-
     private static final double DEFICIT_CHANGE_THRESHOLD = 2.0;
+
+    private static final String[] ALERT_TYPES = {
+            "FROST_ALERT",
+            "HEAT_ALERT",
+            "STORM_ALERT",
+            "FLOOD_ALERT",
+            "DROUGHT_ALERT"
+    };
+
+    private static final String[] RECOMMENDATION_TYPES = {
+            "IRRIGATE_NOW",
+            "IRRIGATE_SOON",
+            "DELAY_IRRIGATION",
+            "MONITOR_CONDITIONS",
+            "CONTINUE_NORMAL"
+    };
 
     public void processIncomingAlert(Recommendation newRec) {
         String farmId = newRec.getFarmId();
@@ -43,24 +55,49 @@ public class AlertService {
         Recommendation lastRec = lastSentCache.getIfPresent(uniqueKey);
 
         if (lastRec == null) {
-            sendAndCacheAlert(uniqueKey, newRec);
+            sendAndCache(uniqueKey, newRec);
             return;
         }
 
         if (isSignificantChange(lastRec, newRec)) {
             log.info("Significant change detected, sending update for {}.", newRec.getRecommendationType());
-            sendAndCacheAlert(uniqueKey, newRec);
+            sendAndCache(uniqueKey, newRec);
         } else {
             log.info("Duplicate alert suppressed (insignificant change).");
         }
     }
 
-    private void sendAndCacheAlert(String key, Recommendation rec) {
-        webSocketService.sendAlertToFarm(rec.getFarmId(), rec);
+    private void sendAndCache(String key, Recommendation rec) {
+        if (isAlertType(rec.getRecommendationType())) {
+            webSocketService.sendAlertToFarm(rec.getFarmId(), rec);
+            log.info("Sent as ALERT for farm: {}", rec.getFarmId());
+        } else if (isRecommendationType(rec.getRecommendationType())) {
+            webSocketService.sendRecommendationToFarm(rec.getFarmId(), rec);
+            log.info("Sent as RECOMMENDATION for farm: {}", rec.getFarmId());
+        } else {
+            log.warn("Unknown recommendation type: {}, sending as recommendation", rec.getRecommendationType());
+            webSocketService.sendRecommendationToFarm(rec.getFarmId(), rec);
+        }
 
         lastSentCache.put(key, rec);
+    }
 
-        log.info("Processed alert for farm: {}", rec.getFarmId());
+    private boolean isAlertType(String type) {
+        for (String alertType : ALERT_TYPES) {
+            if (alertType.equals(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isRecommendationType(String type) {
+        for (String recType : RECOMMENDATION_TYPES) {
+            if (recType.equals(type)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isSignificantChange(Recommendation oldRec, Recommendation newRec) {
@@ -109,7 +146,4 @@ public class AlertService {
         }
         return 0.0;
     }
-
-
-
 }

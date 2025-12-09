@@ -14,13 +14,12 @@ import {Toast, ToastrService} from 'ngx-toastr';
   styleUrl: './signup.css'
 })
 export class Signup {
+  errorMap: { [key: string]: string } = {};
 
   signupData: SignupDetail = {
     email: '',
     firstName: '',
     lastName: '',
-    dateOfBirth: new Date(),
-    address: '',
     password: '',
     password2: ''
   };
@@ -28,21 +27,27 @@ export class Signup {
   constructor(private signupService: SignupService, private router: Router, private toastr: ToastrService) {
   }
 
-  ngOnInit(): void {
-    // This triggers immediately when the page loads#
-    this.toastr.success('Hello! The toast is working.', 'System Test');
-    this.toastr.error('Hello! The toast is working.', 'System Test');
-    this.toastr.info('Hello! The toast is working.', 'System Test');
-  }
+  //ngOnInit(): void {
+  //  // This triggers immediately when the page loads#
+  //  this.toastr.success('Hello! The toast is working.', 'System Test');
+  //  this.toastr.error('Hello! The toast is working.', 'System Test');
+  //}
   onSubmit() {
+    this.errorMap = {};
+    console.log("submit try");
     this.signupService.signupUser(this.signupData).subscribe({
       next: () => {
         this.toastr.success("Signup successful!");
         this.router.navigate(['/home']); // redirect to login after success
       },
       error: (err) => {
-        console.error(err);
-        this.toastr.error("Signup failed!");
+        if (err.error && err.error.errors) {
+          console.log(err.error.errors)
+          this.toastr.error(err.error.message)
+          this.errorMap = err.error.errors;
+        } else {
+          this.toastr.error("Try again!","Error");
+        }
       }
     });
   }

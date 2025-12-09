@@ -129,41 +129,6 @@ input:focus {
 }
 
 
-/* -------------------------------------------------------
-   NEW: DATE INPUT STYLING
--------------------------------------------------------- */
-input[type="date"] {
-  position: relative;
-  color: #333;
-}
-
-/* 1. Placeholder Logic:
-   If the date is empty (invalid) and not being clicked,
-   hide the ugly "mm/dd/yyyy" mask and show the nice text instead.
-*/
-input[type="date"]:required:invalid::-webkit-datetime-edit {
-  color: transparent;
-}
-input[type="date"]:required:invalid::before {
-  content: attr(placeholder); /* Shows "DD.MM.YYYY" */
-  color: #757575; /* Standard placeholder gray */
-  position: absolute;
-  left: 12px; /* Matches input padding */
-}
-
-/* 2. Calendar Icon Styling */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.6;
-  transition: 0.2s;
-  /* Pushes icon slightly away from the edge */
-  margin-right: 5px;
-}
-input[type="date"]::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
-  transform: scale(1.1); /* Subtle zoom effect */
-}
-
 
 /* -------------------------------------------------------
    SIGN UP BUTTON
@@ -204,65 +169,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 
 /* -------------------------------------------------------
-   DATE INPUT STYLING (The "Opacity" Fix)
--------------------------------------------------------- */
-input[type="date"] {
-  position: relative;
-  cursor: pointer;
-  min-height: 44px;
-}
-
-/* 1. HIDE THE NATIVE MASK (tt.mm.jjjj)
-*/
-input[type="date"]:invalid::-webkit-datetime-edit {
-  opacity: 0;
-  visibility: hidden; /* Extra safety to ensure it's gone */
-}
-
-/* 2. SHOW THE CUSTOM PLACEHOLDER (DD.MM.YYYY)
-   We position this exactly where the text would be.
-*/
-input[type="date"]:invalid::before {
-  content: "DD.MM.YYYY";
-  color: #999;
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-weight: 400;
-  pointer-events: none; /* Clicks pass through to the input */
-}
-
-/* 3. SUCCESS STATE (When date is selected)
-   When valid, reset opacity so the real date shows up.
-*/
-input[type="date"]:valid {
-  color: #333;
-}
-input[type="date"]:valid::-webkit-datetime-edit {
-  opacity: 1;
-  visibility: visible;
-}
-input[type="date"]:valid::before {
-  display: none;
-}
-
-
-/* 4. CALENDAR ICON STYLING */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.5;
-  transition: 0.2s;
-  margin-right: 5px;
-  filter: invert(0.2);
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-/* -------------------------------------------------------
    MEDIA QUERIES (RESPONSIVE)
 -------------------------------------------------------- */
 @media (max-width: 900px) {
@@ -280,4 +186,26 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
       rgba(255, 255, 255, 0.4) 100%
     );
   }
+}
+
+
+input.error-input {
+  border: 1px solid #dc3545 !important;
+  background-color: #fff8f8 !important;
+}
+
+
+input.error-input:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important; /* Red Glow instead of Orange */
+  outline: none;
+}
+
+.error-msg {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  padding-left: 4px; /* Aligns text slightly better with the rounded input */
+  font-weight: 600;
 }

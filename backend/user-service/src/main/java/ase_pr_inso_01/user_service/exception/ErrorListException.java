@@ -1,41 +1,41 @@
 package ase_pr_inso_01.user_service.exception;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Common super class for exceptions that report a list of errors
- * back to the user, when the given data did not pass a certain kind of checks.
+ * Common super class for exceptions that report field-specific errors.
  */
 public abstract class ErrorListException extends Exception {
-  private final List<String> errors;
+
+  private final Map<String, String> errors;
   private final String messageSummary;
   private final String errorListDescriptor;
 
-  protected ErrorListException(String errorListDescriptor, String messageSummary, List<String> errors) {
+  protected ErrorListException(String errorListDescriptor, String messageSummary, Map<String, String> errors) {
     super(messageSummary);
     this.errorListDescriptor = errorListDescriptor;
     this.messageSummary = messageSummary;
     this.errors = errors;
   }
 
-  /**
-   * See {@link Throwable#getMessage()} for general information about this method.
-   *
-   * <p>Note: this implementation produces the message
-   * from the {@link #summary} and the list of {@link #errors}
-   */
   @Override
   public String getMessage() {
+    // We convert the map to a string like "email: invalid, password: short" for logs
+    String formattedErrors = errors.entrySet().stream()
+            .map(entry -> entry.getKey() + ": " + entry.getValue())
+            .collect(Collectors.joining(", "));
+
     return "%s. %s: %s."
-            .formatted(messageSummary, errorListDescriptor, String.join(", ", errors));
+            .formatted(messageSummary, errorListDescriptor, formattedErrors);
   }
 
   public String summary() {
     return messageSummary;
   }
 
-  public List<String> errors() {
-    return Collections.unmodifiableList(errors);
+  public Map<String, String> getErrors() {
+    return Collections.unmodifiableMap(errors);
   }
 }

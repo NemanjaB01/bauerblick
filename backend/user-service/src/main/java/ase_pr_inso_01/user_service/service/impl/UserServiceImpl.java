@@ -13,7 +13,9 @@ import ase_pr_inso_01.user_service.validation.UserValidator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -43,8 +45,6 @@ public class UserServiceImpl implements UserService {
     user.setEmail(dto.getEmail());
     user.setFirstName(dto.getFirstName());
     user.setLastName(dto.getLastName());
-    user.setDateOfBirth(dto.getDateOfBirth());
-    user.setAddress(dto.getAdress());
 
     // secure password hashing
     user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
     if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
       throw new ValidationException(
               "Login failed",
-              List.of("Invalid email or password")
+              Map.of("password", "Wrong password")
       );
     }
 

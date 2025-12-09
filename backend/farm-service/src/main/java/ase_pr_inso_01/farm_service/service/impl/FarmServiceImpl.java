@@ -23,6 +23,8 @@ public class FarmServiceImpl implements FarmService {
         Farm farm  = new Farm();
         farm.setName(dto.getName());
         farm.setLocation(dto.getLocation());
+        farm.setLatitude(dto.getLatitude());
+        farm.setLongitude(dto.getLongitude());
         farm.setSoilType(dto.getSoilType());
         farm.setFields(dto.getFields());
         farm.setRecommendations(dto.getRecommendations());

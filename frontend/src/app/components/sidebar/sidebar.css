@@ -24,7 +24,7 @@
 
 /* ============================================
    SIDEBAR HEADER
-   User svatar + username
+   User avatar + username
    ============================================ */
 
 .sidebar-header {
@@ -64,6 +64,24 @@
   cursor: pointer;
 
   transition: all 0.25s ease;
+  position: relative;
+}
+
+.menu-item.has-dropdown {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+
+}
+
+.menu-item.has-dropdown .menu-item-content {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 90%;
+  padding: 20px 0px 13px 28px;
+  border-radius: 18px;
+  /* transition: all 0.75s ease; */
 }
 
 .menu-item img {
@@ -87,6 +105,16 @@
   transform: translateX(8px);
 }
 
+.menu-item.has-dropdown:hover {
+  background: transparent;
+  transform: none;
+}
+
+.menu-item.has-dropdown .menu-item-content:hover {
+  background: rgba(0, 0, 0, 0.06);
+  transform: translateX(8px);
+}
+
 .menu-item:hover img {
   transform: scale(1.15);
 }
@@ -97,4 +125,141 @@
 
 .menu-item:active {
   transform: translateX(4px) scale(0.98);
+}
+
+/* ============================================
+   DROPDOWN FOR MY FARMS
+   ============================================ */
+
+.farms-dropdown {
+  position: relative;
+  left: 0;
+  top: 0;
+  margin-top: 0;
+  width: 100%;
+  border-radius: 18px;
+  padding: 0;
+  /* box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); */
+  backdrop-filter: blur(22px);
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.9s ease;
+  z-index: 100;
+}
+
+.menu-item.has-dropdown:hover .farms-dropdown {
+  max-height: 500px;
+  opacity: 1;
+  /* padding: 20px; */
+  /* margin-top: 10px; */
+}
+
+/* Dropdown Header */
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.dropdown-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dropdown-icon {
+  font-size: 20px;
+}
+
+/* Farm List */
+.farm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.farm-item {
+  /* padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.04); */
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.farm-item:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(84, 84, 84, 0.15);
+  /* transform: translateX(3px); */
+}
+
+.farm-item span {
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #616161;
+}
+
+/* Add Farm Button */
+.add-farm-btn {
+  width: 100%;
+  /* padding: 12px; */
+  background: rgba(174, 173, 173, 0.08);
+  color: #333;
+  border: none;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.add-farm-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.add-farm-btn:active {
+  transform: translateY(0);
+}
+
+/* Empty State */
+.empty-farms {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+/* Custom Scrollbar for Farm List */
+.farm-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.farm-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.farm-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.farm-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }

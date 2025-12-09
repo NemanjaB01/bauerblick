@@ -1,13 +1,13 @@
-
 .page-container {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background-image: url('/assets/images/main_background.png');
+  background-image: url('/assets/images/login_background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
+  flex-direction: column;
 }
 
 .topbar-container {
@@ -15,20 +15,15 @@
   top: 0;
   left: 0;
   width: 100%;
-
   height: 70px;
   padding: 0 32px;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   background: rgba(82, 167, 34, 0.23);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
-
   z-index: 50;
 }
 
@@ -63,6 +58,7 @@
   transform: scale(1.12);
   opacity: 0.85;
 }
+
 .menu-wrapper {
   position: relative;
 }
@@ -71,22 +67,16 @@
   position: absolute;
   top: 75px;
   right: 0;
-
   width: 220px;
-
   background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #bc4705 100%);
   border: 4px solid #5C2E0A;
   border-radius: 12px;
-
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.4),
     inset 0 2px 4px rgba(255, 255, 255, 0.1),
     inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-
   padding: 8px;
-
   animation: dropdownSlide 0.3s ease-out;
-
   z-index: 100;
 }
 
@@ -97,7 +87,6 @@
   left: 0;
   right: 0;
   bottom: 0;
-
   background-image:
     repeating-linear-gradient(
       90deg,
@@ -106,7 +95,6 @@
       rgba(0, 0, 0, 0.1) 2px,
       rgba(0, 0, 0, 0.1) 4px
     );
-
   border-radius: 8px;
   pointer-events: none;
 }
@@ -115,17 +103,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-
   padding: 14px 16px;
   margin: 4px 0;
-
   background: rgba(139, 69, 19, 0.3);
   border: 2px solid #6B3410;
   border-radius: 8px;
-
   cursor: pointer;
   transition: all 0.2s ease;
-
   position: relative;
   z-index: 1;
 }
@@ -171,12 +155,6 @@
   }
 }
 
-.sidebar {
-  width: 260px;
-  flex-shrink: 0;
-}
-
-/* Optional gradient overlay (kept — it gives the right-side a nice glow) */
 .page-container::after {
   content: "";
   position: absolute;
@@ -190,55 +168,39 @@
   z-index: 0;
 }
 
-/* -------------------------------------------------------
-   SPLIT LAYOUT
--------------------------------------------------------- */
 .content-area {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  z-index: 2;
-
-}
-
-
-.left-content {
-    flex: 1;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-
-}
-
-.right-content {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-right: 6vw;
+  margin-top: 70px;
+  position: relative;
+  z-index: 2;
+  padding: 40px 20px;
 }
 
-.login-card {
-  width: 500px;
-  margin-top: 70px;
+.farm-content {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.newFarm-card {
+  width: 100%;
+  max-width: 500px;
   padding: 40px;
   border-radius: 25px;
-  height: 80%;
-  /* glass effect stays */
   background: rgba(255, 255, 255, 0.40);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-
   box-shadow: 0 10px 35px rgba(0,0,0,0.18);
   position: relative;
 }
-.map-card {
-  /* padding: 20px; */
-  padding-bottom: 20px;
-}
 
 .map-card {
+  padding-bottom: 20px;
   border-radius: 16px;
   margin: 20px 0;
 }
@@ -250,68 +212,21 @@
   color: #333;
 }
 
-/* 3. Fancy version with gradient border */
-.map-card-fancy {
-  position: relative;
-  padding: 2px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  margin: 20px 0;
-}
-
-.map-card-fancy .map-inner {
-  background: white;
-  border-radius: 14px;
-}
-
-#map-fancy {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* 4. Loading state overlay */
-.map-loading {
-  position: relative;
-}
-
-.map-loading::after {
-  content: 'Loading map...';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 15px 30px;
-  border-radius: 8px;
-  font-weight: 500;
-  color: #666;
-}
-
-/* 5. Custom zoom controls styling (if using Leaflet/Mapbox) */
-.leaflet-control-zoom a {
-  background-color: #fff !important;
-  color: #333 !important;
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-}
-.login-icon {
-  width: 90px;   /* adjust this number */
+.newFarm-icon {
+  width: 90px;
   height: auto;
   display: block;
 }
-.login-title {
+
+.newFarm-title {
   display: flex;
-  align-items: center;      /* vertically center icon */
-  gap: 10px;                /* space between text & icon */
+  align-items: center;
+  gap: 10px;
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 25px;
 }
 
-/* -------------------------------------------------------
-   FORM ELEMENTS
--------------------------------------------------------- */
 label {
   font-size: 18px;
   font-weight: 600;
@@ -320,7 +235,7 @@ label {
 }
 
 input {
-  width: 70%;
+  width: 100%;
   padding: 14px;
   font-size: 16px;
   border-radius: 10px;
@@ -329,7 +244,7 @@ input {
   background: rgba(255, 255, 255, 0.9);
 }
 
-.signin-btn {
+.submit-btn {
   width: 100%;
   padding: 14px;
   font-size: 18px;
@@ -341,35 +256,8 @@ input {
   cursor: pointer;
 }
 
-.signin-btn:hover {
+.submit-btn:hover {
   background-color: #d96226;
-}
-
-
-
-.autocomplete-dropdown {
-  list-style-type: none;
-  z-index: 2000;
-  padding: 14px;            
-  margin: 0;             /* remove default margin */
-  position: absolute;
-  z-index: 1000;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  max-height: 200px;
-  overflow-y: auto;
-  width: 300px;          /* same as input */
-}
-
-.autocomplete-dropdown li {
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.autocomplete-dropdown li:hover {
-  background-color: #007bff;
-  color: white;
 }
 
 .address-search-container {
@@ -388,19 +276,16 @@ input {
   top: 100%;
   left: 0;
   right: 0;
-
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
-  list-style: none; /* remove bullets */
+  list-style: none;
   margin: 4px 0 0 0;
   padding: 0;
-
   max-height: 250px;
   overflow-y: auto;
-
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 9999; /* always above the map */
+  z-index: 9999;
 }
 
 .autocomplete-dropdown li {
@@ -413,21 +298,22 @@ input {
   background: #eef3ff;
 }
 
-
-/* Container for dropdown */
 .form-group select {
-    width: 70%;
-    padding: 10px 14px;
-    font-size: 15px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    appearance: none; /* remove default arrow in some browsers */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpolygon points='0,0 12,0 6,6' style='fill:%23666;'/%3E%3C/svg%3E");
-    cursor: pointer;
-    transition: all 0.2s ease;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpolygon points='0,0 12,0 6,6' style='fill:%23666;'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .form-group select:focus {
@@ -436,16 +322,7 @@ input {
   box-shadow: 0 0 6px rgba(74, 140, 247, 0.4);
 }
 
-.form-group select {
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 12px 12px;
-}
-
-
 input, select, textarea {
   box-sizing: border-box;
   margin-bottom: 10px;
 }
-
-

@@ -1,0 +1,26 @@
+package ase_pr_inso_01.user_service.model;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDate;
+
+@Document(collection = "users")
+@Getter
+@Setter
+public class User {
+  @Id
+  private String id;
+  private String email;
+  private String firstName;
+  private String lastName;
+  private String password;
+  private String password2;
+  private String address;
+  private LocalDate dateOfBirth;
+  private String role = "USER";
+
+  //TODO: enhance this to also include login attempts and security question!
+}

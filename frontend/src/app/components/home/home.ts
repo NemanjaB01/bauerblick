@@ -5,6 +5,7 @@ import { FieldGrid } from '../field-grid/field-grid';
 import { WeatherWidget } from '../weather-widget/weather-widget';
 import { Recommendations } from '../recommendations/recommendations';
 import {CommonModule} from '@angular/common';
+import { AlertsNotification } from '../alerts-notification/alerts-notification';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +17,8 @@ import {CommonModule} from '@angular/common';
     FieldGrid,
     WeatherWidget,
     Recommendations,
-    CommonModule
+    CommonModule,
+    AlertsNotification
   ]
 })
 export class HomeComponent {

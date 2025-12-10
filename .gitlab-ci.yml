@@ -1,0 +1,84 @@
+stages:
+  - build
+  - test
+  - deploy
+
+# Cache Maven dependencies for faster builds
+cache:
+  paths:
+    - .m2/repository
+
+# Build Docker images for each service
+build_api_gateway:
+  stage: build
+  script:
+    - cd backend/api-gateway
+    - mvn clean install
+#    - docker build -t /api-gateway:$CI_PIPELINE_ID .
+#    - docker push /api-gateway:$CI_PIPELINE_ID
+  only:
+    - main
+
+build_user_service:
+  stage: build
+  script:
+    - cd backend/user-service
+    - mvn clean install
+  #    - docker build -t /api-gateway:$CI_PIPELINE_ID .
+  #    - docker push /api-gateway:$CI_PIPELINE_ID
+  only:
+    - main
+
+build_farm_service:
+  stage: build
+  script:
+    - cd backend/farm-service
+    - mvn clean install
+  #    - docker build -t /api-gateway:$CI_PIPELINE_ID .
+  #    - docker push /api-gateway:$CI_PIPELINE_ID
+  only:
+    - main
+
+build_service_registry:
+  stage: build
+  script:
+    - cd backend/service-registry
+    - mvn clean install
+  #    - docker build -t /api-gateway:$CI_PIPELINE_ID .
+  #    - docker push /api-gateway:$CI_PIPELINE_ID
+  only:
+    - main
+
+# Deploy to your environment (optional)
+# Replace these with the actual deployment steps for your environment (Kubernetes, etc.)
+deploy_api_gateway:
+  stage: deploy
+  script:
+    - echo "Deploying to staging environment"
+    - kubectl apply -f deployment.yaml
+  only:
+    - main
+
+deploy_user_service:
+  stage: deploy
+  script:
+    - kubectl apply -f kubernetes/user-service-deployment.yaml
+    - kubectl apply -f kubernetes/user-service-service.yaml
+    - kubectl apply -f kubernetes/user-service-ingress.yaml
+
+
+deploy_farm_service:
+  stage: deploy
+  script:
+    - echo "Deploying to staging environment"
+    - kubectl apply -f deployment.yaml
+  only:
+    - main
+
+deploy_service_registry:
+  stage: deploy
+  script:
+    - echo "Deploying to staging environment"
+    - kubectl apply -f deployment.yaml
+  only:
+    - main

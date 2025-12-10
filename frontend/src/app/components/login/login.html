@@ -19,7 +19,9 @@
                  name="email"
                  [(ngModel)]="email"
                  required
-                 placeholder="username@email.com">
+                 email
+                 placeholder="username@email.com"
+                 [class.error-input]="loginFailed">
 
           <label>Password</label>
           <div class="password-row">
@@ -27,7 +29,8 @@
                    name="password"
                    [(ngModel)]="password"
                    required
-                   placeholder="Password">
+                   placeholder="Password"
+                   [class.error-input]="loginFailed">
           </div>
 
           <a class="forgot-link">Forgot Password?</a>
@@ -46,9 +49,4 @@
       </div>
     </div>
   </div>
-
-<div *ngIf="errorMessage" style="color:red">
-  {{ errorMessage }}
-</div>
-
 </div>

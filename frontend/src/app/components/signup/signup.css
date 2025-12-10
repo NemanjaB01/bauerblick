@@ -4,14 +4,16 @@
 .page-container {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh; /* Allows scrolling on small screens */
 
   background-image: url('/assets/images/login_background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
 
   display: flex;
+  overflow-x: hidden;
 }
 
 /* Soft glow on the right side */
@@ -26,6 +28,7 @@
     rgba(255, 255, 255, 0.55) 100%
   );
   z-index: 0;
+  pointer-events: none;
 }
 
 
@@ -38,30 +41,32 @@
   flex-direction: row;
   position: relative;
   z-index: 2;
+  width: 100%;
 }
 
-/* Left half (barn + landscape visible) */
 .left-content {
   flex: 1;
   padding-left: 6vw;
 }
 
-/* Right half (signup card centered) */
 .right-content {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   padding-right: 6vw;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 
 /* -------------------------------------------------------
-   SIGNUP CARD (glass effect)
+   SIGNUP CARD
 -------------------------------------------------------- */
 .signup-card {
-  width: 480px;
-  padding: 40px;
+  width: 420px;  /* Reduced width */
+  max-width: 90%;
+  padding: 30px; /* Reduced padding */
   border-radius: 25px;
 
   background: rgba(255, 255, 255, 0.40);
@@ -80,13 +85,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .signup-icon {
-  width: 70px;
+  width: 60px;
   height: auto;
 }
 
@@ -95,21 +100,34 @@
    INPUT LABELS + FIELDS
 -------------------------------------------------------- */
 label {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: block;
 }
 
 input {
   width: 100%;
-  padding: 14px;
-  font-size: 16px;
+  padding: 12px;
+  font-size: 15px;
   border-radius: 10px;
-  border: none;
-  margin-bottom: 20px;
+  border: 1px solid transparent; /* Prepare for focus state */
+  margin-bottom: 15px;
   background: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+  transition: box-shadow 0.2s, border 0.2s; /* Smooth selection animation */
 }
+
+/* NEW: THE "SELECTION" LOOK
+   Replaces the default blue browser outline with your theme's orange
+*/
+input:focus {
+  outline: none;
+  border-color: #e46b2b;
+  box-shadow: 0 0 0 3px rgba(228, 107, 43, 0.25); /* Soft orange glow */
+  background: #ffffff;
+}
+
 
 
 /* -------------------------------------------------------
@@ -125,7 +143,8 @@ input {
   color: white;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 5px;
+  transition: background-color 0.2s;
 }
 
 .signup-btn:hover {
@@ -138,7 +157,7 @@ input {
 -------------------------------------------------------- */
 .signin-row {
   text-align: center;
-  margin-top: 25px;
+  margin-top: 20px;
   font-size: 15px;
 }
 
@@ -147,4 +166,46 @@ input {
   color: #b54f23;
   cursor: pointer;
   text-decoration: none;
+}
+
+/* -------------------------------------------------------
+   MEDIA QUERIES (RESPONSIVE)
+-------------------------------------------------------- */
+@media (max-width: 900px) {
+  .left-content {
+    display: none;
+  }
+  .right-content {
+    padding-right: 0;
+    justify-content: center;
+  }
+  .page-container::after {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.4) 100%
+    );
+  }
+}
+
+
+input.error-input {
+  border: 1px solid #dc3545 !important;
+  background-color: #fff8f8 !important;
+}
+
+
+input.error-input:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important; /* Red Glow instead of Orange */
+  outline: none;
+}
+
+.error-msg {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  padding-left: 4px; /* Aligns text slightly better with the rounded input */
+  font-weight: 600;
 }

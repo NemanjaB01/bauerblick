@@ -13,4 +13,8 @@ export class Sidebar {
   addNewFarm() {
     this.router.navigate(["new-farm"])
   }
+
+  navigateToSeeds() {
+    this.router.navigate(['/seeds']);
+  }
 }

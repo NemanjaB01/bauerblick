@@ -33,20 +33,14 @@ public class SeedService {
         wheat.setSeedType(SeedType.WHEAT);
         wheat.setDisplayName("Wheat");
         wheat.setScientificName("Triticum aestivum");
-
         wheat.setMinTemperature(3.0);
-        wheat.setOptimalTemperature(15.0);
         wheat.setMaxTemperature(30.0);
-
-        wheat.setMinSoilMoisture(0.3);
-        wheat.setOptimalSoilMoisture(0.5);
-        wheat.setMaxSoilMoisture(0.8);
-
         wheat.setWaterRequirement(5.0);
-
-        wheat.setFrostRiskTemperature(2.0);
         wheat.setHeatStressTemperature(30.0);
         wheat.setHeavyRainThreshold(10.0);
+        wheat.setSeedCoefficient(1.15);
+        wheat.setMinSoilMoisture(0.25);
+        wheat.setAllowedWaterDeficit(5.0);
 
         return wheat;
     }
@@ -56,44 +50,30 @@ public class SeedService {
         corn.setSeedType(SeedType.CORN);
         corn.setDisplayName("Corn");
         corn.setScientificName("Zea mays");
-
-        corn.setMinTemperature(10.0);
-        corn.setOptimalTemperature(25.0);
+        corn.setMinTemperature(2.0);
         corn.setMaxTemperature(35.0);
-
-        corn.setMinSoilMoisture(0.4);
-        corn.setOptimalSoilMoisture(0.6);
-        corn.setMaxSoilMoisture(0.8);
-
         corn.setWaterRequirement(8.0);
-
-        corn.setFrostRiskTemperature(2.0);
         corn.setHeatStressTemperature(35.0);
         corn.setHeavyRainThreshold(15.0);
-
+        corn.setSeedCoefficient(1.20);
+        corn.setMinSoilMoisture(0.35);
+        corn.setAllowedWaterDeficit(2.5);
         return corn;
     }
 
     private Seed createBarleySeed() {
         Seed barley = new Seed();
-        barley.setSeedType(SeedType.PUMPKIN);
+        barley.setSeedType(SeedType.BARLEY);
         barley.setDisplayName("Barley");
         barley.setScientificName("Hordeum vulgare");
-
         barley.setMinTemperature(2.0);
-        barley.setOptimalTemperature(18.0);
         barley.setMaxTemperature(28.0);
-
-        barley.setMinSoilMoisture(0.3);
-        barley.setOptimalSoilMoisture(0.5);
-        barley.setMaxSoilMoisture(0.7);
-
         barley.setWaterRequirement(4.5);
-
-        barley.setFrostRiskTemperature(1.0);
         barley.setHeatStressTemperature(28.0);
         barley.setHeavyRainThreshold(12.0);
-
+        barley.setSeedCoefficient(1.15);
+        barley.setMinSoilMoisture(0.28);
+        barley.setAllowedWaterDeficit(4.0);
         return barley;
     }
 
@@ -102,21 +82,14 @@ public class SeedService {
         pumpkin.setSeedType(SeedType.PUMPKIN);
         pumpkin.setDisplayName("Pumpkin");
         pumpkin.setScientificName("Cucurbita pepo");
-
-        pumpkin.setMinTemperature(15.0);
-        pumpkin.setOptimalTemperature(24.0);
+        pumpkin.setMinTemperature(5.0);
         pumpkin.setMaxTemperature(32.0);
-
-        pumpkin.setMinSoilMoisture(0.4);
-        pumpkin.setOptimalSoilMoisture(0.6);
-        pumpkin.setMaxSoilMoisture(0.8);
-
         pumpkin.setWaterRequirement(7.0);
-
-        pumpkin.setFrostRiskTemperature(4.0);
         pumpkin.setHeatStressTemperature(32.0);
         pumpkin.setHeavyRainThreshold(20.0);
-
+        pumpkin.setSeedCoefficient(1.00);
+        pumpkin.setMinSoilMoisture(0.30);
+        pumpkin.setAllowedWaterDeficit(3.0);
         return pumpkin;
     }
 
@@ -125,21 +98,14 @@ public class SeedService {
         grapes.setSeedType(SeedType.BLACK_GRAPES);
         grapes.setDisplayName("Black Grapes");
         grapes.setScientificName("Vitis vinifera");
-
-        grapes.setMinTemperature(12.0);
-        grapes.setOptimalTemperature(25.0);
+        grapes.setMinTemperature(2.0);
         grapes.setMaxTemperature(35.0);
-
-        grapes.setMinSoilMoisture(0.3);
-        grapes.setOptimalSoilMoisture(0.5);
-        grapes.setMaxSoilMoisture(0.7);
-
         grapes.setWaterRequirement(6.0);
-
-        grapes.setFrostRiskTemperature(2.0);
         grapes.setHeatStressTemperature(35.0);
         grapes.setHeavyRainThreshold(15.0);
-
+        grapes.setSeedCoefficient(0.75);
+        grapes.setMinSoilMoisture(0.22);
+        grapes.setAllowedWaterDeficit(6.0);
         return grapes;
     }
 
@@ -148,21 +114,14 @@ public class SeedService {
         grapes.setSeedType(SeedType.WHITE_GRAPES);
         grapes.setDisplayName("White Grapes");
         grapes.setScientificName("Vitis vinifera");
-
-        grapes.setMinTemperature(10.0);
-        grapes.setOptimalTemperature(22.0);
+        grapes.setMinTemperature(1.0);
         grapes.setMaxTemperature(32.0);
-
-        grapes.setMinSoilMoisture(0.3);
-        grapes.setOptimalSoilMoisture(0.5);
-        grapes.setMaxSoilMoisture(0.7);
-
         grapes.setWaterRequirement(5.5);
-
-        grapes.setFrostRiskTemperature(1.0);
         grapes.setHeatStressTemperature(32.0);
         grapes.setHeavyRainThreshold(15.0);
-
+        grapes.setSeedCoefficient(0.70);
+        grapes.setMinSoilMoisture(0.25);
+        grapes.setAllowedWaterDeficit(5.5);
         return grapes;
     }
 

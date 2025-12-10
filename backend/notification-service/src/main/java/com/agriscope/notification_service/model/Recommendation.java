@@ -20,8 +20,4 @@ public class Recommendation {
     private LocalDateTime weatherTimestamp;
     private Map<String, Object> metrics = new HashMap<>();
 
-    private boolean read = false;
-    private boolean dismissed = false;
-    private LocalDateTime readAt;
-    private LocalDateTime dismissedAt;
 }

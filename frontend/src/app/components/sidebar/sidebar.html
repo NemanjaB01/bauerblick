@@ -7,10 +7,30 @@
 
   <div class="menu">
 
-    <div class="menu-item">
-      <img src="assets/icons/my_farms.svg" />
-      <span>My farms</span>
+            <!-- Dropdown Menu -->
+<div class="menu-item has-dropdown">
+  <div class="menu-item-content">
+    <img src="assets/icons/my_farms.svg" />
+    <span>My farms</span>
+  </div>
+  
+  <div class="farms-dropdown">
+    
+    <div class="farm-list">
+      <div class="farm-item">
+        <span>Farm 1</span>
+      </div>
+      <div class="farm-item">
+        <span>Farm 2</span>
+      </div>
     </div>
+    
+    <button class="add-farm-btn" (click)="addNewFarm()">
+      <span>+</span>
+      <span>Add New Farm</span>
+    </button>
+  </div>
+</div>
 
     <div class="menu-item">
       <img src="assets/icons/feedback.svg" />
@@ -25,11 +45,6 @@
     <div class="menu-item">
       <img src="assets/icons/stats.svg" />
       <span>Statistic</span>
-    </div>
-
-    <div class="menu-item">
-      <img src="assets/icons/my_profile.svg" />
-      <span>My profile</span>
     </div>
   </div>
 </div>

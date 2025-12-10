@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { Map } from '../map/map';
 import { SoilType } from '../../models/SoilType';
 import { Farm } from '../../models/Farm';
-import { FarmService } from '../../services/farm';
+import { FarmService } from '../../services/farm-service/farm';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 @Component({

@@ -1,4 +1,4 @@
-package rules.current;
+package rules.safety;
 
 import com.agriscope.rule_engine.domain.model.CurrentWeatherData
 import com.agriscope.rule_engine.domain.model.Seed
@@ -11,7 +11,7 @@ global java.util.List recommendations;
 rule "Black Grapes - Frost Alert"
 when
     $seed: Seed(seedType == SeedType.BLACK_GRAPES)
-    $weather: CurrentWeatherData(temperature_2m < $seed.frostRiskTemperature)
+    $weather: CurrentWeatherData(temperature_2m < $seed.minTemperature)
 then
     Recommendation rec = new Recommendation();
     rec.setUserId($weather.getUserId());
@@ -42,8 +42,7 @@ rule "Black Grapes - Optimal Conditions"
 when
     $seed: Seed(seedType == SeedType.BLACK_GRAPES)
     $weather: CurrentWeatherData(
-        temperature_2m >= $seed.minTemperature && temperature_2m <= $seed.maxTemperature,
-        rain < $seed.heavyRainThreshold
+        temperature_2m >= $seed.minTemperature && temperature_2m <= $seed.maxTemperature
     )
 then
     Recommendation rec = new Recommendation();

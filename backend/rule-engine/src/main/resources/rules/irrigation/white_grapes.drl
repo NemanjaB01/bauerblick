@@ -1,0 +1,144 @@
+package rules.irrigation;
+
+import com.agriscope.rule_engine.domain.model.Seed;
+import com.agriscope.rule_engine.domain.model.FarmDetails;
+import com.agriscope.rule_engine.domain.model.Recommendation;
+import com.agriscope.rule_engine.domain.dto.DailyAnalysis;
+import com.agriscope.rule_engine.domain.enums.SeedType;
+import com.agriscope.rule_engine.domain.enums.SoilType;
+import com.agriscope.rule_engine.domain.enums.RecommendationType;
+
+global java.util.List recommendations;
+
+rule "Delay Irrigation - WHITE GRAPES"
+    salience 99
+    activation-group "whitegrapes-irrigation"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $calc : WaterDeficitResult(
+            seed == $seed,
+            deficit > $seed.allowedWaterDeficit
+        )
+        $analysis : DailyAnalysis(
+            currentSoilMoisture < $seed.minSoilMoisture,
+            totalRain > 2.5
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.DELAY_IRRIGATION);
+        rec.setAdvice("Delay Irrigation for White Grapes");
+        rec.setReasoning("White grapes benefit from mild water stress for acidity balance. " +
+            "Rain forecast (" + String.format("%.1f", $analysis.getTotalRain()) +
+            " mm) may improve wine quality characteristics.");
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("forecast_rain", $analysis.getTotalRain());
+        rec.getMetrics().put("soil_moisture", $analysis.getCurrentSoilMoisture());
+        recommendations.add(rec);
+end
+
+rule "Irrigation - WHITE GRAPES "
+    salience 50
+    activation-group "whitegrapes-irrigation"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $calc : WaterDeficitResult(
+            seed == $seed,
+            deficit > $seed.allowedWaterDeficit * 1.3
+        )
+        $analysis : DailyAnalysis(
+            currentSoilMoisture < $seed.minSoilMoisture * 0.65
+        )
+        not DailyAnalysis(totalRain > 2.5)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+        rec.setAdvice("Irrigate White Grapes: " + String.format("%.1f", $calc.getDeficit()) + " mm needed");
+        rec.setReasoning("White grapes severely stressed. " +
+            "Excessive stress can reduce yield and affect wine acidity balance.");
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_moisture", $analysis.getCurrentSoilMoisture());
+        recommendations.add(rec);
+end
+
+rule "Irrigation Soon Warning - WHITE GRAPES"
+    salience 40
+    activation-group "whitegrapes-irrigation"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $calc : WaterDeficitResult(
+            seed == $seed,
+            deficit > $seed.allowedWaterDeficit * 0.75,
+            deficit <= $seed.allowedWaterDeficit * 1.3
+        )
+        $analysis : DailyAnalysis(
+            currentSoilMoisture >= $seed.minSoilMoisture * 0.55,
+            currentSoilMoisture < $seed.minSoilMoisture
+        )
+        not DailyAnalysis(totalRain > 2.5)
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
+        rec.setAdvice("Monitor White Grapes Water Status");
+        rec.setReasoning("White grapes showing optimal stress levels for quality. " +
+            "Moisture: " + String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
+            ". Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm. " +
+            "Monitor for signs of excessive stress.");
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_moisture", $analysis.getCurrentSoilMoisture());
+        recommendations.add(rec);
+end
+
+rule "No Action Needed - WHITE GRAPES"
+    salience 10
+    activation-group "whitegrapes-irrigation"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $calc : WaterDeficitResult(
+            seed == $seed,
+            deficit <= $seed.allowedWaterDeficit * 0.75
+        )
+        $analysis : DailyAnalysis(
+            currentSoilMoisture >= $seed.minSoilMoisture
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setAdvice("White Grapes Conditions Optimal");
+        rec.setReasoning("White grapes have ideal moisture levels (" +
+            String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
+            ") for quality production. Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_moisture", $analysis.getCurrentSoilMoisture());
+        recommendations.add(rec);
+end
+
+rule "Monitor Conditions - WHITE GRAPES (Fallback)"
+    salience 1
+    activation-group "whitegrapes-irrigation"
+    when
+        $farm : FarmDetails($soil : soilType)
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES, $displayName : displayName)
+        $calc : WaterDeficitResult(seed == $seed)
+        $analysis : DailyAnalysis()
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.MONITOR_CONDITIONS);
+        rec.setAdvice("Monitor White Grapes Conditions");
+        rec.setReasoning("White grapes require careful water balance for acidity. " +
+            "Current deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm. " +
+            "Soil moisture: " + String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
+            " on " + $soil + " soil. Monitor for optimal wine quality development.");
+        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+        rec.getMetrics().put("soil_moisture", $analysis.getCurrentSoilMoisture());
+        rec.getMetrics().put("rule_fired", "whitegrapes-monitor-fallback");
+        recommendations.add(rec);
+end

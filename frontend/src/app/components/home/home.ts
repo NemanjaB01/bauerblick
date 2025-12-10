@@ -8,6 +8,7 @@ import {CommonModule} from '@angular/common';
 import {AuthService} from '../../services/auth-service/auth.service';
 import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
+import { AlertsNotification } from '../alerts-notification/alerts-notification';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +20,8 @@ import {ToastrService} from 'ngx-toastr';
     FieldGrid,
     WeatherWidget,
     Recommendations,
-    CommonModule
+    CommonModule,
+    AlertsNotification
   ]
 })
 export class HomeComponent {

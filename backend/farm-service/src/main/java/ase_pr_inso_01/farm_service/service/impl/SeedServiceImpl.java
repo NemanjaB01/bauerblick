@@ -19,6 +19,7 @@ public class SeedServiceImpl implements SeedService {
     public SeedServiceImpl(SeedRepository seedRepository) {
         this.seedRepository = seedRepository;
     }
+
     @Override
     public List<SeedDto> getAllSeeds() {
         return seedRepository.findAll()
@@ -50,21 +51,29 @@ public class SeedServiceImpl implements SeedService {
 
     private SeedDto mapToDto(Seed seed) {
         SeedDto dto = new SeedDto();
+
         dto.setId(seed.getId());
         dto.setSeedType(seed.getSeedType());
-        dto.setDisplayName(seed.getSeedType().getDisplayName());
+
+        if (seed.getDisplayName() != null) {
+            dto.setDisplayName(seed.getDisplayName());
+        } else if (seed.getSeedType() != null) {
+            dto.setDisplayName(seed.getSeedType().getDisplayName());
+        }
+
         dto.setScientificName(seed.getScientificName());
+
         dto.setMinTemperature(seed.getMinTemperature());
-        dto.setOptimalTemperature(seed.getOptimalTemperature());
         dto.setMaxTemperature(seed.getMaxTemperature());
-        dto.setMinSoilMoisture(seed.getMinSoilMoisture());
-        dto.setOptimalSoilMoisture(seed.getOptimalSoilMoisture());
-        dto.setMaxSoilMoisture(seed.getMaxSoilMoisture());
-        dto.setWaterRequirement(seed.getWaterRequirement());
-        dto.setFrostRiskTemperature(seed.getFrostRiskTemperature());
         dto.setHeatStressTemperature(seed.getHeatStressTemperature());
+
+        dto.setWaterRequirement(seed.getWaterRequirement());
         dto.setHeavyRainThreshold(seed.getHeavyRainThreshold());
+        dto.setMinSoilMoisture(seed.getMinSoilMoisture());
+        dto.setAllowedWaterDeficit(seed.getAllowedWaterDeficit());
+
+        dto.setSeedCoefficient(seed.getSeedCoefficient());
+
         return dto;
     }
-
 }

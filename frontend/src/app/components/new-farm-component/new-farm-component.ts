@@ -129,6 +129,7 @@ export class NewFarmComponent {
     }
   }
 
-
-
+  goBack() {
+    this.router.navigate(['/home']);
+  }
 }

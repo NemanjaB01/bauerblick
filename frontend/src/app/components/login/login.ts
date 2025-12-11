@@ -17,6 +17,7 @@ export class Login {
   email = '';
   password = '';
   loginFailed = false; // 1. Add this flag
+  showPassword = false;
 
   constructor(private auth: AuthService, private router: Router, private toastr: ToastrService) { }
 
@@ -35,4 +36,10 @@ export class Login {
         }
       });
   }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+
 }

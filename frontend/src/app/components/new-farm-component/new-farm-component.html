@@ -37,9 +37,9 @@
           </div>
           <label>Name</label>
           <input type="text"
-                  name="farmName"
-                  [(ngModel)]="farm.name"
-                  placeholder="Enter farm name">
+                 name="farmName"
+                 [(ngModel)]="farm.name"
+                 placeholder="Enter farm name">
 
           <div class="form-group mt-3">
             <label for="soilType">Soil Type</label>
@@ -57,14 +57,14 @@
 
           <label>Location</label>
           <div class="map-card">
-            <app-map [externalCoords]="selectedCoords" 
-                    (locationSelected)="onLocationSelected($event)">
+            <app-map [externalCoords]="selectedCoords"
+                     (locationSelected)="onLocationSelected($event)">
             </app-map>
           </div>
 
-          <button type="submit" 
-                  [disabled]="loginForm.invalid" 
-                  class="submit-btn" 
+          <button type="submit"
+                  [disabled]="loginForm.invalid"
+                  class="submit-btn"
                   (click)="addNewFarm()">
             Add Farm
           </button>
@@ -73,5 +73,13 @@
       </div>
     </div>
   </div>
+
+  <!-- Back Button in Bottom Right Corner -->
+  <button class="back-button" (click)="goBack()">
+    <svg class="back-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+    <span>Back</span>
+  </button>
 
 </div>

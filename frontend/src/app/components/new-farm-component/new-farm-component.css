@@ -326,3 +326,108 @@ input, select, textarea {
   box-sizing: border-box;
   margin-bottom: 10px;
 }
+
+/* ============================================
+   BACK BUTTON - BOTTOM RIGHT CORNER
+   ============================================ */
+
+.back-button {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+  border: 4px solid #5C2E0A;
+  border-radius: 50px;
+
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFF8DC;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Wood grain texture */
+.back-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.05) 2px,
+      rgba(0, 0, 0, 0.05) 4px
+    );
+  border-radius: 50px;
+  pointer-events: none;
+}
+
+.back-arrow {
+  width: 24px;
+  height: 24px;
+  color: #FFF8DC;
+  filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.5));
+  transition: transform 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.back-button span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover effect */
+.back-button:hover {
+  transform: translateY(-4px);
+  background: linear-gradient(135deg, #9B5523 0%, #B06333 50%, #9B5523 100%);
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.5),
+    inset 0 2px 6px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.back-button:hover .back-arrow {
+  transform: translateX(-4px);
+}
+
+/* Active/Click effect */
+.back-button:active {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.4),
+    inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .back-button {
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+
+  .back-arrow {
+    width: 20px;
+    height: 20px;
+  }
+}

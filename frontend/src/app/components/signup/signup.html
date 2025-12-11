@@ -48,23 +48,56 @@
           </div>
 
           <label>Password</label>
-          <input type="password"
-                 name="password"
-                 [(ngModel)]="signupData.password"
-                 required
-                 placeholder="Password"
-                 [class.error-input]="errorMap['password']">
+          <div class="password-row">
+            <input [type]="showPassword ? 'text' : 'password'"
+                   name="password"
+                   [(ngModel)]="signupData.password"
+                   required
+                   placeholder="Password"
+                   [class.error-input]="errorMap['password']">
+
+            <!-- Eye icon toggle for password -->
+            <button type="button"
+                    class="password-toggle"
+                    (click)="togglePasswordVisibility()"
+                    tabindex="-1">
+              <img *ngIf="!showPassword"
+                   src="assets/icons/eye-closed.svg"
+                   alt="Show password"
+                   class="eye-icon">
+              <img *ngIf="showPassword"
+                   src="assets/icons/eye-open.svg"
+                   alt="Hide password"
+                   class="eye-icon">
+            </button>
+          </div>
           <div *ngIf="errorMap['password']" class="error-msg">
             {{ errorMap['password'] }}
           </div>
 
           <label>Retype your password</label>
-          <input type="password"
-                 name="password2"
-                 [(ngModel)]="signupData.password2"
-                 required
-                 placeholder="Password"
-                 [class.error-input]="errorMap['password2']">
+          <div class="password-row">
+            <input [type]="showPassword2 ? 'text' : 'password'"
+                   name="password2"
+                   [(ngModel)]="signupData.password2"
+                   required
+                   placeholder="Password"
+                   [class.error-input]="errorMap['password2']">
+
+            <button type="button"
+                    class="password-toggle"
+                    (click)="togglePassword2Visibility()"
+                    tabindex="-1">
+              <img *ngIf="!showPassword2"
+                   src="assets/icons/eye-closed.svg"
+                   alt="Show password"
+                   class="eye-icon">
+              <img *ngIf="showPassword2"
+                   src="assets/icons/eye-open.svg"
+                   alt="Hide password"
+                   class="eye-icon">
+            </button>
+          </div>
           <div *ngIf="errorMap['password2']" class="error-msg">
             {{ errorMap['password2'] }}
           </div>

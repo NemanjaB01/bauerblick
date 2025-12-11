@@ -13,4 +13,12 @@ export class Sidebar {
   addNewFarm() {
     this.router.navigate(["new-farm"])
   }
+
+  gotoSeeds() {
+    this.router.navigate(["seeds"])
+  }
+
+  gotoHome() {
+    this.router.navigate(["home"])
+  }
 }

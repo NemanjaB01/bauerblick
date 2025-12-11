@@ -2,7 +2,7 @@
 
   <div class="sidebar-header">
     <img src="assets/icons/no_profile_photo.svg" class="avatar" />
-    <div class="username">Max</div>
+    <div class="username">Test</div>
   </div>
 
   <div class="menu">
@@ -13,18 +13,15 @@
     <img src="assets/icons/my_farms.svg" />
     <span>My farms</span>
   </div>
-  
+
   <div class="farms-dropdown">
-    
+
     <div class="farm-list">
-      <div class="farm-item">
+      <div class="farm-item" (click)="gotoHome()">
         <span>Farm 1</span>
       </div>
-      <div class="farm-item">
-        <span>Farm 2</span>
-      </div>
     </div>
-    
+
     <button class="add-farm-btn" (click)="addNewFarm()">
       <span>+</span>
       <span>Add New Farm</span>
@@ -37,7 +34,7 @@
       <span>Feedback</span>
     </div>
 
-    <div class="menu-item">
+    <div class="menu-item" (click)="gotoSeeds()">
       <img src="assets/icons/seeds.svg" />
       <span>Seeds</span>
     </div>

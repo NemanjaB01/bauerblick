@@ -38,19 +38,3 @@ then
     recommendations.add(rec);
 end
 
-rule "White Grapes - Optimal Conditions"
-when
-    $seed: Seed(seedType == SeedType.WHITE_GRAPES)
-    $weather: CurrentWeatherData(
-        temperature_2m >= $seed.minTemperature && temperature_2m <= $seed.maxTemperature
-    )
-then
-    Recommendation rec = new Recommendation();
-    rec.setUserId($weather.getUserId());
-    rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
-    rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
-    rec.setAdvice("CONTINUE_NORMAL_WHITE_GRAPES_OPERATIONS");
-    rec.setReasoning("Optimal conditions for white grapes - temp: " + $weather.getTemperature_2m() + "C, rain: " + $weather.getRain() + "mm");
-    rec.setWeatherTimestamp($weather.getTime());
-    recommendations.add(rec);
-end

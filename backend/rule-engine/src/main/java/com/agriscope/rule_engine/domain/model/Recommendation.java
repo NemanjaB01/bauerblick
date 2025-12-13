@@ -12,6 +12,7 @@ import java.util.Map;
 public class Recommendation {
     private String id;
     private String userId;
+    private String email;
     private String farmId;
 
     private SeedType recommendedSeed;

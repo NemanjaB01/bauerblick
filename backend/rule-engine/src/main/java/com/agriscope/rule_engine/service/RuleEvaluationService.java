@@ -86,6 +86,7 @@ public class RuleEvaluationService {
 
         double currentMoisture = hourlyData.getFirst().getSoil_moisture_3_to_9cm();
         String userId = hourlyData.getFirst().getUserId();
+        String email = hourlyData.getFirst().getEmail();
 
         DailyAnalysis analysis = DailyAnalysis.builder()
                 .totalEt0(sumEt0)
@@ -122,7 +123,7 @@ public class RuleEvaluationService {
             int firedRules = kieSession.fireAllRules();
             log.info("Fired {} CURRENT rules", firedRules);
 
-            processHourlyRecommendations(recommendations, userId, farm.getFarmId(), avgTemperature);
+            processHourlyRecommendations(recommendations, userId, email, farm.getFarmId(), avgTemperature);
 
         } finally {
             kieSession.dispose();
@@ -139,6 +140,7 @@ public class RuleEvaluationService {
 
         for (Recommendation rec : recommendations) {
             rec.setUserId(weatherData.getUserId());
+            rec.setEmail(weatherData.getEmail());
             rec.setFarmId(weatherData.getFarmId());
             rec.setWeatherTimestamp(weatherData.getTime());
 
@@ -151,7 +153,7 @@ public class RuleEvaluationService {
         }
     }
 
-    private void processHourlyRecommendations(List<Recommendation> recommendations, String userId, String farmId, double avgTemperature) {
+    private void processHourlyRecommendations(List<Recommendation> recommendations, String userId, String email, String farmId, double avgTemperature) {
         if (recommendations.isEmpty()) {
             log.info("No recommendations - conditions are normal");
             return;
@@ -161,6 +163,7 @@ public class RuleEvaluationService {
 
         for (Recommendation rec : recommendations) {
             rec.setUserId(userId);
+            rec.setEmail(email);
             rec.setFarmId(farmId);
             rec.setWeatherTimestamp(now);
 

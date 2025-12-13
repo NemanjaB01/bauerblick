@@ -19,7 +19,8 @@ def fetch_daily_weather_for_all():
 
     for user in users:
         user_id = user["id"]
+        email = user["email"]
         farms = user.get("farms", [])
 
         for farm in farms:
-            fetch_and_publish_for_farm(user_id, farm, ForecastType.DAILY)
+            fetch_and_publish_for_farm(user_id, email, farm, ForecastType.DAILY)

@@ -25,7 +25,7 @@ export enum ConnectionStatus {
   providedIn: 'root'
 })
 export class WeatherWebSocketService {
-  private serverUrl = 'http://localhost:8081/ws-alerts';
+  private serverUrl = 'http://localhost:8085/ws-alerts';
   private isConnecting = false;
   private stompClient: Client | null = null;
   private weatherSubject = new Subject<WeatherData>();

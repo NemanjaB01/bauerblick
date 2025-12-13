@@ -16,6 +16,8 @@ public class NotificationService {
 
     private final WebSocketService webSocketService;
 
+    private final EmailService emailService;
+
     private final Cache<String, Recommendation> lastSentCache = Caffeine.newBuilder()
             .expireAfterWrite(24, TimeUnit.HOURS)
             .maximumSize(10000)
@@ -28,9 +30,7 @@ public class NotificationService {
             "FROST_ALERT",
             "HEAT_ALERT",
             "STORM_ALERT",
-            "FLOOD_ALERT",
-            "DROUGHT_ALERT",
-            "CONTINUE_NORMAL"
+            "SAFETY_ALERT"
     };
 
     private static final String[] RECOMMENDATION_TYPES = {
@@ -39,7 +39,6 @@ public class NotificationService {
             "DELAY_IRRIGATION",
             "MONITOR_CONDITIONS",
             "CONTINUE_NORMAL",
-            "SAFETY_ALERT",
             "DELAY_OPERATIONS"
     };
 
@@ -73,7 +72,11 @@ public class NotificationService {
     private void sendAndCache(String key, Recommendation rec) {
         if (isAlertType(rec.getRecommendationType())) {
             webSocketService.sendAlertToFarm(rec.getFarmId(), rec);
-            log.info("Sent as ALERT for farm: {}", rec.getFarmId());
+            String emailBody = String.format("Alert Type: %s for %s\nDetails: %s",
+                    rec.getRecommendationType(), rec.getRecommendedSeed(), rec.getMetrics());
+
+            emailService.sendAlertEmail(rec.getEmail(), "Farm Alert!", emailBody);
+            log.info("Sent as ALERT (WebSocket + Email) for farm: {}", rec.getFarmId());
         } else if (isRecommendationType(rec.getRecommendationType())) {
             webSocketService.sendRecommendationToFarm(rec.getFarmId(), rec);
             log.info("Sent as RECOMMENDATION for farm: {}", rec.getFarmId());

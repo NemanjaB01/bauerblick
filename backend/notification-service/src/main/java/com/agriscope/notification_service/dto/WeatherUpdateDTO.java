@@ -17,6 +17,8 @@ public class WeatherUpdateDTO {
     @JsonProperty("farm_id")
     private String farmId;
 
+    private String email;
+
     private Double lat;
     private Double lon;
 

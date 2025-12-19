@@ -1,0 +1,47 @@
+package rules.disease;
+
+import com.agriscope.rule_engine.domain.model.DailyWeatherData;
+import com.agriscope.rule_engine.domain.model.Seed;
+import com.agriscope.rule_engine.domain.enums.SeedType;
+import com.agriscope.rule_engine.domain.model.Recommendation
+import com.agriscope.rule_engine.domain.enums.RecommendationType;
+
+global java.util.List recommendations;
+
+rule "Pumpkin - Fruit Rot Prevention"
+    when
+        $seed : Seed(seedType == SeedType.PUMPKIN)
+        $day : DailyWeatherData(
+            rain_sum > $seed.heavyRainThreshold
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.PUMPKIN);
+        rec.setRecommendationType(RecommendationType.DISEASE_PREVENTION);
+        rec.setAdvice("7-Day Forecast: Fruit Rot Risk on " + $day.getDate().toLocalDate());
+
+        rec.setReasoning("Heavy rain forecasted for " + $day.getDate().toLocalDate() +
+                         ". Ensure pumpkins allow drainage to prevent rot.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("rain_predicted", $day.getRain_sum());
+
+        recommendations.add(rec);
+end
+
+
+rule "Pumpkin - Powdery Mildew Alert"
+    when
+        $seed : Seed(seedType == SeedType.PUMPKIN)
+        $day : DailyWeatherData(
+            rain_sum < 2.0,
+            temperature_2m_max > 20.0,
+            temperature_2m_max < 30.0
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.PUMPKIN);
+        rec.setAdvice("Scout for Powdery Mildew");
+        rec.setReasoning("Warm, dry days with likely humid nights are forecasted. Inspect leaves for white powdery spots.");
+        recommendations.add(rec);
+end

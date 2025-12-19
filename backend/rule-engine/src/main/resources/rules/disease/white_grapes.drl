@@ -1,0 +1,71 @@
+package rules.daily.grapes;
+import com.agriscope.rule_engine.domain.model.DailyWeatherData;
+import com.agriscope.rule_engine.domain.model.Seed;
+import com.agriscope.rule_engine.domain.enums.SeedType;
+import com.agriscope.rule_engine.domain.model.Recommendation;
+import com.agriscope.rule_engine.domain.enums.RecommendationType;
+
+global java.util.List recommendations;
+
+rule "White Grapes - Downy Mildew Alert"
+    when
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $day : DailyWeatherData(
+            temperature_2m_min > 10.0,
+            rain_sum > 8.0
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.DISEASE_PREVENTION);
+
+        rec.setAdvice("7-Day Forecast: Downy Mildew Risk on " + $day.getDate().toLocalDate());
+        rec.setReasoning("Conditions (Wet & Temp > 10C) on " + $day.getDate().toLocalDate() + " favor Downy Mildew. Apply protective fungicide.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("rain_predicted", $day.getRain_sum());
+        rec.getMetrics().put("temp_min_predicted", $day.getTemperature_2m_min());
+
+        recommendations.add(rec);
+end
+
+rule "White Grapes - Acidity Loss Prevention"
+    when
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $day : DailyWeatherData(
+            temperature_2m_max > 30.0
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.HEAT_STRESS_PREVENTION);
+
+        rec.setAdvice("7-Day Forecast: Heat Stress Warning on " + $day.getDate().toLocalDate());
+        rec.setReasoning("High temps (>30C) predicted on " + $day.getDate().toLocalDate() + ". Risk of acidity loss. Prepare irrigation.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("temp_max_predicted", $day.getTemperature_2m_max());
+
+        recommendations.add(rec);
+end
+
+rule "White Grapes - Pest Risk (Berry Moth)"
+    when
+        $seed : Seed(seedType == SeedType.WHITE_GRAPES)
+        $day : DailyWeatherData(
+            temperature_2m_min > 14.0,
+            rain_sum < 2.0
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
+        rec.setRecommendationType(RecommendationType.PEST_RISK);
+
+        rec.setAdvice("7-Day Forecast: Grape Berry Moth Risk on " + $day.getDate().toLocalDate());
+        rec.setReasoning("Warm and dry nights predicted. High risk of moth flight and egg laying on berries. Monitor pheromone traps.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("temp_min_predicted", $day.getTemperature_2m_min());
+
+        recommendations.add(rec);
+end

@@ -1,0 +1,70 @@
+package rules.daily.grapes;
+import com.agriscope.rule_engine.domain.model.DailyWeatherData;
+import com.agriscope.rule_engine.domain.model.Seed;
+import com.agriscope.rule_engine.domain.enums.SeedType;
+import com.agriscope.rule_engine.domain.model.Recommendation;
+import com.agriscope.rule_engine.domain.enums.RecommendationType;
+
+global java.util.List recommendations;
+
+rule "Black Grapes - Botrytis Risk"
+    when
+        $seed : Seed(seedType == SeedType.BLACK_GRAPES)
+        $day : DailyWeatherData(
+            rain_sum > $seed.diseaseRainThreshold,
+            temperature_2m_max > 18.0
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
+        rec.setRecommendationType(RecommendationType.DISEASE_PREVENTION);
+
+        rec.setAdvice("7-Day Forecast: High Botrytis Risk on " + $day.getDate().toLocalDate());
+        rec.setReasoning("Rain and warm temps predicted on " + $day.getDate().toLocalDate() + ". Consider harvesting if ripe.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("rain_predicted", $day.getRain_sum());
+
+        recommendations.add(rec);
+end
+
+rule "Black Grapes - Sun Scald Warning"
+    when
+        $seed : Seed(seedType == SeedType.BLACK_GRAPES)
+        $day : DailyWeatherData(
+            temperature_2m_max > $seed.getHeatStressTemperature()
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
+        rec.setRecommendationType(RecommendationType.HEAT_STRESS_PREVENTION);
+
+        rec.setAdvice("7-Day Forecast: Sun Scald / Heat Stress on " + $day.getDate().toLocalDate());
+        rec.setReasoning("Extreme heat (" + $day.getTemperature_2m_max() + "C) forecasted. Ensure canopy shade.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("temp_max_predicted", $day.getTemperature_2m_max());
+
+        recommendations.add(rec);
+end
+
+rule "Black Grapes - Pest Risk (Berry Moth)"
+    when
+        $seed : Seed(seedType == SeedType.BLACK_GRAPES)
+        $day : DailyWeatherData(
+            temperature_2m_min > 14.0,
+            rain_sum < 2.0
+        )
+    then
+        Recommendation rec = new Recommendation();
+        rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
+        rec.setRecommendationType(RecommendationType.PEST_RISK);
+
+        rec.setAdvice("7-Day Forecast: Grape Berry Moth Risk on " + $day.getDate().toLocalDate());
+        rec.setReasoning("Warm and dry nights predicted. High risk of moth flight and egg laying on berries. Monitor pheromone traps.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("temp_min_predicted", $day.getTemperature_2m_min());
+
+        recommendations.add(rec);
+end

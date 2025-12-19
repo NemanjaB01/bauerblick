@@ -22,4 +22,11 @@ public class Seed {
     private Double heavyRainThreshold;
     private Double seedCoefficient;
     private Double allowedWaterDeficit;
+
+    private Double diseaseRiskMinTemp;
+    private Double diseaseRiskMaxTemp;
+    private Double diseaseRainThreshold;
+    private Double maxWindTolerance;
+
+
 }

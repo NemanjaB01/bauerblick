@@ -9,6 +9,7 @@ import com.agriscope.rule_engine.domain.model.CurrentWeatherData;
 import com.agriscope.rule_engine.domain.model.FarmDetails;
 import com.agriscope.rule_engine.domain.model.HourlyWeatherData;
 import com.agriscope.rule_engine.service.RuleEvaluationService;
+import com.agriscope.rule_engine.domain.model.DailyWeatherData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -67,7 +68,7 @@ public class WeatherMessageListener {
                 processHourlyForecast(forecastData, userId, email, farmId, crops);
                 break;
             case "DAILY":
-//                processDailyForecast(forecastData, userId, farmId);    TODO
+                processDailyForecast(forecastData, userId, email, farmId, crops);
                 break;
             default:
                 log.warn("Unknown forecast type: {}", forecastType);
@@ -113,6 +114,36 @@ public class WeatherMessageListener {
         log.info("Processing Irrigation logic for {} hours of data", hourlyList.size());
 
         ruleEvaluationService.evaluateHourlDataForFarm(hourlyList, farm, crops);
+    }
+
+    private void processDailyForecast(List<WeatherForecastDTO> forecastData,
+                                      String userId,
+                                      String email,
+                                      String farmId,
+                                      List<String> crops) {
+
+        List<DailyWeatherData> dailyList = new ArrayList<>();
+
+        for (WeatherForecastDTO dto : forecastData) {
+            DailyWeatherData daily = new DailyWeatherData();
+            daily.setUserId(userId);
+            daily.setEmail(email);
+            daily.setFarmId(farmId);
+            daily.setForecastType(ForecastType.DAILY);
+            daily.setTemperature_2m_max(dto.getTemperature2mMax());
+            daily.setTemperature_2m_min(dto.getTemperature2mMin());
+            daily.setRain_sum(dto.getRainSum());
+            daily.setWind_speed_10m_max(dto.getWindSpeed10mMax());
+            daily.setEt0_fao_evapotranspiration(dto.getEt0FaoEvapotranspiration());
+
+            if (dto.getTime() != null) {
+                daily.setDate(parseDateTime(dto.getTime()));
+            }
+            dailyList.add(daily);
+        }
+
+        log.info("Processing DAILY rules for {} days forecast", dailyList.size());
+        ruleEvaluationService.evaluateDailyRules(dailyList, crops);
     }
 
     private HourlyWeatherData convertToHourlyWeatherData(WeatherForecastDTO dto, String userId, String email, String farmId) {

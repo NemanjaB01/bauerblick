@@ -52,6 +52,23 @@ export class RecommendationsWebSocketService implements OnDestroy {
     this.connectToWebSocket(farmId);
   }
 
+  private sendAck(recId: string, farmId: string): void {
+    if (this.stompClient && this.stompClient.connected) {
+      const ackPayload = {
+        recommendationId: recId,
+        farmId: farmId,
+        status: 'RECEIVED'
+      };
+
+      console.log('Sending ACK for recommendation:', recId);
+
+      this.stompClient.publish({
+        destination: '/app/notification/ack',
+        body: JSON.stringify(ackPayload)
+      });
+    }
+  }
+
   private connectToWebSocket(farmId: string): void {
     if (this.isConnecting || this.stompClient?.connected) {
       console.log('Already connecting or connected');
@@ -125,6 +142,7 @@ export class RecommendationsWebSocketService implements OnDestroy {
           this.allRecommendations.push(recommendation);
           this.recommendationsListSubject.next([...this.allRecommendations]);
           this.recommendationsSubject.next(recommendation);
+          this.sendAck(recommendation.id, recommendation.farmId);
         }
       } catch (error) {
         console.error('Error parsing recommendation:', error);

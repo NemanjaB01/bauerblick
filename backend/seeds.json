@@ -10,7 +10,11 @@
     "heavyRainThreshold": 10.0,
     "seedCoefficient": 1.15,
     "minSoilMoisture": 0.25,
-    "allowedWaterDeficit": 5.0
+    "allowedWaterDeficit": 5.0,
+    "diseaseRiskMinTemp": 15.0,
+    "diseaseRiskMaxTemp": 30.0,
+    "diseaseRainThreshold": 5.0,
+    "maxWindTolerance": 25.0
   },
   {
     "seedType": "CORN",
@@ -23,7 +27,11 @@
     "heavyRainThreshold": 15.0,
     "seedCoefficient": 1.2,
     "minSoilMoisture": 0.35,
-    "allowedWaterDeficit": 2.5
+    "allowedWaterDeficit": 2.5,
+    "diseaseRiskMinTemp": 18.0,
+    "diseaseRiskMaxTemp": 32.0,
+    "diseaseRainThreshold": 10.0,
+    "maxWindTolerance": 30.0
   },
   {
     "seedType": "BARLEY",
@@ -36,7 +44,11 @@
     "heavyRainThreshold": 12.0,
     "seedCoefficient": 1.15,
     "minSoilMoisture": 0.28,
-    "allowedWaterDeficit": 4.0
+    "allowedWaterDeficit": 4.0,
+    "diseaseRiskMinTemp": 10.0,
+    "diseaseRiskMaxTemp": 22.0,
+    "diseaseRainThreshold": 5.0,
+    "maxWindTolerance": 20.0
   },
   {
     "seedType": "PUMPKIN",
@@ -49,7 +61,11 @@
     "heavyRainThreshold": 20.0,
     "seedCoefficient": 1.0,
     "minSoilMoisture": 0.3,
-    "allowedWaterDeficit": 3.0
+    "allowedWaterDeficit": 3.0,
+    "diseaseRiskMinTemp": 20.0,
+    "diseaseRiskMaxTemp": 30.0,
+    "diseaseRainThreshold": 3.0,
+    "maxWindTolerance": 35.0
   },
   {
     "seedType": "BLACK_GRAPES",
@@ -62,7 +78,11 @@
     "heavyRainThreshold": 15.0,
     "seedCoefficient": 0.75,
     "minSoilMoisture": 0.22,
-    "allowedWaterDeficit": 6.0
+    "allowedWaterDeficit": 6.0,
+    "diseaseRiskMinTemp": 18.0,
+    "diseaseRiskMaxTemp": 30.0,
+    "diseaseRainThreshold": 3.0,
+    "maxWindTolerance": 40.0
   },
   {
     "seedType": "WHITE_GRAPES",
@@ -75,6 +95,10 @@
     "heavyRainThreshold": 15.0,
     "seedCoefficient": 0.7,
     "minSoilMoisture": 0.25,
-    "allowedWaterDeficit": 5.5
+    "allowedWaterDeficit": 5.5,
+    "diseaseRiskMinTemp": 10.0,
+    "diseaseRiskMaxTemp": 28.0,
+    "diseaseRainThreshold": 8.0,
+    "maxWindTolerance": 40.0
   }
 ]

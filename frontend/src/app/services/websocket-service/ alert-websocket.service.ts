@@ -54,6 +54,23 @@ export class AlertsWebSocketService implements OnDestroy {
     this.connectToWebSocket(farmId);
   }
 
+  private sendAck(alertId: string, farmId: string): void {
+    if (this.stompClient && this.stompClient.connected) {
+      const ackPayload = {
+        recommendationId: alertId,
+        farmId: farmId,
+        status: 'RECEIVED'
+      };
+
+      console.log('Sending ACK for alert:', alertId);
+
+      this.stompClient.publish({
+        destination: '/app/notification/ack',
+        body: JSON.stringify(ackPayload)
+      });
+    }
+  }
+
   private connectToWebSocket(farmId: string): void {
     if (this.isConnecting || this.stompClient?.connected) {
       console.log('Already connecting or connected');
@@ -127,6 +144,7 @@ export class AlertsWebSocketService implements OnDestroy {
           this.allAlerts.push(alert);
           this.alertsListSubject.next([...this.allAlerts]);
           this.alertsSubject.next(alert);
+          this.sendAck(alert.id, alert.farmId);
         }
       } catch (error) {
         console.error('Error parsing alert:', error);

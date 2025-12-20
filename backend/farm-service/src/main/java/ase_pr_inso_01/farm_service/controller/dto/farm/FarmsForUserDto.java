@@ -1,21 +1,21 @@
-package ase_pr_inso_01.farm_service.models;
-
+package ase_pr_inso_01.farm_service.controller.dto.farm;
+import ase_pr_inso_01.farm_service.models.Field;
+import ase_pr_inso_01.farm_service.models.Recommendation;
 import ase_pr_inso_01.farm_service.models.enums.SoilType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "farms")
 @Getter
 @Setter
-public class Farm {
-    @Id
+@AllArgsConstructor
+public class FarmsForUserDto {
+
     private String id;
     private String name;
     private String location;
-    private Float latitude;
-    private Float longitude;
+    private float latitude;
+    private float longitude;
     private SoilType soilType;
     private Field[] fields;
     private Recommendation[] recommendations;

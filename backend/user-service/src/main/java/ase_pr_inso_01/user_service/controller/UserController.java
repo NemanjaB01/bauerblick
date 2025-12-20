@@ -1,13 +1,12 @@
 package ase_pr_inso_01.user_service.controller;
 
 import ase_pr_inso_01.user_service.controller.dto.user.UserCreateDto;
+import ase_pr_inso_01.user_service.controller.dto.user.UserDetailsDto;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
 import ase_pr_inso_01.user_service.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/users")
@@ -22,4 +21,17 @@ public class UserController {
     //LOGGER.info("POST /api/users {}", user);
     userService.createUser(user);
   }
+
+    // GET /api/users/{userId}
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDetailsDto> getUser(@PathVariable String userId) {
+        UserDetailsDto userDto = userService.getUserById(userId);
+        return ResponseEntity.ok(userDto);
+    }
+
+    @GetMapping("/by-email/{email}")
+    public ResponseEntity<UserDetailsDto> getUserByEmail(@PathVariable String email) {
+        UserDetailsDto userDto = userService.getUserByEmail(email);
+        return ResponseEntity.ok(userDto);
+    }
 }

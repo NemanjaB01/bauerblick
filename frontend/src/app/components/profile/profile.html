@@ -1,0 +1,200 @@
+<div class="page-container">
+
+  <div class="topbar-container">
+    <div class="topbar-left">
+      <img src="assets/icons/logo.svg" class="topbar-icon logo-icon" />
+    </div>
+    <div class="topbar-right">
+      <app-alerts-notification></app-alerts-notification>
+      <div class="menu-wrapper">
+        <img src="assets/icons/menu.svg" class="topbar-icon" (click)="toggleMenu()" />
+
+        <!-- Wooden Dropdown Menu -->
+        <div class="wooden-dropdown" *ngIf="isMenuOpen">
+          <div class="dropdown-item" (click)="goToProfile()">
+            <img src="assets/icons/my_profile.svg" class="dropdown-icon" />
+            <span>My Profile</span>
+          </div>
+          <div class="dropdown-item" (click)="logout()">
+            <img src="assets/icons/logout_app.svg" class="dropdown-icon" />
+            <span>Logout</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <div class="profile-content">
+
+      <!-- Profile Card -->
+      <div class="profile-card">
+
+        <!-- Header -->
+        <div class="profile-header">
+          <img src="assets/icons/my_profile.svg" class="header-icon" />
+          <h1 class="profile-title">My Profile</h1>
+        </div>
+
+        <!-- Avatar Section -->
+        <div class="avatar-section-centered">
+          <div class="avatar-container">
+            <img [src]="profilePicture || 'assets/icons/no_profile_photo.svg'"
+                 class="profile-avatar"
+                 alt="Profile Picture" />
+            <button class="change-avatar-btn" (click)="fileInput.click()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
+            <input #fileInput
+                   type="file"
+                   accept="image/*"
+                   (change)="onFileSelected($event)"
+                   style="display: none" />
+          </div>
+          <p class="avatar-hint">Click to change profile picture</p>
+        </div>
+
+        <div class="profile-grid">
+
+          <div class="left-column">
+
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text"
+                     name="firstName"
+                     [(ngModel)]="userData.firstName"
+                     required
+                     placeholder="Max"
+                     [class.changed]="hasChanges('firstName')">
+            </div>
+
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text"
+                     name="lastName"
+                     [(ngModel)]="userData.lastName"
+                     required
+                     placeholder="Mustermann"
+                     [class.changed]="hasChanges('lastName')">
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email"
+                     name="email"
+                     [(ngModel)]="userData.email"
+                     readonly
+                     class="readonly-input">
+              <span class="readonly-hint">Email cannot be changed</span>
+            </div>
+
+          </div>
+
+          <div class="right-column">
+
+            <div class="password-section">
+              <div class="section-header">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                <h3>Change Password</h3>
+              </div>
+
+              <div class="form-group">
+                <label>Current Password</label>
+                <div class="password-row">
+                  <input [type]="showCurrentPassword ? 'text' : 'password'"
+                         name="currentPassword"
+                         [(ngModel)]="passwordData.currentPassword"
+                         placeholder="Enter current password">
+                  <button type="button"
+                          class="password-toggle"
+                          (click)="toggleCurrentPassword()">
+                    <img *ngIf="!showCurrentPassword" src="assets/icons/eye-closed.svg" class="eye-icon">
+                    <img *ngIf="showCurrentPassword" src="assets/icons/eye-open.svg" class="eye-icon">
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>New Password</label>
+                <div class="password-row">
+                  <input [type]="showNewPassword ? 'text' : 'password'"
+                         name="newPassword"
+                         [(ngModel)]="passwordData.newPassword"
+                         placeholder="Enter new password">
+                  <button type="button"
+                          class="password-toggle"
+                          (click)="toggleNewPassword()">
+                    <img *ngIf="!showNewPassword" src="assets/icons/eye-closed.svg" class="eye-icon">
+                    <img *ngIf="showNewPassword" src="assets/icons/eye-open.svg" class="eye-icon">
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Confirm New Password</label>
+                <div class="password-row">
+                  <input [type]="showConfirmPassword ? 'text' : 'password'"
+                         name="confirmPassword"
+                         [(ngModel)]="passwordData.confirmPassword"
+                         placeholder="Confirm new password">
+                  <button type="button"
+                          class="password-toggle"
+                          (click)="toggleConfirmPassword()">
+                    <img *ngIf="!showConfirmPassword" src="assets/icons/eye-closed.svg" class="eye-icon">
+                    <img *ngIf="showConfirmPassword" src="assets/icons/eye-open.svg" class="eye-icon">
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="action-buttons">
+          <button type="button"
+                  class="discard-btn"
+                  (click)="onDiscard()"
+                  [disabled]="!hasAnyChanges()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Discard Changes
+          </button>
+
+          <button type="submit"
+                  class="save-btn"
+                  [disabled]="!hasAnyChanges()"
+                  (click)="onSave()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 13l4 4L19 7"/>
+            </svg>
+            Save Changes
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <button class="back-button" (click)="goBack()">
+    <svg class="back-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+    <span>Back</span>
+  </button>
+
+</div>

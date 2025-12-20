@@ -1,0 +1,662 @@
+/* ============================================
+   PAGE CONTAINER
+   ============================================ */
+
+.page-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('/assets/images/login_background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Gradient overlay like add new farm */
+.page-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.35) 55%,
+    rgba(255, 255, 255, 0.55) 100%
+  );
+  z-index: 0;
+}
+
+/* ============================================
+   TOPBAR
+   ============================================ */
+
+.topbar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(82, 167, 34, 0.23);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-right: 60px;
+}
+
+.topbar-icon {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.logo-icon {
+  width: 95px;
+  height: 95px;
+}
+
+.topbar-icon:hover {
+  transform: scale(1.12);
+}
+
+.menu-wrapper {
+  position: relative;
+}
+
+.wooden-dropdown {
+  position: absolute;
+  top: 75px;
+  right: 0;
+  width: 220px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #bc4705 100%);
+  border: 4px solid #5C2E0A;
+  border-radius: 12px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  animation: dropdownSlide 0.3s ease-out;
+  z-index: 100;
+}
+
+.wooden-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin: 4px 0;
+  background: rgba(139, 69, 19, 0.3);
+  border: 2px solid #6B3410;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.dropdown-item:hover {
+  background: rgba(160, 82, 45, 0.5);
+  border-color: #8B4513;
+  transform: translateX(-3px);
+  box-shadow:
+    3px 3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-item:active {
+  transform: translateX(-1px);
+  box-shadow:
+    1px 1px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.dropdown-item span {
+  font-size: 18px;
+  font-weight: 500;
+  color: #FFF8DC;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-family: 'Poppins', sans-serif;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+
+.content-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 70px;
+  position: relative;
+  z-index: 2;
+  padding: 30px 20px;
+  overflow-y: auto;
+}
+
+.profile-content {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============================================
+   PROFILE CARD
+   ============================================ */
+
+.profile-card {
+  width: 100%;
+  max-width: 1100px;
+  padding: 28px 35px;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.40);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 35px;
+  margin-bottom: 18px;
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   AVATAR SECTION (CENTERED AT TOP)
+   ============================================ */
+
+.avatar-section-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.avatar-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.profile-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(82, 167, 34, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.avatar-container:hover .profile-avatar {
+  border-color: rgba(82, 167, 34, 0.6);
+  transform: scale(1.05);
+}
+
+.avatar-hint {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #666;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ============================================
+   PROFILE HEADER
+   ============================================ */
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.header-icon {
+  width: 56px;
+  height: 56px;
+}
+
+.profile-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+/* ============================================
+   AVATAR SECTION
+   ============================================ */
+
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 18px;
+}
+
+.avatar-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.profile-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(82, 167, 34, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.avatar-container:hover .profile-avatar {
+  border-color: rgba(82, 167, 34, 0.6);
+  transform: scale(1.05);
+}
+
+.change-avatar-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #52A722 0%, #6BC134 100%);
+  border: 3px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(82, 167, 34, 0.4);
+  transition: all 0.3s ease;
+}
+
+.change-avatar-btn svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
+
+.change-avatar-btn:hover {
+  background: linear-gradient(135deg, #5CB62A 0%, #75CA3E 100%);
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(82, 167, 34, 0.5);
+}
+
+.avatar-hint {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #52A722;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(82, 167, 34, 0.15);
+}
+
+input.changed {
+  border-color: #e46b2b;
+  background: rgba(228, 107, 43, 0.05);
+}
+
+input.changed:focus {
+  border-color: #e46b2b;
+  box-shadow: 0 0 0 3px rgba(228, 107, 43, 0.15);
+}
+
+.readonly-input {
+  background: rgba(200, 200, 200, 0.3);
+  cursor: not-allowed;
+  color: #666;
+}
+
+.readonly-input:focus {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+}
+
+.readonly-hint {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  color: #888;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ============================================
+   PASSWORD ROW
+   ============================================ */
+
+.password-row {
+  position: relative;
+  width: 100%;
+}
+
+.password-row input {
+  padding-right: 50px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.password-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.eye-icon {
+  width: 22px;
+  height: 22px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.password-toggle:hover .eye-icon {
+  opacity: 1;
+}
+
+/* ============================================
+   PASSWORD SECTION
+   ============================================ */
+
+.password-section {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 14px;
+  border: 2px dashed rgba(82, 167, 34, 0.3);
+  height: 100%;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+  color: #52A722;
+}
+
+.section-header h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.discard-btn,
+.save-btn {
+  flex: 1;
+  padding: 12px 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.discard-btn svg,
+.save-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.discard-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.discard-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e4495d 0%, #d03444 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #e46b2b 0%, #d96226 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(228, 107, 43, 0.3);
+}
+
+.save-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f07535 0%, #e46b2b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(228, 107, 43, 0.4);
+}
+
+.discard-btn:disabled,
+.save-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.discard-btn:active:not(:disabled),
+.save-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* ============================================
+   BACK BUTTON
+   ============================================ */
+
+.back-button {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+  border: 4px solid #5C2E0A;
+  border-radius: 50px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFF8DC;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.back-arrow {
+  width: 24px;
+  height: 24px;
+  color: #FFF8DC;
+}
+
+.back-button:hover {
+  background: linear-gradient(135deg, #9B5523 0%, #B06333 50%, #9B5523 100%);
+  transform: translateY(-4px);
+}
+
+.back-button:hover .back-arrow {
+  transform: translateX(-4px);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 900px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .profile-card {
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-card {
+    padding: 25px 20px;
+    max-width: 500px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .back-button {
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+}

@@ -39,7 +39,7 @@ export class HomeComponent {
 
   goToProfile() {
     this.isMenuOpen = false;
-    // Navigate to profile
+    this.router.navigate(['/profile']);
   }
 
   logout() {

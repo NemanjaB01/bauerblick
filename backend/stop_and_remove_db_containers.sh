@@ -12,5 +12,11 @@ docker stop farmsdb
 # Remove the farmsdb container
 docker rm farmsdb
 
+# Stop the seedsdb container
+docker stop seedsdb
+
+# Remove the seedsdb container
+docker rm seedsdb
+
 # Output the status of the containers
 docker ps -a

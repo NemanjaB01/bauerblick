@@ -25,6 +25,8 @@ public class FarmCreateDto {
 
     private Field fields[];
     private Recommendation recommendations[];
+
+    private String email;
 }
 
 

@@ -1,0 +1,80 @@
+[
+  {
+    "seedType": "WHEAT",
+    "displayName": "Wheat",
+    "scientificName": "Triticum aestivum",
+    "minTemperature": 3.0,
+    "maxTemperature": 30.0,
+    "waterRequirement": 5.0,
+    "heatStressTemperature": 30.0,
+    "heavyRainThreshold": 10.0,
+    "seedCoefficient": 1.15,
+    "minSoilMoisture": 0.25,
+    "allowedWaterDeficit": 5.0
+  },
+  {
+    "seedType": "CORN",
+    "displayName": "Corn",
+    "scientificName": "Zea mays",
+    "minTemperature": 2.0,
+    "maxTemperature": 35.0,
+    "waterRequirement": 8.0,
+    "heatStressTemperature": 35.0,
+    "heavyRainThreshold": 15.0,
+    "seedCoefficient": 1.2,
+    "minSoilMoisture": 0.35,
+    "allowedWaterDeficit": 2.5
+  },
+  {
+    "seedType": "BARLEY",
+    "displayName": "Barley",
+    "scientificName": "Hordeum vulgare",
+    "minTemperature": 2.0,
+    "maxTemperature": 28.0,
+    "waterRequirement": 4.5,
+    "heatStressTemperature": 28.0,
+    "heavyRainThreshold": 12.0,
+    "seedCoefficient": 1.15,
+    "minSoilMoisture": 0.28,
+    "allowedWaterDeficit": 4.0
+  },
+  {
+    "seedType": "PUMPKIN",
+    "displayName": "Pumpkin",
+    "scientificName": "Cucurbita pepo",
+    "minTemperature": 5.0,
+    "maxTemperature": 32.0,
+    "waterRequirement": 7.0,
+    "heatStressTemperature": 32.0,
+    "heavyRainThreshold": 20.0,
+    "seedCoefficient": 1.0,
+    "minSoilMoisture": 0.3,
+    "allowedWaterDeficit": 3.0
+  },
+  {
+    "seedType": "BLACK_GRAPES",
+    "displayName": "Black Grapes",
+    "scientificName": "Vitis vinifera",
+    "minTemperature": 2.0,
+    "maxTemperature": 35.0,
+    "waterRequirement": 6.0,
+    "heatStressTemperature": 35.0,
+    "heavyRainThreshold": 15.0,
+    "seedCoefficient": 0.75,
+    "minSoilMoisture": 0.22,
+    "allowedWaterDeficit": 6.0
+  },
+  {
+    "seedType": "WHITE_GRAPES",
+    "displayName": "White Grapes",
+    "scientificName": "Vitis vinifera",
+    "minTemperature": 1.0,
+    "maxTemperature": 32.0,
+    "waterRequirement": 5.5,
+    "heatStressTemperature": 32.0,
+    "heavyRainThreshold": 15.0,
+    "seedCoefficient": 0.7,
+    "minSoilMoisture": 0.25,
+    "allowedWaterDeficit": 5.5
+  }
+]

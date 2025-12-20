@@ -64,9 +64,9 @@
    SIGNUP CARD
 -------------------------------------------------------- */
 .signup-card {
-  width: 420px;  /* Reduced width */
+  width: 420px;
   max-width: 90%;
-  padding: 30px; /* Reduced padding */
+  padding: 30px;
   border-radius: 25px;
 
   background: rgba(255, 255, 255, 0.40);
@@ -111,24 +111,69 @@ input {
   padding: 12px;
   font-size: 15px;
   border-radius: 10px;
-  border: 1px solid transparent; /* Prepare for focus state */
+  border: 1px solid transparent;
   margin-bottom: 15px;
   background: rgba(255, 255, 255, 0.9);
   box-sizing: border-box;
-  transition: box-shadow 0.2s, border 0.2s; /* Smooth selection animation */
+  transition: box-shadow 0.2s, border 0.2s;
 }
 
-/* NEW: THE "SELECTION" LOOK
-   Replaces the default blue browser outline with your theme's orange
-*/
 input:focus {
   outline: none;
   border-color: #e46b2b;
-  box-shadow: 0 0 0 3px rgba(228, 107, 43, 0.25); /* Soft orange glow */
+  box-shadow: 0 0 0 3px rgba(228, 107, 43, 0.25);
   background: #ffffff;
 }
 
+/* -------------------------------------------------------
+   PASSWORD ROW WITH TOGGLE ICON
+-------------------------------------------------------- */
+.password-row {
+  position: relative;
+  width: 100%;
+  margin-bottom: 15px;
+}
 
+.password-row input {
+  width: 100%;
+  padding-right: 50px; /* Space for the eye icon */
+  margin-bottom: 0;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.password-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.password-toggle:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.eye-icon {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.password-toggle:hover .eye-icon {
+  opacity: 1;
+}
 
 /* -------------------------------------------------------
    SIGN UP BUTTON
@@ -151,6 +196,10 @@ input:focus {
   background-color: #d96226;
 }
 
+.signup-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
 
 /* -------------------------------------------------------
    SIGN-IN LINK BELOW BUTTON
@@ -166,6 +215,33 @@ input:focus {
   color: #b54f23;
   cursor: pointer;
   text-decoration: none;
+}
+
+.signin-row a:hover {
+  text-decoration: underline;
+}
+
+/* -------------------------------------------------------
+   ERROR HANDLING
+-------------------------------------------------------- */
+input.error-input {
+  border: 1px solid #dc3545 !important;
+  background-color: #fff8f8 !important;
+}
+
+input.error-input:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+  outline: none;
+}
+
+.error-msg {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: -10px;
+  margin-bottom: 8px;
+  padding-left: 4px;
+  font-weight: 600;
 }
 
 /* -------------------------------------------------------
@@ -186,26 +262,4 @@ input:focus {
       rgba(255, 255, 255, 0.4) 100%
     );
   }
-}
-
-
-input.error-input {
-  border: 1px solid #dc3545 !important;
-  background-color: #fff8f8 !important;
-}
-
-
-input.error-input:focus {
-  border-color: #dc3545 !important;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important; /* Red Glow instead of Orange */
-  outline: none;
-}
-
-.error-msg {
-  color: #dc3545;
-  font-size: 0.85rem;
-  margin-top: 4px;
-  margin-bottom: 8px;
-  padding-left: 4px; /* Aligns text slightly better with the rounded input */
-  font-weight: 600;
 }

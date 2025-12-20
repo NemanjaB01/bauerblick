@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 public class SeedDto {
@@ -18,16 +19,13 @@ public class SeedDto {
     private String scientificName;
 
     private Double minTemperature;
-    private Double optimalTemperature;
     private Double maxTemperature;
-
-    private Double minSoilMoisture;
-    private Double optimalSoilMoisture;
-    private Double maxSoilMoisture;
+    private Double heatStressTemperature;
 
     private Double waterRequirement;
-
-    private Double frostRiskTemperature;
-    private Double heatStressTemperature;
     private Double heavyRainThreshold;
+    private Double minSoilMoisture;
+    private Double allowedWaterDeficit;
+
+    private Double seedCoefficient;
 }

@@ -24,8 +24,20 @@ export class Signup {
     password2: ''
   };
 
+  showPassword = false;
+  showPassword2 = false;
+
   constructor(private signupService: SignupService, private router: Router, private toastr: ToastrService) {
   }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  togglePassword2Visibility() {
+    this.showPassword2 = !this.showPassword2;
+  }
+
 
   //ngOnInit(): void {
   //  // This triggers immediately when the page loads#

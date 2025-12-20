@@ -45,7 +45,7 @@ export class HomeComponent {
   logout() {
     this.authService.logoutUser();
     this.isMenuOpen = false;
-    this.toastr.info("Signed out!")
+    this.toastr.success("Signed out!")
     this.router.navigate(['/login']);
   }
 

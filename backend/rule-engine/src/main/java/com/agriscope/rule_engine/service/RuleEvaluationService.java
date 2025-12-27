@@ -1,6 +1,7 @@
 package com.agriscope.rule_engine.service;
 
 import com.agriscope.rule_engine.domain.dto.DailyAnalysis;
+import com.agriscope.rule_engine.domain.enums.GrowthStage;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.model.*;
 import com.agriscope.rule_engine.messaging.RecommendationProducer;
@@ -113,7 +114,9 @@ public class RuleEvaluationService {
                     try {
                         SeedType type = SeedType.valueOf(seedName.toUpperCase());
                         Seed seed = seedService.getSeed(type);
-                        if (seed != null) kieSession.insert(seed);
+                        if (seed != null) {
+                            kieSession.insert(new FieldStatus(type, GrowthStage.MATURE));   // default mature
+                        }
                     } catch (Exception e) {
                         log.warn("Invalid seed name: {}", seedName);
                     }

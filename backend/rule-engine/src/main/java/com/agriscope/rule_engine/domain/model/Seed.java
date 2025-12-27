@@ -4,6 +4,9 @@ import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Seed {
@@ -28,5 +31,11 @@ public class Seed {
     private Double diseaseRainThreshold;
     private Double maxWindTolerance;
 
-
+    private Map<String, Double> ruleParams = new HashMap<>();
+    public double getParam(String key, double defaultValue) {
+        if (ruleParams != null && ruleParams.containsKey(key)) {
+            return ruleParams.get(key);
+        }
+        return defaultValue;
+    }
 }

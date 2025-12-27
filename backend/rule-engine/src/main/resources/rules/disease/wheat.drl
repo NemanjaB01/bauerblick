@@ -1,34 +1,35 @@
-package rules.daily.wheat;
+package rules.disease;
 import com.agriscope.rule_engine.domain.model.DailyWeatherData;
 import com.agriscope.rule_engine.domain.model.Seed;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.model.Recommendation;
-import java.time.format.DateTimeFormatter
 import com.agriscope.rule_engine.domain.enums.RecommendationType;
 
 global java.util.List recommendations;
 
-rule "Wheat - Disease Risk (Fusarium)"
+rule "Wheat - Disease Risk (Fusarium) Dynamic"
     when
         $seed : Seed(seedType == SeedType.WHEAT)
+
+        $rainLimit : Number() from $seed.diseaseRainThreshold * $seed.getParam("disease_rain_factor", 1.0)
+        $minTemp   : Number() from $seed.diseaseRiskMinTemp + $seed.getParam("disease_temp_offset", 0.0)
+
         $day : DailyWeatherData(
-            rain_sum > $seed.diseaseRainThreshold,
-            temperature_2m_max >= $seed.diseaseRiskMinTemp,
+            rain_sum > $rainLimit.doubleValue(),
+            temperature_2m_max >= $minTemp.doubleValue(),
             temperature_2m_max <= $seed.diseaseRiskMaxTemp
         )
     then
         Recommendation rec = new Recommendation();
         rec.setRecommendedSeed(SeedType.WHEAT);
         rec.setRecommendationType(RecommendationType.DISEASE_PREVENTION);
-        rec.setAdvice("7-Day Forecast Alert: Fusarium Risk detected on " + $day.getDate().toLocalDate());
 
-        rec.setReasoning("In the upcoming 7 days, specifically on " + $day.getDate().toLocalDate() +
-                         ", forecast predicts rain (" + $day.getRain_sum() + "mm) with warm temps. " +
-                         "These are ideal conditions for Fusarium. Plan fungicide application before this date.");
+        rec.setAdvice("7-Day Forecast Alert: Fusarium Risk on " + $day.getDate().toLocalDate());
+        rec.setReasoning("Forecast predicts rain (" + $day.getRain_sum() + "mm) > threshold (" +
+                         String.format("%.1f", $rainLimit) + "mm) and warm temps. High risk.");
 
         rec.getMetrics().put("forecast_date", $day.getDate().toString());
         rec.getMetrics().put("rain_predicted", $day.getRain_sum());
-
         recommendations.add(rec);
 end
 

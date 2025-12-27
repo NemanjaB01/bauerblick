@@ -8,20 +8,23 @@ import com.agriscope.rule_engine.domain.enums.RecommendationType;
 
 global java.util.List recommendations;
 
-rule "Pumpkin - Fruit Rot Prevention"
+rule "Pumpkin - Fruit Rot Prevention Dynamic"
     when
         $seed : Seed(seedType == SeedType.PUMPKIN)
+
+        $rainLimit : Number() from $seed.heavyRainThreshold * $seed.getParam("disease_rain_factor", 1.0)
+
         $day : DailyWeatherData(
-            rain_sum > $seed.heavyRainThreshold
+            rain_sum > $rainLimit.doubleValue()
         )
     then
         Recommendation rec = new Recommendation();
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.DISEASE_PREVENTION);
-        rec.setAdvice("7-Day Forecast: Fruit Rot Risk on " + $day.getDate().toLocalDate());
 
-        rec.setReasoning("Heavy rain forecasted for " + $day.getDate().toLocalDate() +
-                         ". Ensure pumpkins allow drainage to prevent rot.");
+        rec.setAdvice("7-Day Forecast: Fruit Rot Risk on " + $day.getDate().toLocalDate());
+        rec.setReasoning("Heavy rain forecast (" + $day.getRain_sum() + "mm) exceeds threshold (" +
+                         String.format("%.1f", $rainLimit) + "mm). Ensure drainage.");
 
         rec.getMetrics().put("forecast_date", $day.getDate().toString());
         rec.getMetrics().put("rain_predicted", $day.getRain_sum());
@@ -30,18 +33,28 @@ rule "Pumpkin - Fruit Rot Prevention"
 end
 
 
-rule "Pumpkin - Powdery Mildew Alert"
+rule "Pumpkin - Powdery Mildew Alert Dynamic"
     when
         $seed : Seed(seedType == SeedType.PUMPKIN)
+
+        $minTemp : Number() from $seed.diseaseRiskMinTemp + $seed.getParam("disease_temp_offset", 0.0)
+
+        $dryLimit : Number() from $seed.getParam("disease_dry_rain_limit", 2.0)
+
         $day : DailyWeatherData(
-            rain_sum < 2.0,
-            temperature_2m_max > 20.0,
-            temperature_2m_max < 30.0
+            rain_sum < $dryLimit.doubleValue(),
+            temperature_2m_max > $minTemp.doubleValue(),
+            temperature_2m_max < $seed.diseaseRiskMaxTemp
         )
     then
         Recommendation rec = new Recommendation();
         rec.setRecommendedSeed(SeedType.PUMPKIN);
+        rec.setRecommendationType(RecommendationType.DISEASE_PREVENTION);
+
         rec.setAdvice("Scout for Powdery Mildew");
-        rec.setReasoning("Warm, dry days with likely humid nights are forecasted. Inspect leaves for white powdery spots.");
+        rec.setReasoning("Warm (> " + String.format("%.1f", $minTemp) + "C), dry forecast favors Powdery Mildew. Inspect leaves.");
+
+        rec.getMetrics().put("forecast_date", $day.getDate().toString());
+        rec.getMetrics().put("temp_max_predicted", $day.getTemperature_2m_max());
         recommendations.add(rec);
 end

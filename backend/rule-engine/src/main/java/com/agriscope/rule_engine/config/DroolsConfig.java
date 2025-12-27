@@ -17,8 +17,9 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class DroolsConfig {
 
-    private static final String RULES_SEED_PATH = "rules/safety/";
+    private static final String RULES_SAFETY_PATH = "rules/safety/";
     private static final String RULES_IRRIGATION_PATH = "rules/irrigation/";
+    private static final String RULES_DISEASE_PATH = "rules/disease/";
     private KieServices kieServices = KieServices.Factory.get();
 
     @Bean
@@ -26,12 +27,12 @@ public class DroolsConfig {
 
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
 
-        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "wheat.drl"));
-        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "corn.drl"));
-        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "barley.drl"));
-        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "pumpkin.drl"));
-        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "black_grapes.drl"));
-        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SEED_PATH + "white_grapes.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SAFETY_PATH + "wheat.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SAFETY_PATH + "corn.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SAFETY_PATH + "barley.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SAFETY_PATH + "pumpkin.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SAFETY_PATH + "black_grapes.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_SAFETY_PATH + "white_grapes.drl"));
 
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "irrigation_common.drl"));
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "wheat.drl"));
@@ -40,6 +41,13 @@ public class DroolsConfig {
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "pumpkin.drl"));
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "black_grapes.drl"));
         kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_IRRIGATION_PATH + "white_grapes.drl"));
+
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_DISEASE_PATH + "wheat.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_DISEASE_PATH + "corn.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_DISEASE_PATH + "barley.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_DISEASE_PATH + "pumpkin.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_DISEASE_PATH + "black_grapes.drl"));
+        kieFileSystem.write(ResourceFactory.newClassPathResource(RULES_DISEASE_PATH + "white_grapes.drl"));
 
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
         kieBuilder.buildAll();

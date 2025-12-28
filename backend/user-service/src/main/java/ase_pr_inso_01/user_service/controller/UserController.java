@@ -2,8 +2,10 @@ package ase_pr_inso_01.user_service.controller;
 
 import ase_pr_inso_01.user_service.controller.dto.user.UserCreateDto;
 import ase_pr_inso_01.user_service.controller.dto.user.UserDetailsDto;
+import ase_pr_inso_01.user_service.controller.dto.user.UserEditDto;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
+import ase_pr_inso_01.user_service.model.User;
 import ase_pr_inso_01.user_service.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,5 +49,18 @@ public class UserController {
     UserDetailsDto user = userService.getUserByEmail(email);
 
     return ResponseEntity.ok(user);
+  }
+  @PutMapping("/me")
+  public ResponseEntity<?> updateProfile(Principal principal, @RequestBody UserEditDto dto) {
+    try {
+      String email = principal.getName();
+      User updatedUser = userService.editUser(email, dto);
+      return ResponseEntity.ok(updatedUser);
+
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError().body("An error occurred while updating profile");
+    }
   }
 }

@@ -3,7 +3,7 @@ import {Globals} from '../../global/globals';
 import {HttpClient} from '@angular/common/http';
 import {AuthService} from '../auth-service/auth.service';
 import {Observable, ObservedValueOf} from 'rxjs';
-import {UserProfileDetail} from '../../dtos/user';
+import {EditUserDto, UserProfileDetail} from '../../dtos/user';
 
 @Injectable({
   providedIn: 'root',
@@ -15,5 +15,8 @@ export class UserService {
   }
   getProfile() :Observable<UserProfileDetail> {
     return this.httpClient.get<UserProfileDetail>(this.profileDataUri);
+  }
+  editProfile(data: EditUserDto): Observable<UserProfileDetail> {
+    return this.httpClient.put<UserProfileDetail>(this.profileDataUri, data);
   }
 }

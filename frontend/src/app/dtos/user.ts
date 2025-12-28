@@ -3,3 +3,10 @@ export interface UserProfileDetail {
   firstName: string;
   lastName: string;
 }
+
+export interface EditUserDto {
+  firstName: string;
+  lastName: string;
+  oldPassword?: string;
+  newPassword?: string;
+}

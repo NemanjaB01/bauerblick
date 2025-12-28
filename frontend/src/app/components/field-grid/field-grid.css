@@ -109,7 +109,6 @@
     );
 }
 
-/* Soil highlights */
 .field-rows::after {
   content: '';
   position: absolute;
@@ -127,7 +126,6 @@
     );
 }
 
-/* Lighting effects on field surface */
 .field-top::after {
   content: '';
   position: absolute;
@@ -331,7 +329,7 @@
   }
 }
 
-/* Staggered animation delays for each plant */
+/* Animation delays for each plant */
 .plant-item:nth-child(1) { animation-delay: 0s; }
 .plant-item:nth-child(2) { animation-delay: 0.05s; }
 .plant-item:nth-child(3) { animation-delay: 0.1s; }
@@ -494,14 +492,12 @@
     inset 0 2px 4px rgba(82, 167, 34, 0.2);
 }
 
-/* Larger icons for wheat and corn */
 .seed-option img[alt="Wheat"],
 .seed-option img[alt="Corn"] {
   width: 90px;
   height: 90px;
 }
 
-/* Spacing adjustment for barley */
 .seed-option:has(img[alt="Barley"]) span {
   margin-top: 25px;
 }
@@ -794,7 +790,7 @@
 }
 
 /* ============================================
-   READY BADGE - FLYING ABOVE FIELD
+   READY BADGE - STRONGER GLOW VERSION
    ============================================ */
 
 .ready-badge {
@@ -807,7 +803,6 @@
     translateZ(20px)
     rotateX(-55deg);
 
-
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
   color: #8B4513;
   padding: 12px 24px;
@@ -817,10 +812,16 @@
   font-size: 16px;
   font-weight: 700;
 
+  box-shadow:
+    0 6px 25px rgba(255, 215, 0, 0.6),
+    0 0 35px rgba(255, 215, 0, 0.5),
+    0 0 50px rgba(255, 165, 0, 0.3),
+    inset 0 3px 8px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(139, 69, 19, 0.3);
+
   animation: floatBadge 2s ease-in-out infinite;
   transform-style: preserve-3d;
 }
-
 
 @keyframes floatBadge {
   0%, 100% {
@@ -829,6 +830,13 @@
       translateZ(60px)
       rotateX(-55deg)
       translateY(0px);
+
+    box-shadow:
+      0 6px 25px rgba(255, 215, 0, 0.6),
+      0 0 35px rgba(255, 215, 0, 0.5),
+      0 0 50px rgba(255, 165, 0, 0.3),
+      inset 0 3px 8px rgba(255, 255, 255, 0.6),
+      inset 0 -2px 6px rgba(139, 69, 19, 0.3);
   }
   50% {
     transform:
@@ -836,18 +844,26 @@
       translateZ(70px)
       rotateX(-55deg)
       translateY(-8px);
+
+    box-shadow:
+      0 8px 35px rgba(255, 215, 0, 0.8),
+      0 0 50px rgba(255, 215, 0, 0.7),
+      0 0 70px rgba(255, 165, 0, 0.5),
+      inset 0 3px 10px rgba(255, 255, 255, 0.7),
+      inset 0 -2px 6px rgba(139, 69, 19, 0.3);
   }
 }
 
 .ready-badge span {
   display: block;
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, 0.5),
+    0 0 5px rgba(255, 165, 0, 0.3);
 }
 
-/* Make sure field allows 3D transforms */
 .field.ready {
   transform-style: preserve-3d;
 }
-
 /* ============================================
    HARVEST MODAL
    ============================================ */
@@ -938,7 +954,7 @@
 }
 
 /* ============================================
-   HARVEST NOW BUTTON - ABOVE READY FIELDS
+   HARVEST NOW BUTTON
    ============================================ */
 
 .harvest-now-btn {
@@ -947,7 +963,6 @@
   left: 50%;
   transform: translateX(-50%);
 
-  /* Button styling */
   padding: 12px 24px;
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
   color: #8B4513;
@@ -1007,8 +1022,7 @@
 }
 
 /* ============================================
-   GROWING STAGE: Bigger icons, tighter spacing
-   READY STAGE: Same as before
+   GROWING STAGE
    ============================================ */
 
 .field[data-field].growing .plants-container {
@@ -1048,8 +1062,8 @@
 }
 
 .plant-icon[src*="wheat_ready"] {
-  width: 220px !important;
-  height: 220px !important;
+  width: 200px !important;
+  height: 200px !important;
 }
 
 .plant-icon[src*="corn_growing"] {
@@ -1078,13 +1092,13 @@
 }
 
 .plant-icon[src*="black_grape_ready"] {
-  width: 180px !important;
+  width: 170px !important;
   height: 180px !important;
 }
 
 .plant-icon[src*="white_grape_ready"] {
-  width: 180px !important;
-  height: 220px !important;
+  width: 160px !important;
+  height: 240px !important;
 }
 
 .plant-icon[src*="pumpkin_growing"] {
@@ -1102,3 +1116,49 @@
   overflow: visible !important;
 }
 
+/* ============================================
+   PUMPKIN FIELD: 2x2 grid (4 plants only)
+   for both growing and ready stages
+   ============================================ */
+
+.field[data-field].growing .plants-container:has(.plant-icon[src*="pumpkin"]) {
+  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-rows: repeat(2, 1fr) !important;
+  gap: -15px !important;
+  padding: 10px !important;
+  top: -40px !important;
+  left: -30px !important;
+}
+
+.field[data-field].growing .plant-item:has(.plant-icon[src*="pumpkin"]):nth-child(n+5) {
+  display: none !important;
+}
+
+.field[data-field].growing .plant-item:has(.plant-icon[src*="pumpkin"]) {
+  margin: -100px !important;
+}
+
+.field[data-field].ready .plants-container:has(.plant-icon[src*="pumpkin"]) {
+  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-rows: repeat(2, 1fr) !important;
+  gap: -15px !important;
+  padding: 10px !important;
+}
+
+.field[data-field].ready .plant-item:has(.plant-icon[src*="pumpkin"]):nth-child(n+5) {
+  display: none !important;
+}
+
+.field[data-field].ready .plant-item:has(.plant-icon[src*="pumpkin"]) {
+  margin: -100px !important;
+}
+
+.plant-icon[src*="pumpkin_growing"] {
+  width: 260px !important;
+  height: 260px !important;
+}
+
+.plant-icon[src*="pumpkin_ready"] {
+  width: 240px !important;
+  height: 240px !important;
+}

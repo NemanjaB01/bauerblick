@@ -1,6 +1,3 @@
-<!-- ============================================
-     DEVELOPER CONTROLS
-
 <div *ngIf="devMode" class="dev-controls">
   <h3> Developer Controls</h3>
   <div class="dev-field-controls">
@@ -24,7 +21,6 @@
     </div>
   </div>
 </div>
-============================================ -->
 <!-- ============================================
      MAIN FARM CONTAINER
      ============================================ -->
@@ -88,6 +84,7 @@
         [class.planted]="isPlanted(field.id)"
         [class.ready]="isReady(field.id)"
         [class.clickable]="isPlanted(field.id)"
+        [class.growing]="field.status === 'growing'"
         [attr.data-field]="field.id"
         (click)="isPlanted(field.id) && openFieldDetailsModal(field.id)">
 

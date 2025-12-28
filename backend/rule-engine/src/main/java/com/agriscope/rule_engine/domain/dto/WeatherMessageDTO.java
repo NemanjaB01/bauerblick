@@ -15,6 +15,8 @@ public class WeatherMessageDTO {
     @JsonProperty("farm_id")
     private String farmId;
 
+    private String email;
+
     private List<String> crops;
 
     private String type;

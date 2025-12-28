@@ -1,6 +1,7 @@
 package com.agriscope.rule_engine.service;
 
 import com.agriscope.rule_engine.domain.dto.DailyAnalysis;
+import com.agriscope.rule_engine.domain.enums.GrowthStage;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.model.*;
 import com.agriscope.rule_engine.messaging.RecommendationProducer;
@@ -86,6 +87,7 @@ public class RuleEvaluationService {
 
         double currentMoisture = hourlyData.getFirst().getSoil_moisture_3_to_9cm();
         String userId = hourlyData.getFirst().getUserId();
+        String email = hourlyData.getFirst().getEmail();
 
         DailyAnalysis analysis = DailyAnalysis.builder()
                 .totalEt0(sumEt0)
@@ -112,7 +114,9 @@ public class RuleEvaluationService {
                     try {
                         SeedType type = SeedType.valueOf(seedName.toUpperCase());
                         Seed seed = seedService.getSeed(type);
-                        if (seed != null) kieSession.insert(seed);
+                        if (seed != null) {
+                            kieSession.insert(new FieldStatus(type, GrowthStage.MATURE));   // default mature
+                        }
                     } catch (Exception e) {
                         log.warn("Invalid seed name: {}", seedName);
                     }
@@ -122,7 +126,7 @@ public class RuleEvaluationService {
             int firedRules = kieSession.fireAllRules();
             log.info("Fired {} CURRENT rules", firedRules);
 
-            processHourlyRecommendations(recommendations, userId, farm.getFarmId(), avgTemperature);
+            processHourlyRecommendations(recommendations, userId, email, farm.getFarmId(), avgTemperature);
 
         } finally {
             kieSession.dispose();
@@ -139,6 +143,7 @@ public class RuleEvaluationService {
 
         for (Recommendation rec : recommendations) {
             rec.setUserId(weatherData.getUserId());
+            rec.setEmail(weatherData.getEmail());
             rec.setFarmId(weatherData.getFarmId());
             rec.setWeatherTimestamp(weatherData.getTime());
 
@@ -151,7 +156,7 @@ public class RuleEvaluationService {
         }
     }
 
-    private void processHourlyRecommendations(List<Recommendation> recommendations, String userId, String farmId, double avgTemperature) {
+    private void processHourlyRecommendations(List<Recommendation> recommendations, String userId, String email, String farmId, double avgTemperature) {
         if (recommendations.isEmpty()) {
             log.info("No recommendations - conditions are normal");
             return;
@@ -161,6 +166,7 @@ public class RuleEvaluationService {
 
         for (Recommendation rec : recommendations) {
             rec.setUserId(userId);
+            rec.setEmail(email);
             rec.setFarmId(farmId);
             rec.setWeatherTimestamp(now);
 
@@ -171,7 +177,48 @@ public class RuleEvaluationService {
         }
     }
 
-    public void evaluateDailyRules(DailyWeatherData weatherData) {
-        // TODO
+    public void evaluateDailyRules(List<DailyWeatherData> dailyList, List<String> seeds) {
+        if (dailyList == null || dailyList.isEmpty()) return;
+
+        KieSession kieSession = kieContainer.newKieSession();
+        List<Recommendation> recommendations = new ArrayList<>();
+
+        try {
+            kieSession.setGlobal("recommendations", recommendations);
+
+            for (DailyWeatherData day : dailyList) {
+                kieSession.insert(day);
+            }
+
+            if (seeds != null) {
+                for (String seedName : seeds) {
+                    try {
+                        SeedType type = SeedType.valueOf(seedName.toUpperCase());
+                        Seed seed = seedService.getSeed(type);
+                        if (seed != null) kieSession.insert(seed);
+                    } catch (Exception e) {
+                        log.warn("Invalid seed: {}", seedName);
+                    }
+                }
+            }
+
+            int firedRules = kieSession.fireAllRules();
+            log.info("Fired {} DAILY rules", firedRules);
+            processDailyRecommendations(recommendations, dailyList.get(0));
+
+        } finally {
+            kieSession.dispose();
+        }
+    }
+
+    private void processDailyRecommendations(List<Recommendation> recs, DailyWeatherData metaData) {
+        for (Recommendation rec : recs) {
+            rec.setUserId(metaData.getUserId());
+            rec.setEmail(metaData.getEmail());
+            rec.setFarmId(metaData.getFarmId());
+            rec.setWeatherTimestamp(LocalDateTime.now());
+            log.info("Sending Daily Recommendation for target date: {}", rec.getMetrics().get("forecast_date"));
+            recommendationProducer.sendRecommendation(rec);
+        }
     }
 }

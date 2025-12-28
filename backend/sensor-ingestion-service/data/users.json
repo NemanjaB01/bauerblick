@@ -1,14 +1,15 @@
 [
   {
-    "id": "user-1",
+    "id": "693d6b799bceadba359966a8",
     "name": "Farmer Anna",
+    "email": "test@test.com",
     "farms": [
       {
         "id": "farm-1-a",
         "name": "North Field",
         "lat": 48.2081,
         "lon": 16.3713,
-        "crops": ["WHEAT", "BARLEY"]
+        "crops": ["WHEAT", "BARLEY", "PUMPKIN", "BLACK_GRAPES", "WHITE_GRAPES", "CORN" ]
       },
       {
         "id": "farm-1-b",
@@ -22,6 +23,7 @@
   {
     "id": "user-2",
     "name": "Farmer Mark",
+    "email": "test@test.com",
     "farms": [
       {
         "id": "farm-2-a",
@@ -35,6 +37,7 @@
   {
     "id": "user-3",
     "name": "Farmer Sara",
+    "email": "test@test.com",
     "farms": [
       {
         "id": "farm-3-a",
@@ -55,6 +58,7 @@
   {
     "id": "user-4",
     "name": "Farmer Leo",
+    "email": "test@test.com",
     "farms": [
       {
         "id": "farm-4-a",

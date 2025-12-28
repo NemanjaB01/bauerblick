@@ -33,7 +33,7 @@ rule "Safety - Thunderstorm Risk"
         )
     then
         Recommendation rec = new Recommendation();
-        rec.setRecommendationType(RecommendationType.SAFETY_ALERT);
+        rec.setRecommendationType(RecommendationType.STORM_ALERT);
         rec.setAdvice("THUNDERSTORM ALERT: Evacuate exposed areas and seek shelter immediately.");
         rec.setReasoning("High probability of severe weather (Precipitation Prob: %.1f%%)."
                          .formatted($weather.getPrecipitation_probability()));

@@ -5,8 +5,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -15,6 +17,10 @@ import java.util.concurrent.TimeUnit;
 public class NotificationService {
 
     private final WebSocketService webSocketService;
+
+    private final EmailService emailService;
+
+    private final ConcurrentHashMap<String, Long> pendingAcks = new ConcurrentHashMap<>();
 
     private final Cache<String, Recommendation> lastSentCache = Caffeine.newBuilder()
             .expireAfterWrite(24, TimeUnit.HOURS)
@@ -28,19 +34,21 @@ public class NotificationService {
             "FROST_ALERT",
             "HEAT_ALERT",
             "STORM_ALERT",
-            "FLOOD_ALERT",
-            "DROUGHT_ALERT",
-            "CONTINUE_NORMAL"
+            "SAFETY_ALERT",
+            "IRRIGATE_NOW"
     };
 
     private static final String[] RECOMMENDATION_TYPES = {
-            "IRRIGATE_NOW",
             "IRRIGATE_SOON",
             "DELAY_IRRIGATION",
             "MONITOR_CONDITIONS",
             "CONTINUE_NORMAL",
-            "SAFETY_ALERT",
-            "DELAY_OPERATIONS"
+            "DELAY_OPERATIONS",
+            "DISEASE_PREVENTION",
+            "NUTRIENT_CHECK",
+            "PLANNING_ALERT",
+            "HEAT_STRESS_PREVENTION",
+            "PEST_RISK"
     };
 
     public void processIncomingRecommendation(Recommendation newRec) {
@@ -73,7 +81,11 @@ public class NotificationService {
     private void sendAndCache(String key, Recommendation rec) {
         if (isAlertType(rec.getRecommendationType())) {
             webSocketService.sendAlertToFarm(rec.getFarmId(), rec);
-            log.info("Sent as ALERT for farm: {}", rec.getFarmId());
+            String emailBody = String.format("Alert Type: %s for %s\nDetails: %s",
+                    rec.getRecommendationType(), rec.getRecommendedSeed(), rec.getMetrics());
+            pendingAcks.put(rec.getId(), System.currentTimeMillis());
+            emailService.sendAlertEmail(rec.getEmail(), "Farm Alert!", emailBody);
+            log.info("Sent as ALERT (WebSocket + Email) for farm: {}", rec.getFarmId());
         } else if (isRecommendationType(rec.getRecommendationType())) {
             webSocketService.sendRecommendationToFarm(rec.getFarmId(), rec);
             log.info("Sent as RECOMMENDATION for farm: {}", rec.getFarmId());
@@ -83,6 +95,27 @@ public class NotificationService {
         }
 
 //        lastSentCache.put(key, rec);
+    }
+
+    public void markAsDelivered(String messageId) {
+        if (pendingAcks.containsKey(messageId)) {
+            pendingAcks.remove(messageId);
+            log.info("Message {} confirmed delivered via WebSocket (User is Online).", messageId);
+        }
+    }
+
+
+    @Scheduled(fixedRate = 10000)
+    public void checkFailedDeliveries() {
+        long now = System.currentTimeMillis();
+        long timeout = 5 * 60 * 1000;
+
+        pendingAcks.forEach((msgId, timestamp) -> {
+            if (now - timestamp > timeout) {
+                log.debug("Ack timeout for msgId: {}. (Email was already sent).", msgId);
+                pendingAcks.remove(msgId);
+            }
+        });
     }
 
     private boolean isAlertType(String type) {

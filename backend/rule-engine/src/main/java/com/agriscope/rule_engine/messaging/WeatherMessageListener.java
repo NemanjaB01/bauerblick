@@ -9,6 +9,7 @@ import com.agriscope.rule_engine.domain.model.CurrentWeatherData;
 import com.agriscope.rule_engine.domain.model.FarmDetails;
 import com.agriscope.rule_engine.domain.model.HourlyWeatherData;
 import com.agriscope.rule_engine.service.RuleEvaluationService;
+import com.agriscope.rule_engine.domain.model.DailyWeatherData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -33,6 +34,7 @@ public class WeatherMessageListener {
     public void handleMessage(WeatherMessageDTO message) {
         try {
             String userId = message.getUserId();
+            String email = message.getEmail();
             String farmId = message.getFarmId();
             String type = message.getType();
             List<String> crops = message.getCrops();
@@ -43,7 +45,7 @@ public class WeatherMessageListener {
                 return;
             }
 
-            processForecastByType(forecast, type, userId, farmId, crops);
+            processForecastByType(forecast, type, userId, email, farmId, crops);
 
 
         } catch (Exception e) {
@@ -55,17 +57,18 @@ public class WeatherMessageListener {
     private void processForecastByType(List<WeatherForecastDTO> forecastData,
                                        String forecastType,
                                        String userId,
+                                       String email,
                                        String farmId,
                                        List<String> crops) {
         switch (forecastType.toUpperCase()) {
             case "CURRENT":
-                processCurrentForecast(forecastData, userId, farmId, crops);
+                processCurrentForecast(forecastData, userId, email, farmId, crops);
                 break;
             case "HOURLY":
-                processHourlyForecast(forecastData, userId, farmId, crops);
+                processHourlyForecast(forecastData, userId, email, farmId, crops);
                 break;
             case "DAILY":
-//                processDailyForecast(forecastData, userId, farmId);    TODO
+                processDailyForecast(forecastData, userId, email, farmId, crops);
                 break;
             default:
                 log.warn("Unknown forecast type: {}", forecastType);
@@ -74,6 +77,7 @@ public class WeatherMessageListener {
 
     private void processCurrentForecast(List<WeatherForecastDTO> forecastData,
                                         String userId,
+                                        String email,
                                         String farmId,
                                         List<String> crops) {
         if (forecastData.isEmpty()) {
@@ -82,7 +86,7 @@ public class WeatherMessageListener {
         }
 
         WeatherForecastDTO dto = forecastData.getFirst();
-        CurrentWeatherData weatherData = convertToCurrentWeatherData(dto, userId, farmId);
+        CurrentWeatherData weatherData = convertToCurrentWeatherData(dto, userId, email, farmId);
         weatherData.setForecastType(ForecastType.CURRENT);
 
         log.info("Current - user={}, farm={}, Temp: {}C, Rain: {}mm, Wind: {}m/s",
@@ -95,11 +99,11 @@ public class WeatherMessageListener {
         ruleEvaluationService.evaluateCurrentDataForFarm(weatherData, crops);
     }
 
-    private void processHourlyForecast(List<WeatherForecastDTO> forecastData, String userId, String farmId, List<String> crops) {
+    private void processHourlyForecast(List<WeatherForecastDTO> forecastData, String userId, String email, String farmId, List<String> crops) {
         List<HourlyWeatherData> hourlyList = new ArrayList<>();
 
         for (WeatherForecastDTO dto : forecastData) {
-            hourlyList.add(convertToHourlyWeatherData(dto, userId, farmId));
+            hourlyList.add(convertToHourlyWeatherData(dto, userId, email, farmId));
         }
 
         FarmDetails farm = new FarmDetails();
@@ -112,9 +116,40 @@ public class WeatherMessageListener {
         ruleEvaluationService.evaluateHourlDataForFarm(hourlyList, farm, crops);
     }
 
-    private HourlyWeatherData convertToHourlyWeatherData(WeatherForecastDTO dto, String userId, String farmId) {
+    private void processDailyForecast(List<WeatherForecastDTO> forecastData,
+                                      String userId,
+                                      String email,
+                                      String farmId,
+                                      List<String> crops) {
+
+        List<DailyWeatherData> dailyList = new ArrayList<>();
+
+        for (WeatherForecastDTO dto : forecastData) {
+            DailyWeatherData daily = new DailyWeatherData();
+            daily.setUserId(userId);
+            daily.setEmail(email);
+            daily.setFarmId(farmId);
+            daily.setForecastType(ForecastType.DAILY);
+            daily.setTemperature_2m_max(dto.getTemperature2mMax());
+            daily.setTemperature_2m_min(dto.getTemperature2mMin());
+            daily.setRain_sum(dto.getRainSum());
+            daily.setWind_speed_10m_max(dto.getWindSpeed10mMax());
+            daily.setEt0_fao_evapotranspiration(dto.getEt0FaoEvapotranspiration());
+
+            if (dto.getTime() != null) {
+                daily.setDate(parseDateTime(dto.getTime()));
+            }
+            dailyList.add(daily);
+        }
+
+        log.info("Processing DAILY rules for {} days forecast", dailyList.size());
+        ruleEvaluationService.evaluateDailyRules(dailyList, crops);
+    }
+
+    private HourlyWeatherData convertToHourlyWeatherData(WeatherForecastDTO dto, String userId, String email, String farmId) {
         HourlyWeatherData data = new HourlyWeatherData();
         data.setUserId(userId);
+        data.setEmail(email);
         data.setFarmId(farmId);
         data.setForecastType(ForecastType.HOURLY);
 
@@ -140,9 +175,11 @@ public class WeatherMessageListener {
 
     private CurrentWeatherData convertToCurrentWeatherData(WeatherForecastDTO dto,
                                                            String userId,
+                                                           String email,
                                                            String farmId) {
         CurrentWeatherData weatherData = new CurrentWeatherData();
         weatherData.setUserId(userId);
+        weatherData.setEmail(email);
         weatherData.setFarmId(farmId);
 
         weatherData.setTemperature_2m(dto.getTemperature2m());

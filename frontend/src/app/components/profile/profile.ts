@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import {UserService} from '../../services/user-service/user-service';
+import {EditUserDto, UserProfileDetail} from '../../dtos/user';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-profile',
@@ -12,19 +15,17 @@ import { Router } from '@angular/router';
 })
 export class Profile implements OnInit {
 
+  showDiscardModal = false;
+
   // User data
   userData = {
-    firstName: 'Max',
-    lastName: 'Mustermann',
-    email: 'max.mustermann@email.com'
+    firstName: '',
+    lastName: '',
+    email: ''
   };
 
   // Original data (for comparison)
-  originalData = {
-    firstName: 'Max',
-    lastName: 'Mustermann',
-    email: 'max.mustermann@email.com'
-  };
+  originalData = { ...this.userData };
 
   // Password data
   passwordData = {
@@ -48,25 +49,42 @@ export class Profile implements OnInit {
   // Delete modal
   showDeleteModal = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private userService: UserService, private toastr: ToastrService) {}
 
   ngOnInit() {
     // Load user data from API/service here
+    const jwtToken = localStorage.getItem('authToken');
+    if(!jwtToken) {
+      console.error('JWT token not found in local storage');
+      return;
+    }
+
     this.loadUserData();
   }
 
   loadUserData() {
-    // TODO: Replace with actual API call
-    // For now, using dummy data
-    this.userData = {
-      firstName: 'Max',
-      lastName: 'Mustermann',
-      email: 'max.mustermann@email.com'
-    };
 
-    this.originalData = { ...this.userData };
-    this.profilePicture = null; // or load from API
-    this.originalProfilePicture = this.profilePicture;
+
+    this.userService.getProfile().subscribe({
+      next: (data: UserProfileDetail) => {
+        this.userData = {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email
+        };
+
+        this.originalData = { ...this.userData };
+
+        // this.profilePicture = data.profilePictureUrl || null;
+        // this.originalProfilePicture = this.profilePicture;
+      },
+      error: (err) => {
+        console.error('Error loading profile:', err);
+        if (err.status === 403 || err.status === 401) {
+          //this.logout(); commented out for testing purposes
+        }
+      }
+    });
   }
 
   // Toggle password visibility
@@ -90,13 +108,13 @@ export class Profile implements OnInit {
 
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        this.toastr.error('Please select an image file');
         return;
       }
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        this.toastr.error('File size must be less than 5MB');
         return;
       }
 
@@ -134,22 +152,22 @@ export class Profile implements OnInit {
   validatePasswordChange(): boolean {
     if (this.passwordData.newPassword || this.passwordData.confirmPassword) {
       if (!this.passwordData.currentPassword) {
-        alert('Please enter your current password');
+        this.toastr.error('Please enter your current password');
         return false;
       }
 
       if (!this.passwordData.newPassword) {
-        alert('Please enter a new password');
+        this.toastr.error('Please enter a new password');
         return false;
       }
 
       if (this.passwordData.newPassword.length < 6) {
-        alert('New password must be at least 6 characters');
+        this.toastr.error('New password must be at least 6 characters');
         return false;
       }
 
       if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-        alert('New passwords do not match');
+        this.toastr.error('New passwords do not match');
         return false;
       }
     }
@@ -157,23 +175,24 @@ export class Profile implements OnInit {
     return true;
   }
 
-  // Save changes
   onSave() {
     if (!this.validatePasswordChange()) {
       return;
     }
 
-    // TODO: Replace with actual API calls
     console.log('Saving profile data:', this.userData);
+    const payload: EditUserDto = {
+      firstName: this.userData.firstName,
+      lastName: this.userData.lastName
+    };
 
     if (this.passwordData.newPassword) {
-      console.log('Changing password');
-      // API call to change password
+      payload.oldPassword = this.passwordData.currentPassword;
+      payload.newPassword = this.passwordData.newPassword;
     }
 
     if (this.profilePicture !== this.originalProfilePicture) {
       console.log('Updating profile picture');
-      // API call to upload new picture
     }
 
     // Update original data
@@ -187,23 +206,69 @@ export class Profile implements OnInit {
       confirmPassword: ''
     };
 
-    alert('Profile updated successfully!');
+    this.userService.editProfile(payload).subscribe({
+      next: (updatedUser) => {
+        console.log('Update successful', updatedUser);
+
+        this.userData.firstName = updatedUser.firstName;
+        this.userData.lastName = updatedUser.lastName;
+
+        this.originalData = { ...this.userData };
+        this.originalProfilePicture = this.profilePicture;
+
+        this.passwordData = {
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
+        this.toastr.success('Profile updated successfully!');
+      },
+      error: (err) => {
+        console.error('Update failed', err);
+
+        if (err.status === 400) {
+          this.toastr.error(typeof err.error === 'string' ? err.error : 'Update failed. Please check your inputs.');
+        } else {
+          this.toastr.error('An unexpected error occurred. Please try again.');
+        }
+      }
+    });
+
   }
 
-  // Discard changes
   onDiscard() {
-    if (confirm('Are you sure you want to discard all changes?')) {
-      this.userData = { ...this.originalData };
-      this.profilePicture = this.originalProfilePicture;
-      this.passwordData = {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      };
-    }
+    this.showDiscardModal = true;
+  }
+  confirmDiscard() {
+    // Reset all data to original values
+    this.userData = { ...this.originalData };
+    this.profilePicture = this.originalProfilePicture;
+    this.passwordData = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+
+    this.showDiscardModal = false;
+
+    this.toastr.info('All changes have been discarded', 'Changes Discarded');
   }
 
-  // Navigation
+  getChangedFields(): string[] {
+    const changes: string[] = [];
+
+    if (this.hasChanges('firstName')) changes.push('First Name');
+    if (this.hasChanges('lastName')) changes.push('Last Name');
+    if (this.passwordData.currentPassword || this.passwordData.newPassword) {
+      changes.push('Password');
+    }
+    if (this.profilePicture !== this.originalProfilePicture) {
+      changes.push('Profile Picture');
+    }
+
+    return changes;
+  }
+
   goBack() {
     this.router.navigate(['/home']);
   }
@@ -214,13 +279,11 @@ export class Profile implements OnInit {
 
   goToProfile() {
     this.isMenuOpen = false;
-    // Already on profile page
   }
 
   logout() {
     this.isMenuOpen = false;
-    // TODO: Add logout logic
-    console.log('Logging out...');
+    localStorage.removeItem('auth_token');
     this.router.navigate(['/login']);
   }
 
@@ -231,7 +294,7 @@ export class Profile implements OnInit {
     console.log('Deleting profile...');
 
     // Show confirmation and redirect
-    alert('Profile deleted successfully');
+    this.toastr.error('Profile deleted successfully');
     this.router.navigate(['/login']);
   }
 }

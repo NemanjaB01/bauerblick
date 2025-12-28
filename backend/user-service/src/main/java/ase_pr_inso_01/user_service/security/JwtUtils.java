@@ -7,10 +7,13 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtUtils {
+
 
   @Value("${app.jwt.secret}")
   private String jwtSecret;
@@ -28,17 +31,21 @@ public class JwtUtils {
   }
 
   public String getUsernameFromJwt(String token) {
-    return Jwts.parser().setSigningKey(jwtSecret)
+    return Jwts.parser().setSigningKey(getSigningKey())
             .parseClaimsJws(token)
             .getBody().getSubject();
   }
 
   public boolean validateJwtToken(String token) {
     try {
-      Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+      Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(token);
       return true;
     } catch (JwtException e) {
       return false;
     }
+  }
+
+  private Key getSigningKey() {
+    return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
   }
 }

@@ -15,6 +15,8 @@ import {ToastrService} from 'ngx-toastr';
 })
 export class Profile implements OnInit {
 
+  showDiscardModal = false;
+
   // User data
   userData = {
     firstName: '',
@@ -235,15 +237,36 @@ export class Profile implements OnInit {
   }
 
   onDiscard() {
-    if (confirm('Are you sure you want to discard all changes?')) {
-      this.userData = { ...this.originalData };
-      this.profilePicture = this.originalProfilePicture;
-      this.passwordData = {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      };
+    this.showDiscardModal = true;
+  }
+  confirmDiscard() {
+    // Reset all data to original values
+    this.userData = { ...this.originalData };
+    this.profilePicture = this.originalProfilePicture;
+    this.passwordData = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+
+    this.showDiscardModal = false;
+
+    this.toastr.info('All changes have been discarded', 'Changes Discarded');
+  }
+
+  getChangedFields(): string[] {
+    const changes: string[] = [];
+
+    if (this.hasChanges('firstName')) changes.push('First Name');
+    if (this.hasChanges('lastName')) changes.push('Last Name');
+    if (this.passwordData.currentPassword || this.passwordData.newPassword) {
+      changes.push('Password');
     }
+    if (this.profilePicture !== this.originalProfilePicture) {
+      changes.push('Profile Picture');
+    }
+
+    return changes;
   }
 
   goBack() {

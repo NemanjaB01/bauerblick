@@ -13,9 +13,9 @@ export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
   { path: 'login', component: Login, canActivate: [NoAuthGuard] },
   { path: 'signup', component: Signup, canActivate: [NoAuthGuard] },
-  { path: 'home', component: HomeComponent, canActivate: [NoAuthGuard] },
-  { path: 'new-farm', component: NewFarmComponent, canActivate: [NoAuthGuard] },
-  { path: 'seeds', component: SeedsComponent, canActivate: [NoAuthGuard] },
-  { path: 'profile', component: Profile, canActivate: [NoAuthGuard] }
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'new-farm', component: NewFarmComponent, canActivate: [AuthGuard] },
+  { path: 'seeds', component: SeedsComponent, canActivate: [AuthGuard] },
+  { path: 'profile', component: Profile, canActivate: [AuthGuard] }
 
 ];

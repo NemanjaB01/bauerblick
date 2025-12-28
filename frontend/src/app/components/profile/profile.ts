@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import {UserService} from '../../services/user-service/user-service';
+import {UserProfileDetail} from '../../dtos/user';
 
 @Component({
   selector: 'app-profile',
@@ -14,17 +16,13 @@ export class Profile implements OnInit {
 
   // User data
   userData = {
-    firstName: 'Max',
-    lastName: 'Mustermann',
-    email: 'max.mustermann@email.com'
+    firstName: '',
+    lastName: '',
+    email: ''
   };
 
   // Original data (for comparison)
-  originalData = {
-    firstName: 'Max',
-    lastName: 'Mustermann',
-    email: 'max.mustermann@email.com'
-  };
+  originalData = { ...this.userData };
 
   // Password data
   passwordData = {
@@ -48,25 +46,42 @@ export class Profile implements OnInit {
   // Delete modal
   showDeleteModal = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private userService: UserService) {}
 
   ngOnInit() {
     // Load user data from API/service here
+    const jwtToken = localStorage.getItem('authToken');
+    if(!jwtToken) {
+      console.error('JWT token not found in local storage');
+      return;
+    }
+
     this.loadUserData();
   }
 
   loadUserData() {
-    // TODO: Replace with actual API call
-    // For now, using dummy data
-    this.userData = {
-      firstName: 'Max',
-      lastName: 'Mustermann',
-      email: 'max.mustermann@email.com'
-    };
 
-    this.originalData = { ...this.userData };
-    this.profilePicture = null; // or load from API
-    this.originalProfilePicture = this.profilePicture;
+
+    this.userService.getProfile().subscribe({
+      next: (data: UserProfileDetail) => {
+        this.userData = {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email
+        };
+
+        this.originalData = { ...this.userData };
+
+        // this.profilePicture = data.profilePictureUrl || null;
+        // this.originalProfilePicture = this.profilePicture;
+      },
+      error: (err) => {
+        console.error('Error loading profile:', err);
+        if (err.status === 403 || err.status === 401) {
+          //this.logout(); commented out for testing purposes
+        }
+      }
+    });
   }
 
   // Toggle password visibility
@@ -219,8 +234,7 @@ export class Profile implements OnInit {
 
   logout() {
     this.isMenuOpen = false;
-    // TODO: Add logout logic
-    console.log('Logging out...');
+    localStorage.removeItem('auth_token');
     this.router.navigate(['/login']);
   }
 

@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found: " + userId));
 
 
-        return new UserDetailsDto(user.getId(), user.getEmail());
+        return new UserDetailsDto(user.getEmail(), user.getFirstName(), user.getLastName());
     }
 
 
@@ -89,6 +89,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found: " + email));
 
-        return new UserDetailsDto(user.getId(), user.getEmail());
+        return new UserDetailsDto(user.getEmail(), user.getFirstName(), user.getLastName());
     }
 }

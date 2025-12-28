@@ -8,6 +8,8 @@ import ase_pr_inso_01.user_service.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping(value = "/api/users")
 public class UserController {
@@ -34,4 +36,16 @@ public class UserController {
         UserDetailsDto userDto = userService.getUserByEmail(email);
         return ResponseEntity.ok(userDto);
     }
+  @GetMapping("/me")
+  public ResponseEntity<UserDetailsDto> getCurrentUser(Principal principal) {
+    if (principal == null) {
+      return ResponseEntity.status(401).build();
+    }
+
+    String email = principal.getName();
+
+    UserDetailsDto user = userService.getUserByEmail(email);
+
+    return ResponseEntity.ok(user);
+  }
 }

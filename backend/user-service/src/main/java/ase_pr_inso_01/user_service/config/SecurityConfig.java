@@ -1,6 +1,7 @@
 package ase_pr_inso_01.user_service.config;
 
 import ase_pr_inso_01.user_service.security.JwtAuthFilter;
+import jakarta.ws.rs.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +37,7 @@ public class SecurityConfig {
 
     http.authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/authentication/**").permitAll()
-            .requestMatchers("/api/users/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
             .anyRequest().authenticated()
     );
 

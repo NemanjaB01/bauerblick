@@ -2,48 +2,56 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import {AlertsNotification} from '../alerts-notification/alerts-notification';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, AlertsNotification],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
 
+  // User data
   userData = {
     firstName: 'Max',
     lastName: 'Mustermann',
     email: 'max.mustermann@email.com'
   };
 
+  // Original data (for comparison)
   originalData = {
     firstName: 'Max',
     lastName: 'Mustermann',
     email: 'max.mustermann@email.com'
   };
 
+  // Password data
   passwordData = {
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   };
 
+  // Password visibility toggles
   showCurrentPassword = false;
   showNewPassword = false;
   showConfirmPassword = false;
 
+  // Profile picture
   profilePicture: string | null = null;
   originalProfilePicture: string | null = null;
 
+  // Menu toggle
   isMenuOpen = false;
+
+  // Delete modal
+  showDeleteModal = false;
 
   constructor(private router: Router) {}
 
   ngOnInit() {
-    // Load user data from our API/service
+    // Load user data from API/service here
     this.loadUserData();
   }
 
@@ -57,7 +65,7 @@ export class Profile implements OnInit {
     };
 
     this.originalData = { ...this.userData };
-    this.profilePicture = null; // or load from API if user has one
+    this.profilePicture = null; // or load from API
     this.originalProfilePicture = this.profilePicture;
   }
 
@@ -204,7 +212,7 @@ export class Profile implements OnInit {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
-  navigateToProfile() {
+  goToProfile() {
     this.isMenuOpen = false;
     // Already on profile page
   }
@@ -216,9 +224,14 @@ export class Profile implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  goToProfile() {
-    this.isMenuOpen = false;
-    this.router.navigate(['/profile']);
-  }
+  deleteProfile() {
+    this.showDeleteModal = false;
 
+    // TODO: Add API call to delete profile
+    console.log('Deleting profile...');
+
+    // Show confirmation and redirect
+    alert('Profile deleted successfully');
+    this.router.navigate(['/login']);
+  }
 }

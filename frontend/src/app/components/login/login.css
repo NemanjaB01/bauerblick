@@ -81,14 +81,14 @@
 }
 
 .login-icon {
-  width: 90px;   /* adjust this number */
+  width: 90px;
   height: auto;
   display: block;
 }
 .login-title {
   display: flex;
-  align-items: center;      /* vertically center icon */
-  gap: 10px;                /* space between text & icon */
+  align-items: center;
+  gap: 10px;
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 25px;
@@ -112,8 +112,80 @@ input {
   border: none;
   margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
 }
 
+/* -------------------------------------------------------
+   PASSWORD ROW WITH TOGGLE ICON
+-------------------------------------------------------- */
+.password-row {
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.password-row input {
+  width: 100%;
+  padding-right: 50px; /* Space for the eye icon */
+  margin-bottom: 0;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.password-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.password-toggle:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.eye-icon {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.password-toggle:hover .eye-icon {
+  opacity: 1;
+}
+
+/* -------------------------------------------------------
+   FORGOT LINK
+-------------------------------------------------------- */
+.forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 14px;
+  color: #b54f23;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* -------------------------------------------------------
+   BUTTONS
+-------------------------------------------------------- */
 .signin-btn {
   width: 100%;
   padding: 14px;
@@ -124,10 +196,16 @@ input {
   color: white;
   font-weight: 700;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .signin-btn:hover {
   background-color: #d96226;
+}
+
+.signin-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .signup-row {
@@ -143,3 +221,29 @@ input {
   text-decoration: none;
 }
 
+.signup-row a:hover {
+  text-decoration: underline;
+}
+
+/* -------------------------------------------------------
+   ERROR HANDLING
+-------------------------------------------------------- */
+input.error-input {
+  border: 1px solid #dc3545 !important;
+  background-color: #fff8f8 !important;
+}
+
+input.error-input:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
+  outline: none;
+}
+
+.error-msg {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: -15px;
+  margin-bottom: 15px;
+  padding-left: 4px;
+  font-weight: 600;
+}

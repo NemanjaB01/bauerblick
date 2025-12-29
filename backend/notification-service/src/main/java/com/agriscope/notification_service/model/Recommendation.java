@@ -9,6 +9,7 @@ import java.util.Map;
 @Data
 public class Recommendation {
     private String id;
+    private String email;
     private String userId;
     private String farmId;
 

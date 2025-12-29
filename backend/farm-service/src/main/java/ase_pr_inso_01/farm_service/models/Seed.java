@@ -12,21 +12,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Setter
 public class Seed {
     @Id
-    private String Id;
+    private String id;
+
     private SeedType seedType;
+    private String displayName;
     private String scientificName;
 
     private Double minTemperature;
-    private Double optimalTemperature;
     private Double maxTemperature;
-
-    private Double minSoilMoisture;
-    private Double optimalSoilMoisture;
-    private Double maxSoilMoisture;
+    private Double heatStressTemperature;
 
     private Double waterRequirement;
-
-    private Double frostRiskTemperature;
-    private Double heatStressTemperature;
     private Double heavyRainThreshold;
+    private Double minSoilMoisture;
+    private Double allowedWaterDeficit;
+    private Double seedCoefficient;
 }

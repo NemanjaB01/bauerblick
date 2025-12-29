@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Data
 public class HourlyWeatherData {
     private String userId;
+    private String email;
     private String farmId;
     private ForecastType forecastType = ForecastType.HOURLY;
     private LocalDateTime date;

@@ -5,6 +5,9 @@ import { FieldGrid } from '../field-grid/field-grid';
 import { WeatherWidget } from '../weather-widget/weather-widget';
 import { Recommendations } from '../recommendations/recommendations';
 import {CommonModule} from '@angular/common';
+import {AuthService} from '../../services/auth-service/auth.service';
+import {Router} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
 import { AlertsNotification } from '../alerts-notification/alerts-notification';
 
 @Component({
@@ -22,6 +25,11 @@ import { AlertsNotification } from '../alerts-notification/alerts-notification';
   ]
 })
 export class HomeComponent {
+  constructor(
+    public authService: AuthService,
+    private router: Router,
+    private toastr: ToastrService
+  ) { }
 
   isMenuOpen = false;
 
@@ -31,12 +39,14 @@ export class HomeComponent {
 
   goToProfile() {
     this.isMenuOpen = false;
-    // Navigate to profile
+    this.router.navigate(['/profile']);
   }
 
   logout() {
+    this.authService.logoutUser();
     this.isMenuOpen = false;
-    // Handle logout
+    this.toastr.success("Signed out!")
+    this.router.navigate(['/login']);
   }
 
   @HostListener('document:click', ['$event'])

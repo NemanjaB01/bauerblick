@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class CurrentWeatherData {
     private String userId;
+    private String email;
     private String farmId;
     private ForecastType forecastType = ForecastType.CURRENT;
     private LocalDateTime time;

@@ -6,9 +6,10 @@ from weather.logger import setup_logger
 logger = setup_logger(name="weather_processor")
 client = WeatherClient() #
 
-def fetch_and_publish_for_farm(user_id, farm_data, forecast_type: ForecastType):
+def fetch_and_publish_for_farm(user_id, email, farm_data, forecast_type: ForecastType):
     farm_id = farm_data.get("id")
     farm_name = farm_data.get("name", farm_id)
+
     lat = farm_data.get("lat")
     lon = farm_data.get("lon")
     crops = farm_data.get("crops", [])
@@ -36,6 +37,7 @@ def fetch_and_publish_for_farm(user_id, farm_data, forecast_type: ForecastType):
         payload = {
             "type": msg_type_map[forecast_type],
             "user_id": user_id,
+            "email": email,
             "farm_id": farm_id,
             "farm_name": farm_name,
             "crops": crops,

@@ -24,7 +24,7 @@ export class Recommendations implements OnInit, OnDestroy {
 
   connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
-  private userId: string = 'user-1';
+  private userId: string = '69457016428948d26c48dfe4';
   private farmId: string = 'farm-1-a';
 
 

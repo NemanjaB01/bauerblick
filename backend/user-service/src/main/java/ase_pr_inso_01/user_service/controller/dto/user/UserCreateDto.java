@@ -21,12 +21,6 @@ public class UserCreateDto {
   @NotBlank(message = "Last name must not be empty")
   private String lastName;
 
-  @NotBlank(message = "Last name must not be empty")
-  private String adress;
-
-  @NotNull(message = "Date of birth must not be null")
-  private LocalDate dateOfBirth;
-
   @NotBlank(message = "Password must not be empty")
   private String password;
 

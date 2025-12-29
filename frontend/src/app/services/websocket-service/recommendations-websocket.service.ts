@@ -30,7 +30,7 @@ export enum ConnectionStatus {
   providedIn: 'root'
 })
 export class RecommendationsWebSocketService implements OnDestroy {
-  private serverUrl = 'http://localhost:8081/ws-alerts';
+  private serverUrl = 'http://localhost:8085/ws-alerts';
   private isConnecting = false;
   private stompClient: Client | null = null;
   private recommendationsSubject = new Subject<RecommendationData>();
@@ -50,6 +50,23 @@ export class RecommendationsWebSocketService implements OnDestroy {
     this.currentFarmId = farmId;
     this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
     this.connectToWebSocket(farmId);
+  }
+
+  private sendAck(recId: string, farmId: string): void {
+    if (this.stompClient && this.stompClient.connected) {
+      const ackPayload = {
+        recommendationId: recId,
+        farmId: farmId,
+        status: 'RECEIVED'
+      };
+
+      console.log('Sending ACK for recommendation:', recId);
+
+      this.stompClient.publish({
+        destination: '/app/notification/ack',
+        body: JSON.stringify(ackPayload)
+      });
+    }
   }
 
   private connectToWebSocket(farmId: string): void {
@@ -125,6 +142,7 @@ export class RecommendationsWebSocketService implements OnDestroy {
           this.allRecommendations.push(recommendation);
           this.recommendationsListSubject.next([...this.allRecommendations]);
           this.recommendationsSubject.next(recommendation);
+          this.sendAck(recommendation.id, recommendation.farmId);
         }
       } catch (error) {
         console.error('Error parsing recommendation:', error);

@@ -21,8 +21,8 @@ export class AlertsNotification implements OnInit, OnDestroy {
   isDropdownOpen = false;
   connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
-  private userId: string = 'user-1';
-  private farmId: string = 'farm-1-b';
+  private userId: string = '69457016428948d26c48dfe4';
+  private farmId: string = 'farm-1-a';
 
   private alertsSubscription?: Subscription;
   private listSubscription?: Subscription;

@@ -18,8 +18,6 @@ public class User {
   private String lastName;
   private String password;
   private String password2;
-  private String address;
-  private LocalDate dateOfBirth;
   private String role = "USER";
 
   //TODO: enhance this to also include login attempts and security question!

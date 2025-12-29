@@ -29,8 +29,8 @@ export class WeatherWidget implements OnInit, OnDestroy {
   private dateInterval?: any;
 
 
-  private userId: string = 'user-1';
-  private farmId: string = 'farm-1-b';
+  private userId: string = '69457016428948d26c48dfe4';
+  private farmId: string = 'farm-1-a';
 
   private getCacheKey(): string {
     return `weather_cache_${this.userId}_${this.farmId}`;

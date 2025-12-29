@@ -5,8 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Map } from '../map/map';
 import { SoilType } from '../../models/SoilType';
-import { Farm } from '../../models/Farm';
-import { FarmService } from '../../services/farm-service/farm';
+import { FarmCreateDto } from '../../dtos/farm';
+import { FarmService } from '../../services/farm-service/farm-service';
+import { UserService } from '../../services/user-service/user-service';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 @Component({
@@ -21,9 +22,9 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
   styleUrl: './new-farm-component.css',
 })
 export class NewFarmComponent {
-  constructor( private router: Router, private farmService : FarmService) { }
-
-  farm : Farm = new Farm();
+  constructor( private router: Router, private farmService : FarmService, private userService: UserService) { }
+  //TODO: Possibly add private auth: AuthService in order to extract email
+  farm : FarmCreateDto = new FarmCreateDto();
   farmName = '';
   errorMessage = '';
   selectedCoords: { lat: number; lng: number } | null = null;
@@ -35,6 +36,16 @@ export class NewFarmComponent {
   selectedSoil: SoilType | null = null;
   soilType : SoilType = SoilType.Chalk;
 
+  ngOnInit() {
+    this.userService.getProfile().subscribe({
+      next: (user) => {
+        this.farm.email = user.email;
+      },
+      error: (err) => {
+        console.error('Failed to fetch user data', err);
+      }
+    });
+  }
 
   onSearch(event: any) {
     const query = event.target.value;
@@ -71,7 +82,7 @@ export class NewFarmComponent {
     const lat = Number(r.lat);
     const lng = Number(r.lon);
 
-    this.selectedCoords = { lat, lng };  
+    this.selectedCoords = { lat, lng };
     this.farm.latitude = this.selectedCoords.lat
     this.farm.longitude = this.selectedCoords.lng
   }
@@ -112,7 +123,9 @@ export class NewFarmComponent {
     if (this.selectedSoil) {
       this.farm.soilType = this.selectedSoil;
     }
-    console.log(this.farm)
+    //this.farm.email = this.auth.email;
+//     this.farm.email = "testuser@example.com";
+    console.log(this.farm);
     console.log(this.selectedSoil);
     if (this.farm) {
       if (this.farm.name == "" ||  this.farm.latitude == 0 || this.farm.longitude == 0) {
@@ -127,6 +140,7 @@ export class NewFarmComponent {
     }
   }
 
-  
-
+  goBack() {
+    this.router.navigate(['/home']);
+  }
 }

@@ -8,7 +8,7 @@ export class Globals {
 
   private static findBackendUrl(): string {
     if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8080
-      return 'http://localhost:8082/api';
+      return 'http://localhost:8080/api';
     } else {
       // assume deployed somewhere and backend is available at same host/port as frontend
       return window.location.protocol + '//' + window.location.host + window.location.pathname + 'api';

@@ -109,7 +109,6 @@
     );
 }
 
-/* Soil highlights */
 .field-rows::after {
   content: '';
   position: absolute;
@@ -127,7 +126,6 @@
     );
 }
 
-/* Lighting effects on field surface */
 .field-top::after {
   content: '';
   position: absolute;
@@ -331,7 +329,7 @@
   }
 }
 
-/* Staggered animation delays for each plant */
+/* Animation delays for each plant */
 .plant-item:nth-child(1) { animation-delay: 0s; }
 .plant-item:nth-child(2) { animation-delay: 0.05s; }
 .plant-item:nth-child(3) { animation-delay: 0.1s; }
@@ -494,14 +492,12 @@
     inset 0 2px 4px rgba(82, 167, 34, 0.2);
 }
 
-/* Larger icons for wheat and corn */
 .seed-option img[alt="Wheat"],
 .seed-option img[alt="Corn"] {
   width: 90px;
   height: 90px;
 }
 
-/* Spacing adjustment for barley */
 .seed-option:has(img[alt="Barley"]) span {
   margin-top: 25px;
 }
@@ -661,4 +657,508 @@
   color: #5A8F3B;
   font-style: italic;
   margin: 0;
+}
+/* ============================================
+   DEVELOPER CONTROLS
+   ============================================ */
+
+.dev-controls {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.95);
+  border: 3px solid #52A722;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 9998;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dev-controls h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: #52A722;
+}
+
+.dev-field-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dev-field-item {
+  background: rgba(82, 167, 34, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid rgba(82, 167, 34, 0.3);
+}
+
+.dev-field-item strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 12px;
+  color: #666;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 5px;
+}
+
+.dev-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dev-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dev-btn.advance {
+  background: linear-gradient(135deg, #52A722 0%, #6BC134 100%);
+  color: white;
+}
+
+.dev-btn.advance:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5CB62A 0%, #75CA3E 100%);
+  transform: translateY(-2px);
+}
+
+.dev-btn.reset {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+}
+
+.dev-btn.reset:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e4495d 0%, #d03444 100%);
+  transform: translateY(-2px);
+}
+
+.dev-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ============================================
+   READY STATE - GLOWING EFFECT
+   ============================================ */
+
+.field.ready .field-top {
+  border-color: #FFD700;
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.6),
+    0 0 40px rgba(255, 215, 0, 0.4),
+    inset 0 0 20px rgba(255, 215, 0, 0.2);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(255, 215, 0, 0.6),
+      0 0 40px rgba(255, 215, 0, 0.4),
+      inset 0 0 20px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(255, 215, 0, 0.8),
+      0 0 60px rgba(255, 215, 0, 0.6),
+      inset 0 0 30px rgba(255, 215, 0, 0.3);
+  }
+}
+
+.field.ready:hover {
+  transform: translateZ(30px);
+}
+
+/* ============================================
+   READY BADGE - STRONGER GLOW VERSION
+   ============================================ */
+
+.ready-badge {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+
+  transform:
+    translateX(-50%)
+    translateZ(20px)
+    rotateX(-55deg);
+
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #8B4513;
+  padding: 12px 24px;
+  border-radius: 20px;
+  border: 3px solid #8B4513;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+
+  box-shadow:
+    0 6px 25px rgba(255, 215, 0, 0.6),
+    0 0 35px rgba(255, 215, 0, 0.5),
+    0 0 50px rgba(255, 165, 0, 0.3),
+    inset 0 3px 8px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(139, 69, 19, 0.3);
+
+  animation: floatBadge 2s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+@keyframes floatBadge {
+  0%, 100% {
+    transform:
+      translateX(-50%)
+      translateZ(60px)
+      rotateX(-55deg)
+      translateY(0px);
+
+    box-shadow:
+      0 6px 25px rgba(255, 215, 0, 0.6),
+      0 0 35px rgba(255, 215, 0, 0.5),
+      0 0 50px rgba(255, 165, 0, 0.3),
+      inset 0 3px 8px rgba(255, 255, 255, 0.6),
+      inset 0 -2px 6px rgba(139, 69, 19, 0.3);
+  }
+  50% {
+    transform:
+      translateX(-50%)
+      translateZ(70px)
+      rotateX(-55deg)
+      translateY(-8px);
+
+    box-shadow:
+      0 8px 35px rgba(255, 215, 0, 0.8),
+      0 0 50px rgba(255, 215, 0, 0.7),
+      0 0 70px rgba(255, 165, 0, 0.5),
+      inset 0 3px 10px rgba(255, 255, 255, 0.7),
+      inset 0 -2px 6px rgba(139, 69, 19, 0.3);
+  }
+}
+
+.ready-badge span {
+  display: block;
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, 0.5),
+    0 0 5px rgba(255, 165, 0, 0.3);
+}
+
+.field.ready {
+  transform-style: preserve-3d;
+}
+/* ============================================
+   HARVEST MODAL
+   ============================================ */
+
+.harvest-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.harvest-modal {
+  border-color: #FFD700;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.harvest-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.harvest-icon {
+  width: 50px;
+  height: 50px;
+  color: #52A722;
+  background: rgba(82, 167, 34, 0.1);
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.harvest-content {
+  margin: 20px 0;
+}
+
+.harvest-info {
+  background: rgba(255, 215, 0, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.status-ready {
+  color: #52A722;
+  font-weight: 700;
+}
+
+.harvest-warning {
+  background: rgba(255, 165, 0, 0.1);
+  border: 2px solid rgba(255, 165, 0, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 15px;
+}
+
+.harvest-warning p {
+  margin: 0;
+  color: #D2691E;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.harvest-button {
+  padding: 16px 48px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #8B4513;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.harvest-button:hover {
+  background: linear-gradient(135deg, #FFED4E 0%, #FFB94E 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
+}
+
+.harvest-button:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   HARVEST NOW BUTTON
+   ============================================ */
+
+.harvest-now-btn {
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #8B4513;
+  border: 3px solid #8B4513;
+  border-radius: 20px;
+
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+  z-index: 200;
+
+  box-shadow:
+    0 6px 20px rgba(255, 215, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+
+  transition: all 0.3s ease;
+  animation: buttonPulse 2s ease-in-out infinite;
+}
+
+.harvest-now-btn:hover {
+  background: linear-gradient(135deg, #FFED4E 0%, #FFB94E 100%);
+  transform: translateX(-50%) translateY(-5px) scale(1.05);
+  box-shadow:
+    0 8px 25px rgba(255, 215, 0, 0.6),
+    inset 0 2px 6px rgba(255, 255, 255, 0.5);
+}
+
+.harvest-now-btn:active {
+  transform: translateX(-50%) translateY(-2px) scale(1.0);
+  box-shadow:
+    0 4px 15px rgba(255, 215, 0, 0.5),
+    inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes buttonPulse {
+  0%, 100% {
+    box-shadow:
+      0 6px 20px rgba(255, 215, 0, 0.5),
+      inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow:
+      0 8px 30px rgba(255, 215, 0, 0.7),
+      inset 0 2px 6px rgba(255, 255, 255, 0.5);
+  }
+}
+
+.field.ready:hover .harvest-now-btn {
+  z-index: 250;
+}
+
+.harvest-now-btn::before {
+  content: '🌾 ';
+  margin-right: 5px;
+}
+
+/* ============================================
+   GROWING STAGE
+   ============================================ */
+
+.field[data-field].growing .plants-container {
+  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-rows: repeat(4, 1fr) !important;
+  gap: -10px !important;
+  padding: 8px !important;
+  top: -65px !important;
+  left: -65px !important;
+}
+
+/* Show ALL 16 plants for growing */
+.field[data-field].growing .plant-item {
+  display: flex !important;
+  margin: -500px !important;
+}
+
+/* READY STAGE - 3x3 grid (9 plants) */
+.field[data-field].ready .plants-container {
+  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-rows: repeat(3, 1fr) !important;
+  gap: 15px !important;
+  padding: 7px !important;
+}
+
+.field[data-field].ready .plant-item:nth-child(n+10) {
+  display: none !important;
+}
+
+.field[data-field].ready .plant-item {
+  margin: -250px !important;
+}
+
+.plant-icon[src*="wheat_growing"] {
+  width: 180px !important;
+  height: 180px !important;
+}
+
+.plant-icon[src*="wheat_ready"] {
+  width: 200px !important;
+  height: 200px !important;
+}
+
+.plant-icon[src*="corn_growing"] {
+  width: 130px !important;
+  height: 130px !important;
+}
+
+.plant-icon[src*="corn_ready"] {
+  width: 220px !important;
+  height: 220px !important;
+}
+
+.plant-icon[src*="barely_growing"] {
+  width: 180px !important;
+  height: 180px !important;
+}
+
+.plant-icon[src*="barely_ready"] {
+  width: 220px !important;
+  height: 220px !important;
+}
+
+.plant-icon[src*="black_grape_growing"] {
+  width: 160px !important;
+  height: 160px !important;
+}
+
+.plant-icon[src*="black_grape_ready"] {
+  width: 170px !important;
+  height: 180px !important;
+}
+
+.plant-icon[src*="white_grape_ready"] {
+  width: 160px !important;
+  height: 240px !important;
+}
+
+.plant-icon[src*="pumpkin_growing"] {
+  width: 180px !important;
+  height: 180px !important;
+}
+
+.plant-icon[src*="pumpkin_ready"] {
+  width: 180px !important;
+  height: 180px !important;
+}
+
+.field.growing,
+.field.growing .field-top {
+  overflow: visible !important;
+}
+
+/* ============================================
+   PUMPKIN FIELD: 2x2 grid (4 plants only)
+   for both growing and ready stages
+   ============================================ */
+
+.field[data-field].growing .plants-container:has(.plant-icon[src*="pumpkin"]) {
+  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-rows: repeat(2, 1fr) !important;
+  gap: -15px !important;
+  padding: 10px !important;
+  top: -40px !important;
+  left: -30px !important;
+}
+
+.field[data-field].growing .plant-item:has(.plant-icon[src*="pumpkin"]):nth-child(n+5) {
+  display: none !important;
+}
+
+.field[data-field].growing .plant-item:has(.plant-icon[src*="pumpkin"]) {
+  margin: -100px !important;
+}
+
+.field[data-field].ready .plants-container:has(.plant-icon[src*="pumpkin"]) {
+  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-rows: repeat(2, 1fr) !important;
+  gap: -15px !important;
+  padding: 10px !important;
+}
+
+.field[data-field].ready .plant-item:has(.plant-icon[src*="pumpkin"]):nth-child(n+5) {
+  display: none !important;
+}
+
+.field[data-field].ready .plant-item:has(.plant-icon[src*="pumpkin"]) {
+  margin: -100px !important;
+}
+
+.plant-icon[src*="pumpkin_growing"] {
+  width: 260px !important;
+  height: 260px !important;
+}
+
+.plant-icon[src*="pumpkin_ready"] {
+  width: 240px !important;
+  height: 240px !important;
 }

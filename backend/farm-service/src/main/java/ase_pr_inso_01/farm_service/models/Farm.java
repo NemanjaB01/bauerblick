@@ -19,4 +19,5 @@ public class Farm {
     private SoilType soilType;
     private Field[] fields;
     private Recommendation[] recommendations;
+    private String userId;
 }

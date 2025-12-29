@@ -26,7 +26,7 @@ public class UserValidator {
     if (email.isEmpty()) {
       validationErrors.put("email", "No email given");
     }
-    if (userRepository.findByEmail(email) == null) {
+    if (userRepository.findUserByEmail(email) == null) {
       throw new NotFoundException("User with given e-mail was not found!");
     }
     if (!validationErrors.isEmpty()) {

@@ -35,9 +35,11 @@ public class SecurityConfig {
     http.sessionManagement(sm ->
             sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+    //TODO: Test this part
     http.authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/authentication/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+            .requestMatchers( "/api/users/**").permitAll()
             .anyRequest().authenticated()
     );
 

@@ -7,6 +7,7 @@ import { Map } from '../map/map';
 import { SoilType } from '../../models/SoilType';
 import { FarmCreateDto } from '../../dtos/farm';
 import { FarmService } from '../../services/farm-service/farm-service';
+import { UserService } from '../../services/user-service/user-service';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 @Component({
@@ -21,7 +22,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
   styleUrl: './new-farm-component.css',
 })
 export class NewFarmComponent {
-  constructor( private router: Router, private farmService : FarmService) { }
+  constructor( private router: Router, private farmService : FarmService, private userService: UserService) { }
   //TODO: Possibly add private auth: AuthService in order to extract email
   farm : FarmCreateDto = new FarmCreateDto();
   farmName = '';
@@ -35,6 +36,16 @@ export class NewFarmComponent {
   selectedSoil: SoilType | null = null;
   soilType : SoilType = SoilType.Chalk;
 
+  ngOnInit() {
+    this.userService.getProfile().subscribe({
+      next: (user) => {
+        this.farm.email = user.email;
+      },
+      error: (err) => {
+        console.error('Failed to fetch user data', err);
+      }
+    });
+  }
 
   onSearch(event: any) {
     const query = event.target.value;
@@ -113,7 +124,7 @@ export class NewFarmComponent {
       this.farm.soilType = this.selectedSoil;
     }
     //this.farm.email = this.auth.email;
-    this.farm.email = "testuser@example.com";
+//     this.farm.email = "testuser@example.com";
     console.log(this.farm);
     console.log(this.selectedSoil);
     if (this.farm) {

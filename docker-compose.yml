@@ -1,0 +1,72 @@
+services:
+  users-db:
+    image: mongo
+    container_name: users-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - users-db_data:/data/db
+  farms-db:
+    image: mongo
+    container_name: farms-db
+    ports:
+      - "27018:27017"
+    volumes:
+      - farms-db_data:/data/db
+
+  # Eureka Service Registry
+  service-registry:
+    build: ./backend/service-registry
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+    environment:
+      - eureka.client.registerWithEureka=false
+      - eureka.client.fetchRegistry=false
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+
+  # User Service
+  user-service:
+    build: ./backend/user-service
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - service-registry
+      - users-db
+    environment:
+      - spring.profiles.active=prod
+      - spring.data.mongodb.uri=mongodb://users-db:27017/usersdb
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+
+  # Farm Service
+  farm-service:
+    build: ./backend/farm-service
+    container_name: farm-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - service-registry
+      - farms-db
+    environment:
+      - spring.profiles.active=prod
+      - spring.data.mongodb.uri=mongodb://farms-db:27017/farmsdb
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+
+  # API Gateway
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - service-registry
+      - user-service
+      - farm-service
+    environment:
+      - spring.profiles.active=prod
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+
+volumes:
+  users-db_data:
+  farms-db_data:

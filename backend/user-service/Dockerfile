@@ -14,8 +14,8 @@ RUN ./mvnw dependency:go-offline
 COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
-# Expose user service port
-EXPOSE 8081
+# Expose user service port and debug port
+EXPOSE 8081 5005
 
 # Run the Spring Boot app
-ENTRYPOINT ["java", "-jar", "/app/target/user-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "/app/target/user-service-0.0.1-SNAPSHOT.jar"]

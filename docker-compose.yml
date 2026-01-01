@@ -31,6 +31,7 @@ services:
     container_name: user-service
     ports:
       - "8081:8081"
+      - "5005:5005"   # expose debug port to host
     depends_on:
       - service-registry
       - users-db
@@ -45,6 +46,7 @@ services:
     container_name: farm-service
     ports:
       - "8082:8082"
+      - "5006:5006"   # expose debug port to host
     depends_on:
       - service-registry
       - farms-db

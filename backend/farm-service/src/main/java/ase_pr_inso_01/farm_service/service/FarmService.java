@@ -13,4 +13,6 @@ public interface FarmService {
     Farm getFarmByName(String name);
 
     List<FarmsForUserDto> getFarmsByUserId(String userId);
+
+    List<FarmsForUserDto> getFarmsByUserEmail(String email) throws Exception;
 }

@@ -12,10 +12,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 public class UserDetailsDto {
+    private String id;
     @NotBlank(message = "Email must not be empty")
     @Email(message = "Invalid email format")
     private String email;
-
     private String firstName;
     private String lastName;
 }

@@ -15,52 +15,57 @@ import java.security.Principal;
 @RestController
 @RequestMapping(value = "/api/users")
 public class UserController {
-  private final UserService userService;
-  public UserController(UserService userService) {
-    this.userService = userService;
-  }
+    private final UserService userService;
 
-  @PostMapping
-  public void createUser(@RequestBody UserCreateDto user) throws ValidationException, ConflictException {
-    //LOGGER.info("POST /api/users {}", user);
-    userService.createUser(user);
-  }
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
-    // GET /api/users/{userId}
+    @PostMapping
+    public void createUser(@RequestBody UserCreateDto user) throws ValidationException, ConflictException {
+        //LOGGER.info("POST /api/users {}", user);
+        userService.createUser(user);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDetailsDto> getCurrentUser(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = principal.getName();
+
+        UserDetailsDto user = userService.getUserByEmail(email);
+
+        return ResponseEntity.ok(user);
+    }
+
+    // TODO: Probably unnecessary
+    @GetMapping("/by-email/{email}")
+    public ResponseEntity<UserDetailsDto> getUserByEmail(@PathVariable String email) {
+        //TODO: Add exception handling
+        UserDetailsDto userDto = userService.getUserByEmail(email);
+        return ResponseEntity.ok(userDto);
+    }
+
+    // TODO: Probably unnecessary
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetailsDto> getUser(@PathVariable String userId) {
         UserDetailsDto userDto = userService.getUserById(userId);
         return ResponseEntity.ok(userDto);
     }
 
-    @GetMapping("/by-email/{email}")
-    public ResponseEntity<UserDetailsDto> getUserByEmail(@PathVariable String email) {
-        UserDetailsDto userDto = userService.getUserByEmail(email);
-        return ResponseEntity.ok(userDto);
+    @PutMapping("/me")
+    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody UserEditDto dto) {
+        try {
+            String email = principal.getName();
+            User updatedUser = userService.editUser(email, dto);
+            return ResponseEntity.ok(updatedUser);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An error occurred while updating profile");
+        }
     }
-  @GetMapping("/me")
-  public ResponseEntity<UserDetailsDto> getCurrentUser(Principal principal) {
-    if (principal == null) {
-      return ResponseEntity.status(401).build();
-    }
-
-    String email = principal.getName();
-
-    UserDetailsDto user = userService.getUserByEmail(email);
-
-    return ResponseEntity.ok(user);
-  }
-  @PutMapping("/me")
-  public ResponseEntity<?> updateProfile(Principal principal, @RequestBody UserEditDto dto) {
-    try {
-      String email = principal.getName();
-      User updatedUser = userService.editUser(email, dto);
-      return ResponseEntity.ok(updatedUser);
-
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
-      return ResponseEntity.internalServerError().body("An error occurred while updating profile");
-    }
-  }
 }

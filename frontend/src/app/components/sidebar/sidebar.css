@@ -263,3 +263,9 @@
 .farm-list::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
+
+.farm-item.selected {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  border-left: 4px solid #007bff;  /* Highlight with a left border */
+}

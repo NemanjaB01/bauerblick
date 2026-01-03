@@ -26,13 +26,13 @@ public class FarmServiceImpl implements FarmService {
 
     @Override
     public Farm createFarm(FarmCreateDto dto) throws Exception {
-        UserDetailsDto user = this.getUser(dto.getEmail());
+        UserDetailsDto user = this.getUserDetails(dto.getEmail());
 
         if (farmRepository.existsByName(dto.getName())) {
             throw new RuntimeException("Farm already registered");
         }
 
-        Farm farm  = new Farm();
+        Farm farm = new Farm();
         farm.setName(dto.getName());
         farm.setLocation(dto.getLocation());
         farm.setLatitude(dto.getLatitude());
@@ -51,8 +51,13 @@ public class FarmServiceImpl implements FarmService {
     }
 
     @Override
-    public List<FarmsForUserDto> getFarmsByUserId(String userId) {
+    public List<FarmsForUserDto> getFarmsByUserEmail(String email) throws Exception {
+        UserDetailsDto user = this.getUserDetails(email);
+        return this.getFarmsByUserId(user.getId());
+    }
 
+    @Override
+    public List<FarmsForUserDto> getFarmsByUserId(String userId) {
         List<Farm> farms = farmRepository.findByUserId(userId);
 
         return farms.stream()
@@ -71,9 +76,9 @@ public class FarmServiceImpl implements FarmService {
     }
 
     // Fetch user details from the User microservice
-    private UserDetailsDto getUser(String email) throws Exception {
+    private UserDetailsDto getUserDetails(String email) throws Exception {
         //TODO: Check if possible to replace localhost with service name
-        String url = "http://localhost:8081/api/users/by-email/" + email;
+        String url = "http://api-gateway:8080/api/users/by-email/" + email;
 
         try {
             UserDetailsDto userDto = restTemplate.getForObject(url, UserDetailsDto.class);
@@ -83,7 +88,6 @@ public class FarmServiceImpl implements FarmService {
             }
 
             return userDto;
-
         } catch (Exception e) {
             throw new Exception("User not found: " + email);
         }

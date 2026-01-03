@@ -33,6 +33,16 @@
         <app-field-grid></app-field-grid>
       </div>
 
+      <h1>TEST</h1>
+      <h1>{{ selectedFarm ? selectedFarm.name : 'No Farm Selected' }}</h1>
+<!-- farm-list.component.html -->
+<div>
+  <button (click)="logFarms()">Log Farms in Memory</button>
+</div>
+
+<button (click)="loadFarms()">Load Farms</button>
+
+
       <div class="right-content">
         <app-weather-widget></app-weather-widget>
         <app-recommendations></app-recommendations>

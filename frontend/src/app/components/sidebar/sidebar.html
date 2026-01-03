@@ -7,27 +7,31 @@
 
   <div class="menu">
 
-            <!-- Dropdown Menu -->
-<div class="menu-item has-dropdown">
-  <div class="menu-item-content">
-    <img src="assets/icons/my_farms.svg" />
-    <span>My farms</span>
-  </div>
+    <!-- Dropdown Menu -->
+    <div class="menu-item has-dropdown">
+      <div class="menu-item-content">
+        <img src="assets/icons/my_farms.svg" />
+        <span>My farms</span>
+      </div>
 
-  <div class="farms-dropdown">
+      <div class="farms-dropdown">
+        <div class="farm-list">
+          <div
+            class="farm-item"
+            *ngFor="let farm of farms"
+            [class.selected]="farm === selectedFarm"
+            (click)="selectFarm(farm)"
+          >
+            <span>{{ farm.name }}</span>
+          </div>
+        </div>
 
-    <div class="farm-list">
-      <div class="farm-item" (click)="gotoHome()">
-        <span>Farm 1</span>
+        <button class="add-farm-btn" (click)="addNewFarm()">
+          <span>+</span>
+          <span>Add New Farm</span>
+        </button>
       </div>
     </div>
-
-    <button class="add-farm-btn" (click)="addNewFarm()">
-      <span>+</span>
-      <span>Add New Farm</span>
-    </button>
-  </div>
-</div>
 
     <div class="menu-item">
       <img src="assets/icons/feedback.svg" />

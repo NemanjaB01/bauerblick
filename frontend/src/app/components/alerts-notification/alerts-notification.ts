@@ -1,7 +1,12 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { AlertsWebSocketService, AlertData, ConnectionStatus } from '../../services/websocket-service/ alert-websocket.service';
+import { UserService } from '../../services/user-service/user-service';
+import { FarmService } from '../../services/farm-service/farm-service';
+
+import { Farm } from '../../models/Farm';
 
 interface AlertTypeInfo {
   icon: string;
@@ -21,18 +26,43 @@ export class AlertsNotification implements OnInit, OnDestroy {
   isDropdownOpen = false;
   connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
-  private userId: string = '69457016428948d26c48dfe4';
-  private farmId: string = 'farm-1-a';
+  private userId: string | null = null;
+  private currentFarm: Farm | null = null;
 
   private alertsSubscription?: Subscription;
   private listSubscription?: Subscription;
   private statusSubscription?: Subscription;
+  private mainSubscription?: Subscription;
 
-  constructor(private alertsService: AlertsWebSocketService) {}
+  constructor(
+    private alertsService: AlertsWebSocketService,
+    private userService: UserService,
+    private farmService: FarmService
+  ) {}
 
   ngOnInit() {
     this.setupWebSocketSubscriptions();
-    this.connectWebSocket();
+    this.initializeDataStream();
+  }
+
+  private initializeDataStream() {
+    this.userService.getProfile().pipe(
+      take(1)
+    ).subscribe({
+      next: (userProfile) => {
+        if (userProfile && userProfile.email) {
+          this.userId = userProfile.email;
+          console.log('AlertsNotification: User identified via email:', this.userId);
+
+          this.subscribeToFarmChanges();
+        } else {
+          console.error('AlertsNotification: Could not load User Email');
+        }
+      },
+      error: (err) => {
+        console.error('AlertsNotification: Failed to fetch profile', err);
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -40,32 +70,52 @@ export class AlertsNotification implements OnInit, OnDestroy {
     this.disconnectWebSocket();
   }
 
+  private subscribeToFarmChanges() {
+    this.mainSubscription = this.farmService.selectedFarm$.subscribe(farm => {
+      if (farm && farm.id) {
+        console.log('AlertsNotification: Farm changed to', farm.name);
+
+        if (this.currentFarm && this.currentFarm.id !== farm.id) {
+          this.alertsService.disconnect();
+          this.alertsService.clearAlerts();
+        }
+
+        this.currentFarm = farm;
+        this.connectWebSocket();
+      } else {
+        console.log('AlertsNotification: No farm selected');
+        this.alertsService.disconnect();
+        this.alerts = [];
+      }
+    });
+  }
+
   private setupWebSocketSubscriptions(): void {
     this.alertsSubscription = this.alertsService.getAlertUpdates().subscribe({
       next: (alert: AlertData) => {
-        console.log('New alert received:', alert);
+        if (this.currentFarm && alert.farmId === this.currentFarm.id) {
+          console.log('New alert received for current farm:', alert);
+        }
       },
-      error: (error) => {
-        console.error('Error in alert updates:', error);
-      }
+      error: (error) => console.error('Error in alert updates:', error)
     });
 
     this.listSubscription = this.alertsService.getAllAlerts().subscribe({
       next: (alerts: AlertData[]) => {
-        console.log('Alerts list updated:', alerts.length);
-        this.alerts = alerts;
+        if (this.currentFarm) {
+          this.alerts = alerts.filter(a => a.farmId === this.currentFarm?.id);
+        } else {
+          this.alerts = [];
+        }
       },
-      error: (error) => {
-        console.error('Error in alerts list:', error);
-      }
+      error: (error) => console.error('Error in alerts list:', error)
     });
 
     this.statusSubscription = this.alertsService.getConnectionStatus().subscribe({
       next: (status: ConnectionStatus) => {
         this.connectionStatus = status;
-        console.log('Alerts connection status:', status);
 
-        if (status === ConnectionStatus.DISCONNECTED) {
+        if (status === ConnectionStatus.DISCONNECTED && this.userId && this.currentFarm) {
           setTimeout(() => {
             if (this.connectionStatus === ConnectionStatus.DISCONNECTED) {
               this.reconnectWebSocket();
@@ -73,15 +123,15 @@ export class AlertsNotification implements OnInit, OnDestroy {
           }, 5000);
         }
       },
-      error: (error) => {
-        console.error('Error in connection status:', error);
-      }
+      error: (error) => console.error('Error in connection status:', error)
     });
   }
 
   private connectWebSocket(): void {
-    console.log(`Connecting alerts for user ${this.userId}, farm ${this.farmId}`);
-    this.alertsService.setFarmForUser(this.userId, this.farmId);
+    if (!this.userId || !this.currentFarm) return;
+
+    console.log(`Connecting alerts for user ${this.userId}, farm ${this.currentFarm.id}`);
+    this.alertsService.setFarmForUser(this.userId, this.currentFarm.id);
   }
 
   private reconnectWebSocket(): void {
@@ -98,6 +148,7 @@ export class AlertsNotification implements OnInit, OnDestroy {
     if (this.alertsSubscription) this.alertsSubscription.unsubscribe();
     if (this.listSubscription) this.listSubscription.unsubscribe();
     if (this.statusSubscription) this.statusSubscription.unsubscribe();
+    if (this.mainSubscription) this.mainSubscription.unsubscribe();
   }
 
   getAlertsCount(): number {
@@ -224,9 +275,5 @@ export class AlertsNotification implements OnInit, OnDestroy {
   clearAllAlerts(): void {
     this.alertsService.clearAlerts();
     this.closeDropdown();
-  }
-
-  isConnected(): boolean {
-    return this.connectionStatus === ConnectionStatus.CONNECTED;
   }
 }

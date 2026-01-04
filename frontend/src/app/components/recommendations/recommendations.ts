@@ -1,7 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RecommendationsWebSocketService, RecommendationData, ConnectionStatus } from '../../services/websocket-service/recommendations-websocket.service';
 import {Subscription} from 'rxjs';
+import { take } from 'rxjs/operators';
+import { RecommendationsWebSocketService, RecommendationData, ConnectionStatus } from '../../services/websocket-service/recommendations-websocket.service';
+import { UserService } from '../../services/user-service/user-service';
+import { FarmService } from '../../services/farm-service/farm-service';
+
+import { Farm } from '../../models/Farm';
 
 
 interface RecommendationTypeInfo {
@@ -24,47 +29,101 @@ export class Recommendations implements OnInit, OnDestroy {
 
   connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
-  private userId: string = '69457016428948d26c48dfe4';
-  private farmId: string = 'farm-1-a';
+  private userId: string | null = null;
+  private currentFarm: Farm | null = null;
 
 
   private recommendationsSubscription?: Subscription;
   private listSubscription?: Subscription;
   private statusSubscription?: Subscription;
+  private mainSubscription?: Subscription;
 
-  constructor(private recommendationsService: RecommendationsWebSocketService) {}
+  constructor(
+    private recommendationsService: RecommendationsWebSocketService,
+    private userService: UserService,
+    private farmService: FarmService
+  ) {}
 
   ngOnInit() {
     this.setupWebSocketSubscriptions();
-    this.connectWebSocket();
+    this.initializeDataStream();
   }
 
   ngOnDestroy() {
     this.cleanupSubscriptions();
+    this.disconnectWebSocket();
+  }
+
+  private initializeDataStream() {
+    this.userService.getProfile().pipe(
+      take(1)
+    ).subscribe({
+      next: (userProfile) => {
+        const uniqueId =  userProfile.email;
+
+        if (uniqueId) {
+          this.userId = uniqueId;
+          console.log('Recommendations: User identified:', this.userId);
+
+          this.subscribeToFarmChanges();
+        } else {
+          console.error('Recommendations: Could not load User Identifier');
+        }
+      },
+      error: (err) => {
+        console.error('Recommendations: Failed to fetch profile', err);
+      }
+    });
+  }
+
+  private subscribeToFarmChanges() {
+    this.mainSubscription = this.farmService.selectedFarm$.subscribe(farm => {
+      if (farm && farm.id) {
+        console.log('Recommendations: Farm changed to', farm.name);
+
+        if (this.currentFarm && this.currentFarm.id !== farm.id) {
+          this.recommendationsService.disconnect();
+          this.recommendationsService.clearRecommendations();
+          this.recommendations = [];
+          this.closeModal();
+        }
+
+        this.currentFarm = farm;
+        this.connectWebSocket();
+      } else {
+        console.log('Recommendations: No farm selected');
+        this.recommendationsService.disconnect();
+        this.recommendations = [];
+        this.closeModal();
+      }
+    });
   }
 
   private setupWebSocketSubscriptions(): void {
     this.recommendationsSubscription = this.recommendationsService.getRecommendationUpdates().subscribe({
       next: (data: RecommendationData) => {
-        console.log('New recommendation received:', data);
+        if (this.currentFarm && data.farmId === this.currentFarm.id) {
+          console.log('New recommendation received for current farm:', data);
+        }
       },
-      error: (error) => {
-        console.error('Error in recommendation updates:', error);
-      }
+      error: (error) => console.error('Error in recommendation updates:', error)
     });
 
     this.listSubscription = this.recommendationsService.getAllRecommendations().subscribe({
       next: (recommendations: RecommendationData[]) => {
-        console.log('Recommendations list updated:', recommendations.length);
-        this.recommendations = recommendations;
+        if (this.currentFarm) {
+          this.recommendations = recommendations.filter(r => r.farmId === this.currentFarm?.id);
+        } else {
+          this.recommendations = [];
+        }
+
+        console.log('Recommendations list updated:', this.recommendations.length);
 
         if (this.isModalOpen && this.currentRecommendationIndex >= this.recommendations.length) {
           this.currentRecommendationIndex = Math.max(0, this.recommendations.length - 1);
         }
       },
-      error: (error) => {
-        console.error('Error in recommendations list:', error);
-      }
+      error: (error) => console.error('Error in recommendations list:', error)
     });
 
     this.statusSubscription = this.recommendationsService.getConnectionStatus().subscribe({
@@ -72,7 +131,7 @@ export class Recommendations implements OnInit, OnDestroy {
         this.connectionStatus = status;
         console.log('Recommendations connection status:', status);
 
-        if (status === ConnectionStatus.DISCONNECTED) {
+        if (status === ConnectionStatus.DISCONNECTED && this.userId && this.currentFarm) {
           setTimeout(() => {
             if (this.connectionStatus === ConnectionStatus.DISCONNECTED) {
               this.reconnectWebSocket();
@@ -80,17 +139,17 @@ export class Recommendations implements OnInit, OnDestroy {
           }, 5000);
         }
       },
-      error: (error) => {
-        console.error('Error in connection status:', error);
-      }
+      error: (error) => console.error('Error in connection status:', error)
     });
   }
 
   private connectWebSocket(): void {
-    console.log(`Connecting recommendations for user ${this.userId}, farm ${this.farmId}`);
+    if (!this.userId || !this.currentFarm) return;
+
+    console.log(`Connecting recommendations for user ${this.userId}, farm ${this.currentFarm.id}`);
 
     try {
-      this.recommendationsService.setFarmForUser(this.userId, this.farmId);
+      this.recommendationsService.setFarmForUser(this.userId, this.currentFarm.id);
     } catch (error) {
       console.error('Error connecting recommendations WebSocket:', error);
     }
@@ -101,22 +160,16 @@ export class Recommendations implements OnInit, OnDestroy {
     this.recommendationsService.reconnect();
   }
 
+  private disconnectWebSocket(): void {
+    this.recommendationsService.disconnect();
+  }
+
   private cleanupSubscriptions(): void {
-    if (this.recommendationsSubscription) {
-      this.recommendationsSubscription.unsubscribe();
-    }
-    if (this.listSubscription) {
-      this.listSubscription.unsubscribe();
-    }
-    if (this.statusSubscription) {
-      this.statusSubscription.unsubscribe();
-    }
+    if (this.recommendationsSubscription) this.recommendationsSubscription.unsubscribe();
+    if (this.listSubscription) this.listSubscription.unsubscribe();
+    if (this.statusSubscription) this.statusSubscription.unsubscribe();
+    if (this.mainSubscription) this.mainSubscription.unsubscribe();
   }
-
-  isConnected(): boolean {
-    return this.connectionStatus === ConnectionStatus.CONNECTED;
-  }
-
 
   /**
    * Format seed name: remove underscores and capitalize properly

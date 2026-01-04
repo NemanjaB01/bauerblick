@@ -14,6 +14,15 @@ services:
     volumes:
       - farms-db_data:/data/db
 
+  seeds-db:
+    image: mongo
+    container_name: seeds-db
+    ports:
+      - "27019:27017"
+    volumes:
+      - ./backend/seeds.json:/data/seeds.json
+      - ./backend/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+
   # Eureka Service Registry
   service-registry:
     build: ./backend/service-registry
@@ -68,6 +77,82 @@ services:
     environment:
       - spring.profiles.active=prod
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+
+  # Rule Engine Service
+  rule-engine:
+    build: ./backend/rule-engine
+    container_name: rule-engine
+    ports:
+      - "8084:8084"
+    depends_on:
+      - service-registry
+      - rabbitmq
+      - seeds-db
+      - notification-service
+    environment:
+      - spring.profiles.active=prod
+      - spring.data.mongodb.uri=mongodb://seeds-db:27017/seedsdb
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+
+  # Notification Service
+  notification-service:
+    build: ./backend/notification-service
+    container_name: notification-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - service-registry
+      - rabbitmq
+      - redis
+    environment:
+      - spring.profiles.active=prod
+      - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - spring.rabbitmq.host=rabbitmq
+      - spring.rabbitmq.port=5672
+
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=aagriscope@gmail.com
+      - SPRING_MAIL_PASSWORD=ftnxrgeryqkzgjzq
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  sensor-ingestion-service:
+    build: ./backend/sensor-ingestion-service
+    container_name: sensor-ingestion
+    depends_on:
+      - rabbitmq
+      - users-db
+      - farms-db
+      - rule-engine
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - USERS_MONGO_URI=mongodb://users-db:27017/usersdb
+      - FARMS_MONGO_URI=mongodb://farms-db:27017/farmsdb
+
 
 volumes:
   users-db_data:

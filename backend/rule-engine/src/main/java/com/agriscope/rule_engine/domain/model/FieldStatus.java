@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class FieldStatus {
+    private String fieldId;
     private SeedType seedType;
     private GrowthStage stage;
 }

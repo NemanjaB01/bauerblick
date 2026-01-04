@@ -1,6 +1,7 @@
 package com.agriscope.rule_engine.messaging;
 
 import com.agriscope.rule_engine.config.RabbitMQConfig;
+import com.agriscope.rule_engine.domain.dto.FieldDTO;
 import com.agriscope.rule_engine.domain.dto.WeatherForecastDTO;
 import com.agriscope.rule_engine.domain.dto.WeatherMessageDTO;
 import com.agriscope.rule_engine.domain.enums.ForecastType;
@@ -37,15 +38,15 @@ public class WeatherMessageListener {
             String email = message.getEmail();
             String farmId = message.getFarmId();
             String type = message.getType();
-            List<String> crops = message.getCrops();
             List<WeatherForecastDTO> forecast = message.getForecast();
+            List<FieldDTO> fields = message.getFields();
 
             if (type == null || forecast == null || forecast.isEmpty()) {
                 log.warn("Received invalid weather message for userId={}, farmId={}", userId, farmId);
                 return;
             }
 
-            processForecastByType(forecast, type, userId, email, farmId, crops);
+            processForecastByType(forecast, type, userId, email, farmId, fields);
 
 
         } catch (Exception e) {
@@ -59,16 +60,16 @@ public class WeatherMessageListener {
                                        String userId,
                                        String email,
                                        String farmId,
-                                       List<String> crops) {
+                                       List<FieldDTO> fields) {
         switch (forecastType.toUpperCase()) {
             case "CURRENT":
-                processCurrentForecast(forecastData, userId, email, farmId, crops);
+                processCurrentForecast(forecastData, userId, email, farmId, fields);
                 break;
             case "HOURLY":
-                processHourlyForecast(forecastData, userId, email, farmId, crops);
+                processHourlyForecast(forecastData, userId, email, farmId, fields);
                 break;
             case "DAILY":
-                processDailyForecast(forecastData, userId, email, farmId, crops);
+                processDailyForecast(forecastData, userId, email, farmId, fields);
                 break;
             default:
                 log.warn("Unknown forecast type: {}", forecastType);
@@ -79,7 +80,7 @@ public class WeatherMessageListener {
                                         String userId,
                                         String email,
                                         String farmId,
-                                        List<String> crops) {
+                                        List<FieldDTO> fields) {
         if (forecastData.isEmpty()) {
             log.warn("Empty CURRENT forecast list for user {}, farm {}", userId, farmId);
             return;
@@ -96,10 +97,14 @@ public class WeatherMessageListener {
                 weatherData.getRain(),
                 weatherData.getWind_speed_10m());
 
-        ruleEvaluationService.evaluateCurrentDataForFarm(weatherData, crops);
+        ruleEvaluationService.evaluateCurrentDataForFarm(weatherData, fields);
     }
 
-    private void processHourlyForecast(List<WeatherForecastDTO> forecastData, String userId, String email, String farmId, List<String> crops) {
+    private void processHourlyForecast(List<WeatherForecastDTO> forecastData,
+                                       String userId,
+                                       String email,
+                                       String farmId,
+                                       List<FieldDTO> fields) {
         List<HourlyWeatherData> hourlyList = new ArrayList<>();
 
         for (WeatherForecastDTO dto : forecastData) {
@@ -108,19 +113,18 @@ public class WeatherMessageListener {
 
         FarmDetails farm = new FarmDetails();
         farm.setFarmId(farmId);
-        farm.setSoilType(SoilType.LOAM); // Default for now
         farm.setHasIrrigationSystem(true);
 
         log.info("Processing Irrigation logic for {} hours of data", hourlyList.size());
 
-        ruleEvaluationService.evaluateHourlDataForFarm(hourlyList, farm, crops);
+        ruleEvaluationService.evaluateHourlDataForFarm(hourlyList, farm, fields);
     }
 
     private void processDailyForecast(List<WeatherForecastDTO> forecastData,
                                       String userId,
                                       String email,
                                       String farmId,
-                                      List<String> crops) {
+                                      List<FieldDTO> fields) {
 
         List<DailyWeatherData> dailyList = new ArrayList<>();
 
@@ -143,7 +147,7 @@ public class WeatherMessageListener {
         }
 
         log.info("Processing DAILY rules for {} days forecast", dailyList.size());
-        ruleEvaluationService.evaluateDailyRules(dailyList, crops);
+        ruleEvaluationService.evaluateDailyRules(dailyList, fields);
     }
 
     private HourlyWeatherData convertToHourlyWeatherData(WeatherForecastDTO dto, String userId, String email, String farmId) {

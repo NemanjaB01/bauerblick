@@ -13,6 +13,7 @@ global java.util.List recommendations;
 
 declare WaterDeficitResult
     seed : Seed
+    fieldId : String
     deficit : double
     effectiveRain : double
     plantDemand : double
@@ -41,7 +42,7 @@ rule "Calculate Water Deficit Generic"
         $farm     : FarmDetails($soil : soilType)
         $analysis : DailyAnalysis()
         $seed     : Seed($baseKc : seedCoefficient, $sType : seedType)
-        $status   : FieldStatus(seedType == $sType, $stage : stage)
+        $status   : FieldStatus(seedType == $sType, $stage : stage, $fid : fieldId)
     then
         double stageFactor = getStageCoefficient($stage);
         double adjustedKc = $baseKc * stageFactor;
@@ -52,6 +53,7 @@ rule "Calculate Water Deficit Generic"
 
         WaterDeficitResult calc = new WaterDeficitResult();
         calc.setSeed($seed);
+        calc.setFieldId($fid);
         calc.setDeficit(result);
         calc.setEffectiveRain(effRain);
         calc.setPlantDemand(demand);

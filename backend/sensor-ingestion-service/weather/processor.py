@@ -13,6 +13,7 @@ def fetch_and_publish_for_farm(user_id, email, farm_data, forecast_type: Forecas
     lat = farm_data.get("lat")
     lon = farm_data.get("lon")
     crops = farm_data.get("crops", [])
+    fields = farm_data.get("fields", [])
 
     try:
         df = client.get_forecast(lat, lon, forecast_type)
@@ -41,6 +42,7 @@ def fetch_and_publish_for_farm(user_id, email, farm_data, forecast_type: Forecas
             "farm_id": farm_id,
             "farm_name": farm_name,
             "crops": crops,
+            "fields": fields,
             "lat": lat,
             "lon": lon,
             "forecast": df.to_dict(orient="records")

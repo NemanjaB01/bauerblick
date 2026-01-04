@@ -3,6 +3,7 @@ package com.agriscope.rule_engine.domain.model;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashMap;
 import java.util.Map;

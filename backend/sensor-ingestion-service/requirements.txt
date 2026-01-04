@@ -1,4 +1,3 @@
-django-scheduler
 openmeteo_requests
 requests
 requests-cache
@@ -7,6 +6,6 @@ pandas
 pika>=1.3.2
 schedule
 pymongo
-redis
+tenacity
 urllib3
 

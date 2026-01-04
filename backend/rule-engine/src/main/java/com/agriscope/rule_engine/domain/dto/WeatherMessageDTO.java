@@ -21,5 +21,7 @@ public class WeatherMessageDTO {
 
     private String type;
 
+    private List<FieldDTO> fields;
+
     private List<WeatherForecastDTO> forecast;
 }

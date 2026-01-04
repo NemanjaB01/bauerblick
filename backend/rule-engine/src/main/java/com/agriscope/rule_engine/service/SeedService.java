@@ -20,10 +20,8 @@ public class SeedService {
 
     private final SeedRepository seedRepository;
 
-    @Cacheable(value="seeds", key="#seedType.name()")
-    public Seed getSeed(SeedType seedType) {
-        log.info("Fetching seed configuration from MongoDB for type: {}", seedType);
 
+    public Seed getSeed(SeedType seedType) {
         Optional<Seed> seedOpt = seedRepository.findBySeedType(seedType);
 
         if (seedOpt.isEmpty()) {

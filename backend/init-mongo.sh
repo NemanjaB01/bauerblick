@@ -3,7 +3,7 @@ set -e
 
 mongoimport --host localhost \
             --db seedsdb \
-            --collection seeds \
+            --collection seed \
             --type json \
             --file /data/seeds.json \
             --jsonArray \

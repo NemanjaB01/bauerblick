@@ -1,6 +1,7 @@
 package com.agriscope.rule_engine.service;
 
 import com.agriscope.rule_engine.domain.dto.DailyAnalysis;
+import com.agriscope.rule_engine.domain.dto.FieldDTO;
 import com.agriscope.rule_engine.domain.enums.GrowthStage;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.model.*;
@@ -31,7 +32,7 @@ public class RuleEvaluationService {
     @Autowired
     private RecommendationProducer recommendationProducer;
 
-    public void evaluateCurrentDataForFarm(CurrentWeatherData weatherData, List<String>  seeds) {
+    public void evaluateCurrentDataForFarm(CurrentWeatherData weatherData, List<FieldDTO> fields) {
         log.info("Evaluating CURRENT rules for user {}, farm {}",
                 weatherData.getUserId(), weatherData.getFarmId());
 
@@ -42,19 +43,19 @@ public class RuleEvaluationService {
             kieSession.setGlobal("recommendations", recommendations);
             kieSession.insert(weatherData);
 
-            if (seeds == null || seeds.isEmpty()) {
+            if (fields == null || fields.isEmpty()) {
                 log.warn("No seeds defined for farm {}, skipping seed insertion", weatherData.getFarmId());
             } else {
-                for (String seedName : seeds) {
+                for (FieldDTO field : fields) {
                     try {
-                        SeedType type = SeedType.valueOf(seedName.toUpperCase());
+                        SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         Seed seed = seedService.getSeed(type);
                         if (seed != null) {
                             kieSession.insert(seed);
                             log.debug("Inserted seed: {}", type);
                         }
                     } catch (IllegalArgumentException e) {
-                        log.warn("Unknown seed type received: {}", seedName);
+                        log.warn("Unknown seed type received: {}", field.getSeed_type());
                     }
                 }
             }
@@ -69,7 +70,7 @@ public class RuleEvaluationService {
         }
     }
 
-    public void evaluateHourlDataForFarm(List<HourlyWeatherData> hourlyData, FarmDetails farm, List<String> seeds) {
+    public void evaluateHourlDataForFarm(List<HourlyWeatherData> hourlyData, FarmDetails farm, List<FieldDTO> fields) {
         if (hourlyData == null || hourlyData.isEmpty()) return;
 
         double sumEt0 = hourlyData.stream()
@@ -109,22 +110,25 @@ public class RuleEvaluationService {
                 kieSession.insert(hourlyData.get(i));
             }
             log.info("Inserted {} hours of forecast for General Safety evaluation.", safetyCheckLimit);
-            if (seeds != null) {
-                for (String seedName : seeds) {
+            if (fields != null) {
+                for (FieldDTO field : fields) {
                     try {
-                        SeedType type = SeedType.valueOf(seedName.toUpperCase());
+                        SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         Seed seed = seedService.getSeed(type);
                         if (seed != null) {
-                            kieSession.insert(new FieldStatus(type, GrowthStage.MATURE));   // default mature
+                            kieSession.insert(seed);
                         }
+                        GrowthStage stage = mapGrowthStage(field.getGrowth_stage());
+                        kieSession.insert(new FieldStatus(field.getField_id(), type, stage));
+
+                        log.debug("Inserted field: {} with seed {} at stage {}", field.getField_id(), type, stage);
                     } catch (Exception e) {
-                        log.warn("Invalid seed name: {}", seedName);
-                    }
+                        log.warn("Error processing field {}: {}", field.getField_id(), e.getMessage());                    }
                 }
             }
 
             int firedRules = kieSession.fireAllRules();
-            log.info("Fired {} CURRENT rules", firedRules);
+            log.info("Fired {} HOURLY rules", firedRules);
 
             processHourlyRecommendations(recommendations, userId, email, farm.getFarmId(), avgTemperature);
 
@@ -134,8 +138,20 @@ public class RuleEvaluationService {
 
     }
 
+    private GrowthStage mapGrowthStage(String stageRaw) {
+        if (stageRaw == null) return GrowthStage.YOUNG;
+
+        switch (stageRaw) {
+            case "0": return GrowthStage.SEEDLING;
+            case "1": return GrowthStage.YOUNG;
+            case "2": return GrowthStage.MATURE;
+            case "3": return GrowthStage.READY;
+            default:  return GrowthStage.MATURE;
+        }
+    }
+
     private void processCurrentRecommendations(List<Recommendation> recommendations,
-                                        CurrentWeatherData weatherData) {
+                                               CurrentWeatherData weatherData) {
         if (recommendations.isEmpty()) {
             log.info("No recommendations - conditions are normal");
             return;
@@ -177,7 +193,7 @@ public class RuleEvaluationService {
         }
     }
 
-    public void evaluateDailyRules(List<DailyWeatherData> dailyList, List<String> seeds) {
+    public void evaluateDailyRules(List<DailyWeatherData> dailyList, List<FieldDTO> fields) {
         if (dailyList == null || dailyList.isEmpty()) return;
 
         KieSession kieSession = kieContainer.newKieSession();
@@ -190,21 +206,23 @@ public class RuleEvaluationService {
                 kieSession.insert(day);
             }
 
-            if (seeds != null) {
-                for (String seedName : seeds) {
+            if (fields != null) {
+                for (FieldDTO field : fields) {
                     try {
-                        SeedType type = SeedType.valueOf(seedName.toUpperCase());
+                        SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         Seed seed = seedService.getSeed(type);
                         if (seed != null) kieSession.insert(seed);
+                        GrowthStage stage = mapGrowthStage(field.getGrowth_stage());
+                        kieSession.insert(new FieldStatus(field.getField_id(), type, stage));
                     } catch (Exception e) {
-                        log.warn("Invalid seed: {}", seedName);
+                        log.warn("Invalid seed: {}", field.getSeed_type());
                     }
                 }
             }
 
             int firedRules = kieSession.fireAllRules();
             log.info("Fired {} DAILY rules", firedRules);
-            processDailyRecommendations(recommendations, dailyList.get(0));
+            processDailyRecommendations(recommendations, dailyList.getFirst());
 
         } finally {
             kieSession.dispose();

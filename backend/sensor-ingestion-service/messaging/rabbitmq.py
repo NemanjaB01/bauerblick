@@ -1,14 +1,17 @@
 import pika
 import json
 import logging
+import os
 
 logger = logging.getLogger("rabbitmq")
 
-RABBITMQ_HOST = "localhost"
-RABBITMQ_PORT = 5672
+rabbitmq_host = os.getenv('RABBITMQ_HOST', 'localhost')
 
 def get_connection():
-    return pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT))
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host=rabbitmq_host)
+    )
+    return connection
 
 def publish_message(data, routing_key, exchange="weather_exchange"):
 

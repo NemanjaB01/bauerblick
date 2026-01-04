@@ -3,18 +3,12 @@ import os
 from weather.enums import ForecastType
 from weather.processor import fetch_and_publish_for_farm
 from weather.logger import setup_logger
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-USERS_FILE = os.path.join(BASE_DIR, "data", "users.json")
+from database.repository import get_all_users_with_farms
 
 logger = setup_logger(name="hourly_job")
 
-def load_users():
-    with open(USERS_FILE, "r") as f:
-        return json.load(f)
-
 def fetch_hourly_weather_for_all():
-    users = load_users()
+    users = get_all_users_with_farms()
     logger.info("Fetching HOURLY weather for all users/farms")
 
     for user in users:
@@ -22,5 +16,13 @@ def fetch_hourly_weather_for_all():
         email = user["email"]
         farms = user.get("farms", [])
 
+        if not farms:
+            logger.info(f"User {email} has no farms.")
+            continue
+
         for farm in farms:
+            if farm.get("lat") is None or farm.get("lon") is None:
+                logger.warning(f"Skipping farm {farm.get('id')} - missing coordinates")
+                continue
+
             fetch_and_publish_for_farm(user_id, email, farm, ForecastType.HOURLY)

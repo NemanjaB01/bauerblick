@@ -269,3 +269,124 @@
   font-weight: bold;
   border-left: 4px solid #007bff;  /* Highlight with a left border */
 }
+
+/* ===================
+   DEVELOPER CONTROLS
+   =================== */
+
+.dev-controls {
+  margin-top: 15px;
+  padding: 15px;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(41, 128, 185, 0.2) 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(52, 152, 219, 0.3);
+  box-shadow:
+    0 4px 12px rgba(52, 152, 219, 0.15),
+    inset 0 1px 3px rgba(255, 255, 255, 0.1);
+}
+
+.dev-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(52, 152, 219, 0.25);
+}
+
+.dev-icon {
+  width: 18px;
+  height: 18px;
+  color: #3498db;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.dev-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dev-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dev-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(52, 152, 219, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2980b9;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.dev-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #3498db;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.dev-btn:hover {
+  background: rgba(52, 152, 219, 0.15);
+  border-color: #3498db;
+  transform: translateX(3px);
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.2);
+}
+
+.dev-btn:active {
+  transform: translateX(1px);
+  background: rgba(52, 152, 219, 0.25);
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.15);
+}
+
+@media (max-width: 768px) {
+  .dev-controls {
+    margin-top: 12px;
+    padding: 12px;
+  }
+
+  .dev-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .dev-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .dev-title {
+    font-size: 12px;
+  }
+
+  .dev-buttons {
+    gap: 8px;
+  }
+
+  .dev-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .dev-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}

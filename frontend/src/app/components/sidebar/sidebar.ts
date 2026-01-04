@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import { Router } from '@angular/router';
 import {UserService} from '../../services/user-service/user-service';
@@ -34,6 +34,11 @@ export class Sidebar {
       this.selectedFarm = this.farmService.getSelectedFarm();
     });
   }
+
+  @Input() showDevControls: boolean = false;
+  @Output() logFarmsEvent = new EventEmitter<void>();
+  @Output() loadFarmsEvent = new EventEmitter<void>();
+
   addNewFarm() {
     this.router.navigate(["new-farm"])
   }
@@ -49,5 +54,13 @@ export class Sidebar {
   selectFarm(farm: Farm) {
     this.selectedFarm = farm;
     this.farmService.selectFarm(farm);
+  }
+
+  onLogFarms(): void {
+    this.logFarmsEvent.emit();
+  }
+
+  onLoadFarms(): void {
+    this.loadFarmsEvent.emit();
   }
 }

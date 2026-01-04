@@ -3,7 +3,12 @@
   <div class="topbar-container">
     <div class="topbar-left">
       <img src="assets/icons/logo.svg" class="topbar-icon logo-icon" />
+      <div class="farm-title-section">
+        <h1 class="farm-name">{{ selectedFarm?.name || 'No Farm Selected' }}</h1>
+        <p class="farm-subtitle">Farm</p>
+      </div>
     </div>
+
     <div class="topbar-right">
       <app-alerts-notification></app-alerts-notification>
       <div class="menu-wrapper">
@@ -25,23 +30,18 @@
 
   <div class="body-container">
 
-    <app-sidebar class="sidebar"></app-sidebar>
+    <app-sidebar
+      class="sidebar"
+      [showDevControls]="true"
+      (logFarmsEvent)="logFarms()"
+      (loadFarmsEvent)="loadFarms()">
+    </app-sidebar>
 
     <div class="content-area">
 
       <div class="left-content">
         <app-field-grid></app-field-grid>
       </div>
-
-      <h1>TEST</h1>
-      <h1>{{ selectedFarm ? selectedFarm.name : 'No Farm Selected' }}</h1>
-<!-- farm-list.component.html -->
-<div>
-  <button (click)="logFarms()">Log Farms in Memory</button>
-</div>
-
-<button (click)="loadFarms()">Load Farms</button>
-
 
       <div class="right-content">
         <app-weather-widget></app-weather-widget>

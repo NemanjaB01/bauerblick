@@ -1,9 +1,8 @@
 package ase_pr_inso_01.farm_service.controller;
 
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCreateDto;
-import ase_pr_inso_01.farm_service.controller.dto.farm.FarmsForUserDto;
-import ase_pr_inso_01.farm_service.exception.ConflictException;
-import ase_pr_inso_01.farm_service.exception.ValidationException;
+import ase_pr_inso_01.farm_service.controller.dto.farm.FarmDetailsDto;
+import ase_pr_inso_01.farm_service.controller.dto.farm.FieldUpdateDto;
 import ase_pr_inso_01.farm_service.models.Farm;
 import ase_pr_inso_01.farm_service.service.FarmService;
 
@@ -27,23 +26,40 @@ public class FarmController {
     }
 
     @PostMapping
-    public ResponseEntity<Farm> createFarm(@RequestBody FarmCreateDto farm) throws Exception {
-        Farm created = farmService.createFarm(farm);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-
-    }
-
-    @GetMapping
-    public ResponseEntity<List<FarmsForUserDto>> getFarmsForAuthenticatedUser(Principal principal) throws Exception {
+    public ResponseEntity<Farm> createFarm(Principal principal, @RequestBody FarmCreateDto farm) throws Exception {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
 
         String email = principal.getName();  // Extract email from JWT
-        List<FarmsForUserDto> farms = farmService.getFarmsByUserEmail(email);
 
+        Farm created = farmService.createFarm(farm, email);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+
+    }
+
+    @GetMapping
+    public ResponseEntity<List<FarmDetailsDto>> getFarmsForUser(Principal principal) throws Exception {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = principal.getName();  // Extract email from JWT
+
+        List<FarmDetailsDto> farms = farmService.getFarmsByUserEmail(email);
         return ResponseEntity.ok(farms);
     }
+
+    @PutMapping("/{farmId}/fields") // TODO: Maybe change this to PATCH
+    public ResponseEntity<Void> updateField(@PathVariable String farmId, @RequestBody FieldUpdateDto field, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        farmService.updateField(farmId, field);
+        return ResponseEntity.status(200).build();
+    }
+
 
 //    @GetMapping("/user/{userId}")
 //    public ResponseEntity<List<FarmsForUserDto>> getFarmsByUserId(@PathVariable String userId) {

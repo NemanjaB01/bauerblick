@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { Farm } from '../../models/Farm';
 import { HttpClient } from '@angular/common/http';
 import { FarmCreateDto } from '../../dtos/farm';
 import { tap } from 'rxjs/operators';
 import { Globals } from '../../global/globals';
+import { FieldUpdateDto } from '../../dtos/field';
 
 @Injectable({
   providedIn: 'root',
@@ -47,11 +48,35 @@ export class FarmService {
 
   // Add a new farm and update the list of farms
   addNewFarm(farm: FarmCreateDto): Observable<Farm> {
+    farm.fields= [
+        { id: 1, status: 'empty'},
+        { id: 2, status: 'empty'},
+        { id: 3, status: 'empty'},
+        { id: 4, status: 'empty'},
+        { id: 5, status: 'empty'},
+        { id: 6, status: 'empty'}
+    ];
+
     return this.httpClient.post<Farm>(this.farmsBaseUri, farm).pipe(
       tap((newFarm) => {
         const currentFarms = this.farmsSubject.value;
         this.farmsSubject.next([...currentFarms, newFarm]);  // Add the new farm to the farms list
       })
+    );
+  }
+
+  updateField(field: FieldUpdateDto) {
+    const selectedFarm = this.selectedFarmSubject.value;
+
+    if (!selectedFarm) {
+      return throwError(() => new Error('No farm selected'));
+    }
+
+    console.log("Updating field...", field);
+
+    return this.httpClient.put(
+      `${this.farmsBaseUri}/${selectedFarm.id}/fields`,
+      field
     );
   }
 

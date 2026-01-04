@@ -1,5 +1,6 @@
 package ase_pr_inso_01.farm_service.models;
 
+import ase_pr_inso_01.farm_service.models.enums.SeedType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -13,14 +14,10 @@ import java.util.Date;
 @Setter
 public class Field {
     @Id
-    private String id;
-    private Seed seed;
-    private Integer seedsAmount;
-    private Date datePlanted;
-    private Date expectedHarvest;
-    private String pesticideUsed;
-    private Float area;
-
-
-
+    private Integer id;
+    private String status; //TODO: Enum
+    private String seedType;
+    private Date plantedDate;
+    private Date harvestDate;
+    private String growthStage; //TODO: Enum
 }

@@ -36,17 +36,6 @@ export class NewFarmComponent {
   selectedSoil: SoilType | null = null;
   soilType : SoilType = SoilType.Chalk;
 
-  ngOnInit() {
-    this.userService.getProfile().subscribe({
-      next: (user) => {
-        this.farm.email = user.email;
-      },
-      error: (err) => {
-        console.error('Failed to fetch user data', err);
-      }
-    });
-  }
-
   onSearch(event: any) {
     const query = event.target.value;
 

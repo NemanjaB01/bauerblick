@@ -2,15 +2,13 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { FarmService } from '../../services/farm-service/farm-service';
+import { FieldUpdateDto } from '../../dtos/field';
+import { FieldStatus } from '../../models/FieldStatus';
+import { SeedType } from '../../models/Seed';
+import { GrowthStage } from '../../models/GrowthStage';
+import { Field } from '../../models/Field';
 
-interface Field {
-  id: number;
-  status: 'empty' | 'planted' | 'growing' | 'ready';
-  seedType?: string;
-  plantedDate?: Date;
-  harvestDate?: Date;
-  growthStage?: 'seedling' | 'young' | 'mature' | 'ready';
-}
 
 interface GrowthStageIcons {
   seedling: string;
@@ -31,14 +29,7 @@ interface SeedIconMap {
   styleUrl: './field-grid.css',
 })
 export class FieldGrid {
-  fields: Field[] = [
-    { id: 1, status: 'empty' },
-    { id: 2, status: 'empty' },
-    { id: 3, status: 'empty' },
-    { id: 4, status: 'empty' },
-    { id: 5, status: 'empty' },
-    { id: 6, status: 'empty' }
-  ];
+  fields: Field[] = [];
 
   isModalOpen = false;
   isDetailsModalOpen = false;
@@ -48,8 +39,14 @@ export class FieldGrid {
   sowingDate: string = '';
   harvestDate: string = '';
 
-  constructor(private toastr: ToastrService) {}
 
+constructor(private farmService: FarmService, private toastr: ToastrService) {
+  this.farmService.selectedFarm$.subscribe(farm => {
+    this.fields = farm?.fields || [];
+    console.log(this.fields);
+  });
+}
+  
   devMode = false;
 
   seedIcons: SeedIconMap = {
@@ -347,13 +344,24 @@ export class FieldGrid {
     if (this.selectedFieldId) {
       const fieldIndex = this.fields.findIndex(f => f.id === this.selectedFieldId);
       if (fieldIndex !== -1) {
-        this.fields[fieldIndex] = {
-          ...this.fields[fieldIndex],
+        // this.fields[fieldIndex] = {
+        //   ...this.fields[fieldIndex],
+        //   status: 'planted',
+        //   seedType: this.selectedSeedType!,
+        //   plantedDate: new Date(this.sowingDate),
+        //   growthStage: 'seedling'
+        // };
+
+        const fieldUpdate = {
+          id: this.selectedFieldId,
           status: 'planted',
           seedType: this.selectedSeedType!,
           plantedDate: new Date(this.sowingDate),
-          growthStage: 'seedling'
+          growthStage: GrowthStage.Seedling
         };
+
+        this.farmService.updateField(fieldUpdate)?.subscribe();
+        this.farmService.loadFarms().subscribe();
 
         // Success notification
         // @ts-ignore

@@ -54,11 +54,6 @@ export class NewFarmComponent implements OnInit {
 
       if (this.isFirstFarm) {
         console.log('First farm mode: Back button will be hidden');
-        this.toastr.info(
-          'Create your first farm to get started!',
-          'Welcome to Agriscope',
-          { timeOut: 5000 }
-        );
       }
     });
   }

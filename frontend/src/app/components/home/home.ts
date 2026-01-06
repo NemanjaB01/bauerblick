@@ -62,10 +62,6 @@ export class HomeComponent implements OnInit {
         // If no farms, redirect to add-farm
         if (farms.length === 0) {
           console.log('No farms found, redirecting to add-farm');
-          this.toastr.warning(
-            'Please create your first farm to continue',
-            'No Farms Found'
-          );
 
           this.router.navigate(['/new-farm'], {
             queryParams: { firstFarm: 'true' }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { Farm } from '../../models/Farm';
 import { HttpClient } from '@angular/common/http';
-import { FarmCreateDto } from '../../dtos/farm';
+import {FarmCheckResponse, FarmCreateDto} from '../../dtos/farm';
 import { tap } from 'rxjs/operators';
 import { Globals } from '../../global/globals';
 import { FieldUpdateDto } from '../../dtos/field';
@@ -87,5 +87,9 @@ export class FarmService {
 
   clearSelectedFarm() {
     this.selectedFarmSubject.next(null);
+  }
+
+  checkHasFarms(): Observable<FarmCheckResponse> {
+    return this.httpClient.get<FarmCheckResponse>(`${this.farmsBaseUri}/check`);
   }
 }

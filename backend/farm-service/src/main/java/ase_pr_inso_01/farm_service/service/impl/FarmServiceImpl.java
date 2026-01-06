@@ -1,9 +1,6 @@
 package ase_pr_inso_01.farm_service.service.impl;
 
-import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCreateDto;
-import ase_pr_inso_01.farm_service.controller.dto.farm.FarmDetailsDto;
-import ase_pr_inso_01.farm_service.controller.dto.farm.FieldUpdateDto;
-import ase_pr_inso_01.farm_service.controller.dto.farm.UserDetailsDto;
+import ase_pr_inso_01.farm_service.controller.dto.farm.*;
 import ase_pr_inso_01.farm_service.models.Farm;
 import ase_pr_inso_01.farm_service.models.Field;
 import ase_pr_inso_01.farm_service.repository.FarmRepository;
@@ -11,12 +8,8 @@ import ase_pr_inso_01.farm_service.service.FarmService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-
 
 @Service
 public class FarmServiceImpl implements FarmService {
@@ -29,12 +22,26 @@ public class FarmServiceImpl implements FarmService {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * ⭐ Check if user has any farms
+     */
+    @Override
+    public FarmCheckDto checkUserHasFarms(String email) throws Exception {
+        UserDetailsDto user = this.getUserDetails(email);
+        List<Farm> farms = farmRepository.findByUserId(user.getId());
+
+        return new FarmCheckDto(
+                !farms.isEmpty(),  // hasFarms
+                farms.size()       // farmCount
+        );
+    }
+
     @Override
     public Farm createFarm(FarmCreateDto dto, String email) throws Exception {
         UserDetailsDto user = this.getUserDetails(email);
 
-        if (farmRepository.existsByName(dto.getName())) {
-            throw new RuntimeException("Farm already registered");
+        if (farmRepository.existsByNameAndUserId(dto.getName(), user.getId())) {
+            throw new RuntimeException("You already have a farm with this name");
         }
 
         Farm farm = new Farm();
@@ -60,36 +67,6 @@ public class FarmServiceImpl implements FarmService {
     }
 
     @Override
-    public void updateField(String farmId, FieldUpdateDto fieldUpdate) {
-        // Fetch the farm by ID
-        Optional<Farm> optionalFarm = farmRepository.findById(farmId);
-
-        if (optionalFarm.isEmpty()) {
-            throw new RuntimeException("Farm not found with ID: " + farmId);
-        }
-
-        Farm farm = optionalFarm.get();
-        List<Field> fields = List.of(farm.getFields());  // Assuming fields is a List<Field>
-
-        // Find the field to update using Java Streams
-        Field fieldToUpdate = fields.stream()
-                .filter(f -> f.getId().equals(fieldUpdate.getId()))  // Match by field ID
-                .findFirst()  // Get the first matching field
-                .orElseThrow(() -> new RuntimeException("Field not found with ID: " + fieldUpdate.getId()));  // If not found, throw exception
-
-        // Update the found field
-        fieldToUpdate.setStatus(fieldUpdate.getStatus());
-        fieldToUpdate.setSeedType(fieldUpdate.getSeedType());
-        fieldToUpdate.setPlantedDate(fieldUpdate.getPlantedDate());
-        fieldToUpdate.setGrowthStage(fieldUpdate.getGrowthStage());
-
-        // Save the updated farm back to MongoDB
-        farmRepository.save(farm);
-    }
-
-
-
-    @Override
     public List<FarmDetailsDto> getFarmsByUserId(String userId) {
         List<Farm> farms = farmRepository.findByUserId(userId);
 
@@ -108,9 +85,94 @@ public class FarmServiceImpl implements FarmService {
                 .toList();
     }
 
-    // Fetch user details from the User microservice
+    @Override
+    public void updateField(String farmId, FieldUpdateDto fieldUpdate, String email) throws Exception {
+        UserDetailsDto user = this.getUserDetails(email);
+
+        // Fetch the farm by ID
+        Optional<Farm> optionalFarm = farmRepository.findById(farmId);
+
+        if (optionalFarm.isEmpty()) {
+            throw new RuntimeException("Farm not found with ID: " + farmId);
+        }
+
+        Farm farm = optionalFarm.get();
+
+        // ⭐ SECURITY: Check if farm belongs to user
+        if (!farm.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: This farm does not belong to you");
+        }
+
+        List<Field> fields = List.of(farm.getFields());
+
+        // Find the field to update
+        Field fieldToUpdate = fields.stream()
+                .filter(f -> f.getId().equals(fieldUpdate.getId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Field not found with ID: " + fieldUpdate.getId()));
+
+        // Update the found field
+        fieldToUpdate.setStatus(fieldUpdate.getStatus());
+        fieldToUpdate.setSeedType(fieldUpdate.getSeedType());
+        fieldToUpdate.setPlantedDate(fieldUpdate.getPlantedDate());
+        fieldToUpdate.setGrowthStage(fieldUpdate.getGrowthStage());
+
+        // Save the updated farm
+        farmRepository.save(farm);
+    }
+
+
+    @Override
+    public FarmDetailsDto getFarmById(String farmId, String email) throws Exception {
+        UserDetailsDto user = this.getUserDetails(email);
+
+        Optional<Farm> optionalFarm = farmRepository.findById(farmId);
+
+        if (optionalFarm.isEmpty()) {
+            throw new RuntimeException("Farm not found with ID: " + farmId);
+        }
+
+        Farm farm = optionalFarm.get();
+
+        // Check if farm belongs to user
+        if (!farm.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: This farm does not belong to you");
+        }
+
+        return new FarmDetailsDto(
+                farm.getId(),
+                farm.getName(),
+                farm.getLocation(),
+                farm.getLatitude(),
+                farm.getLongitude(),
+                farm.getSoilType(),
+                farm.getFields(),
+                farm.getRecommendations(),
+                farm.getUserId()
+        );
+    }
+
+    @Override
+    public void deleteFarm(String farmId, String email) throws Exception {
+        UserDetailsDto user = this.getUserDetails(email);
+
+        Optional<Farm> optionalFarm = farmRepository.findById(farmId);
+
+        if (optionalFarm.isEmpty()) {
+            throw new RuntimeException("Farm not found with ID: " + farmId);
+        }
+
+        Farm farm = optionalFarm.get();
+
+        // Check if farm belongs to user
+        if (!farm.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: This farm does not belong to you");
+        }
+
+        farmRepository.delete(farm);
+    }
+
     private UserDetailsDto getUserDetails(String email) throws Exception {
-        //TODO: Check if possible to replace localhost with service name
         String url = "http://api-gateway:8080/api/users/by-email/" + email;
 
         try {

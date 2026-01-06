@@ -1,10 +1,11 @@
-import {Component} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth-service/auth.service';
 import { Router } from '@angular/router';
-import {AuthRequest} from '../../dtos/auth-request';
-import {ToastrService} from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '../../services/auth-service/auth.service';
+import { FarmService } from '../../services/farm-service/farm-service';
+import { AuthRequest } from '../../dtos/auth-request';
 
 @Component({
   selector: 'app-login',
@@ -16,30 +17,68 @@ import {ToastrService} from 'ngx-toastr';
 export class Login {
   email = '';
   password = '';
-  loginFailed = false; // 1. Add this flag
+  loginFailed = false;
   showPassword = false;
+  isLoading = false;
 
-  constructor(private auth: AuthService, private router: Router, private toastr: ToastrService) { }
+  constructor(
+    private auth: AuthService,
+    private farmService: FarmService,
+    private router: Router,
+    private toastr: ToastrService
+  ) {}
 
   onSubmit() {
-    this.loginFailed = false; // Reset error state on new attempt
+    this.loginFailed = false;
+    this.isLoading = true;
 
     this.auth.loginUser(new AuthRequest(this.email, this.password))
       .subscribe({
         next: () => {
-          this.toastr.success("Successfully signed in!");
-          this.router.navigate(['/signup']);
+          this.toastr.success('Successfully signed in!', 'Welcome');
+
+          // Check if user has farms before routing
+          this.checkFarmsAndRoute();
         },
         error: err => {
-          this.loginFailed = true; // 2. Turn inputs red
-          this.toastr.error("Please check your credentials.", "Login failed"); // 3. Show toast
+          this.isLoading = false;  //Stop loading
+          this.loginFailed = true;
+          this.toastr.error('Please check your credentials.', 'Login failed');
         }
       });
+  }
+
+  /**
+   * Check farms and route accordingly
+   */
+  private checkFarmsAndRoute(): void {
+    this.farmService.checkHasFarms().subscribe({
+      next: (response) => {
+        this.isLoading = false;
+
+        if (response.hasFarms) {
+          // User has farms → Go to homepage
+          console.log(`User has ${response.farmCount} farm(s), routing to home`);
+          this.router.navigate(['/home']);
+        } else {
+          // User has no farms → Force Add New Farm
+          console.log('User has no farms, routing to add-farm');
+          this.router.navigate(['/add-farm'], {
+            queryParams: { firstFarm: 'true' }
+          });
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error checking farms:', err);
+
+        // Fallback: try to go to home anyway
+        this.router.navigate(['/home']);
+      }
+    });
   }
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
-
-
 }

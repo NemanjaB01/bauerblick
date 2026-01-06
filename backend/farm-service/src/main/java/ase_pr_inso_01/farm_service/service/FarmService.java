@@ -18,4 +18,8 @@ public interface FarmService {
     List<FarmDetailsDto> getFarmsByUserEmail(String email) throws Exception;
 
     void updateField(String farmId, FieldUpdateDto field);
+
+    FarmDetailsDto getFarmById(String farmId, String email) throws Exception;
+
+    void deleteFarm(String farmId, String email) throws Exception;
 }

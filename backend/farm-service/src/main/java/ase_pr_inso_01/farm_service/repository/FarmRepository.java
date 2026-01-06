@@ -8,5 +8,7 @@ import java.util.List;
 public interface FarmRepository extends MongoRepository<Farm, String> {
     boolean existsByName(String name);
 
+    boolean existsByNameAndUserId(String name, String userId);
+
     List<Farm> findByUserId(String userId);
 }

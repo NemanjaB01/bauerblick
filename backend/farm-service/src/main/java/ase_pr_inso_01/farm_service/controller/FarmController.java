@@ -38,6 +38,20 @@ public class FarmController {
 
     }
 
+    /**
+     * Check if user has any farms.
+     */
+    @GetMapping("/check")
+    public ResponseEntity<FarmCheckDto> checkUserHasFarms(Principal principal) throws Exception {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = principal.getName();
+        FarmCheckDto checkDto = farmService.checkUserHasFarms(email);
+        return ResponseEntity.ok(checkDto);
+    }
+
     @GetMapping
     public ResponseEntity<List<FarmDetailsDto>> getFarmsForUser(Principal principal) throws Exception {
         if (principal == null) {
@@ -66,4 +80,34 @@ public class FarmController {
 //        List<FarmsForUserDto> farms = farmService.getFarmsByUserId(userId);
 //        return ResponseEntity.ok(farms);
 //    }
+
+    @GetMapping("/{farmId}")
+    public ResponseEntity<FarmDetailsDto> getFarmById(
+            @PathVariable String farmId,
+            Principal principal) throws Exception {
+
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = principal.getName();
+        FarmDetailsDto farm = farmService.getFarmById(farmId, email);
+        return ResponseEntity.ok(farm);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createFarm(Principal principal, @Valid @RequestBody FarmCreateDto farm) throws Exception {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = principal.getName();
+
+        try {
+            Farm created = farmService.createFarm(farm, email);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

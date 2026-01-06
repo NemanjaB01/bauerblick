@@ -21,3 +21,8 @@ export class FarmCreateDto {
     soilType!: SoilType;
     fields!: Field[]; //FieldCreateDto[]; //TODO: Dto
 }
+
+export interface FarmCheckResponse {
+  hasFarms: boolean;
+  farmCount: number;
+}

@@ -31,6 +31,7 @@ import { Farm } from '../../models/Farm';
 })
 export class HomeComponent implements OnInit {
   selectedFarm: Farm | null = null;
+  isLoading = true;
 
   constructor(
     public authService: AuthService,
@@ -40,15 +41,8 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Load farms on init
-    this.farmService.loadFarms().subscribe(
-      (farms) => {
-        console.log("Farms loaded:", farms);
-      },
-      (error) => {
-        console.error("Error loading farms:", error);
-      }
-    );
+    // Load farms with protection
+    this.loadFarmsWithProtection();
 
     // Subscribe to selected farm observable
     this.farmService.selectedFarm$.subscribe((farm) => {
@@ -56,20 +50,71 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  /**
+   * ⭐ Load farms with redirect protection
+   */
+  private loadFarmsWithProtection(): void {
+    this.farmService.loadFarms().subscribe({
+      next: (farms) => {
+        console.log("Farms loaded:", farms);
+        this.isLoading = false;
+
+        // If no farms, redirect to add-farm
+        if (farms.length === 0) {
+          console.log('No farms found, redirecting to add-farm');
+          this.toastr.warning(
+            'Please create your first farm to continue',
+            'No Farms Found'
+          );
+
+          this.router.navigate(['/new-farm'], {
+            queryParams: { firstFarm: 'true' }
+          });
+          return;
+        }
+
+        // Farms exist, continue normally
+        console.log(`Loaded ${farms.length} farm(s)`);
+      },
+      error: (error) => {
+        console.error("Error loading farms:", error);
+        this.isLoading = false;
+
+        // Show error toast
+        this.toastr.error(
+          'Failed to load farms. Please try again.',
+          'Error'
+        );
+
+        // If unauthorized, redirect to login
+        if (error.status === 401 || error.status === 403) {
+          this.router.navigate(['/login']);
+        }
+      }
+    });
+  }
+
   // Dev control methods
   logFarms(): void {
     console.log('Farms in memory:', this.farmService.getFarmsInMemory());
+    console.log('Currently selected farm:', this.selectedFarm);
   }
 
   loadFarms(): void {
-    console.log("Loading farms...");
-    this.farmService.loadFarms().subscribe(
-      (farms) => {
-        console.log("Farms loaded:", farms);
+    console.log("Reloading farms...");
+    this.isLoading = true;
+
+    this.farmService.loadFarms().subscribe({
+      next: (farms) => {
+        console.log("Farms reloaded:", farms);
+        this.isLoading = false;
+        this.toastr.success(`Loaded ${farms.length} farm(s)`, 'Success');
       },
-      (error) => {
-        console.error("Error loading farms:", error);
+      error: (error) => {
+        console.error("Error reloading farms:", error);
+        this.isLoading = false;
+        this.toastr.error('Failed to reload farms', 'Error');
       }
-    );
+    });
   }
 }

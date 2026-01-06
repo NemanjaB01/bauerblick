@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import {UserService} from '../../services/user-service/user-service';
 import {EditUserDto, UserProfileDetail} from '../../dtos/user';
 import {ToastrService} from 'ngx-toastr';
+import {TopbarComponent} from '../topbar/topbar';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TopbarComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })

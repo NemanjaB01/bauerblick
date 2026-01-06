@@ -5,13 +5,15 @@ import {CommonModule} from '@angular/common';
 import { Router } from '@angular/router';
 import { SeedService } from '../../services/seed-service/seed-service';
 import { Seed } from '../../models/Seed';
+import {TopbarComponent} from '../topbar/topbar';
 
 @Component({
   selector: 'app-seeds',
   standalone: true,
   imports: [
     Sidebar,
-    CommonModule
+    CommonModule,
+    TopbarComponent
   ],
   templateUrl: './seeds.html',
   styleUrl: './seeds.css',

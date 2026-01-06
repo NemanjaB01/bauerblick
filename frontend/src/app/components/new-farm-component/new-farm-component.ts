@@ -1,6 +1,5 @@
 import { Component, HostListener } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import { NgOptimizedImage} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Map } from '../map/map';
@@ -8,7 +7,7 @@ import { SoilType } from '../../models/SoilType';
 import { FarmCreateDto } from '../../dtos/farm';
 import { FarmService } from '../../services/farm-service/farm-service';
 import { UserService } from '../../services/user-service/user-service';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import {TopbarComponent} from '../topbar/topbar';
 
 @Component({
   selector: 'app-new-farm-component',
@@ -16,7 +15,8 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
   imports: [
     CommonModule,
     FormsModule,
-    Map
+    Map,
+    TopbarComponent
   ],
   templateUrl: './new-farm-component.html',
   styleUrl: './new-farm-component.css',

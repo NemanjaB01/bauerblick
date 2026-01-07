@@ -1,5 +1,6 @@
 package ase_pr_inso_01.farm_service.controller;
 
+import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCheckDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCreateDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmDetailsDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FieldUpdateDto;
@@ -7,6 +8,7 @@ import ase_pr_inso_01.farm_service.models.Farm;
 import ase_pr_inso_01.farm_service.service.FarmService;
 
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -66,6 +66,8 @@ public class FarmServiceImpl implements FarmService {
         return this.getFarmsByUserId(user.getId());
     }
 
+
+
     @Override
     public List<FarmDetailsDto> getFarmsByUserId(String userId) {
         List<Farm> farms = farmRepository.findByUserId(userId);

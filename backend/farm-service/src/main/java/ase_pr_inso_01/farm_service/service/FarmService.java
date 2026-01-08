@@ -17,14 +17,11 @@ public interface FarmService {
     List<FarmDetailsDto> getFarmsByUserId(String userId);
 
     List<FarmDetailsDto> getFarmsByUserEmail(String email) throws Exception;
-
-    void updateField(String farmId, FieldUpdateDto field);
+    void updateField(String farmId, FieldUpdateDto fieldUpdate, String email) throws Exception;
 
     FarmDetailsDto getFarmById(String farmId, String email) throws Exception;
 
     void deleteFarm(String farmId, String email) throws Exception;
-
-    void updateField(String farmId, FieldUpdateDto fieldUpdate, String email) throws Exception;
 
     FarmCheckDto checkUserHasFarms(String email) throws Exception;
 }

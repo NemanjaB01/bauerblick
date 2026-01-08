@@ -27,18 +27,7 @@ public class FarmController {
         this.farmService = farmService;
     }
 
-    @PostMapping
-    public ResponseEntity<Farm> createFarm(Principal principal, @RequestBody FarmCreateDto farm) throws Exception {
-        if (principal == null) {
-            return ResponseEntity.status(401).build();
-        }
 
-        String email = principal.getName();  // Extract email from JWT
-
-        Farm created = farmService.createFarm(farm, email);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-
-    }
 
     /**
      * Check if user has any farms.
@@ -67,12 +56,12 @@ public class FarmController {
     }
 
     @PutMapping("/{farmId}/fields") // TODO: Maybe change this to PATCH
-    public ResponseEntity<Void> updateField(@PathVariable String farmId, @RequestBody FieldUpdateDto field, Principal principal) {
+    public ResponseEntity<Void> updateField(@PathVariable String farmId, @RequestBody FieldUpdateDto field, Principal principal) throws Exception {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
 
-        farmService.updateField(farmId, field);
+        farmService.updateField(farmId, field, null);
         return ResponseEntity.status(200).build();
     }
 
@@ -112,4 +101,5 @@ public class FarmController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
 }

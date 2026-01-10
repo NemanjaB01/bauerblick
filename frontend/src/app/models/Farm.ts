@@ -10,5 +10,6 @@ export class Farm {
     soilType : SoilType = 0;
     fields : Field[] = [];
     recomendations : Recommendation[] = [];
+    userId?: string;
     //TODO: stats ?
 }

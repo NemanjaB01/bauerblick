@@ -3,23 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { FarmService } from '../../services/farm-service/farm-service';
-import { FieldUpdateDto } from '../../dtos/field';
 import { FieldStatus } from '../../models/FieldStatus';
-import { SeedType } from '../../models/Seed';
 import { GrowthStage } from '../../models/GrowthStage';
 import { Field } from '../../models/Field';
+import { SeedType } from '../../models/SeedType';
 
 
-interface GrowthStageIcons {
-  seedling: string;
-  young: string;
-  mature: string;
-  ready: string;
-}
-
-interface SeedIconMap {
-  [seedType: string]: GrowthStageIcons;
-}
+type GrowthStageIcons = Record<GrowthStage, string>;
+type SeedIconMap = Record<SeedType, GrowthStageIcons>;
 
 @Component({
   selector: 'app-field-grid',
@@ -31,11 +22,15 @@ interface SeedIconMap {
 export class FieldGrid {
   fields: Field[] = [];
 
+  public SeedType = SeedType;
+  public FieldStatus = FieldStatus;
+  public GrowthStage = GrowthStage;
+
   isModalOpen = false;
   isDetailsModalOpen = false;
   isHarvestModalOpen = false;
   selectedFieldId: number | null = null;
-  selectedSeedType: string | null = null;
+  selectedSeedType: SeedType | null = null;
   sowingDate: string = '';
   harvestDate: string = '';
 
@@ -46,46 +41,46 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     console.log(this.fields);
   });
 }
-  
+
   devMode = false;
 
   seedIcons: SeedIconMap = {
-    wheat: {
-      seedling: 'assets/icons/plant.svg',
-      young: 'assets/icons/wheat_growing.svg',
-      mature: 'assets/icons/wheat_growing.svg',
-      ready: 'assets/icons/wheat_ready.svg'
+    [SeedType.wheat]: {
+      [GrowthStage.seedling]: 'assets/icons/plant.svg',
+      [GrowthStage.young]: 'assets/icons/wheat_growing.svg',
+      [GrowthStage.mature]: 'assets/icons/wheat_growing.svg',
+      [GrowthStage.ready]: 'assets/icons/wheat_ready.svg',
     },
-    corn: {
-      seedling: 'assets/icons/plant.svg',
-      young: 'assets/icons/corn_growing.svg',
-      mature: 'assets/icons/corn_growing.svg',
-      ready: 'assets/icons/corn_ready.svg'
+    [SeedType.corn]: {
+      [GrowthStage.seedling]: 'assets/icons/plant.svg',
+      [GrowthStage.young]: 'assets/icons/corn_growing.svg',
+      [GrowthStage.mature]: 'assets/icons/corn_growing.svg',
+      [GrowthStage.ready]: 'assets/icons/corn_ready.svg',
     },
-    barley: {
-      seedling: 'assets/icons/plant.svg',
-      young: 'assets/icons/barely_growing.svg',
-      mature: 'assets/icons/barely_growing.svg',
-      ready: 'assets/icons/barely_ready.svg'
+    [SeedType.barley]: {
+      [GrowthStage.seedling]: 'assets/icons/plant.svg',
+      [GrowthStage.young]: 'assets/icons/barely_growing.svg',
+      [GrowthStage.mature]: 'assets/icons/barely_growing.svg',
+      [GrowthStage.ready]: 'assets/icons/barely_ready.svg',
     },
-    white_grape: {
-      seedling: 'assets/icons/plant.svg',
-      young: 'assets/icons/black_grape_growing.svg',
-      mature: 'assets/icons/black_grape_growing.svg',
-      ready: 'assets/icons/white_grape_ready.svg'
+    [SeedType.blackGrapes]: {
+      [GrowthStage.seedling]: 'assets/icons/plant.svg',
+      [GrowthStage.young]: 'assets/icons/black_grape_growing.svg',
+      [GrowthStage.mature]: 'assets/icons/black_grape_growing.svg',
+      [GrowthStage.ready]: 'assets/icons/black_grape_ready.svg',
     },
-    red_grape: {
-      seedling: 'assets/icons/plant.svg',
-      young: 'assets/icons/black_grape_growing.svg',
-      mature: 'assets/icons/black_grape_growing.svg',
-      ready: 'assets/icons/black_grape_ready.svg'
+    [SeedType.whiteGrapes]: {
+      [GrowthStage.seedling]: 'assets/icons/plant.svg',
+      [GrowthStage.young]: 'assets/icons/black_grape_growing.svg',
+      [GrowthStage.mature]: 'assets/icons/black_grape_growing.svg',
+      [GrowthStage.ready]: 'assets/icons/white_grape_ready.svg',
     },
-    pumpkin: {
-      seedling: 'assets/icons/plant.svg',
-      young: 'assets/icons/pumpkin_growing.svg',
-      mature: 'assets/icons/pumpkin_growing.svg',
-      ready: 'assets/icons/pumpkin_ready.svg'
-    }
+    [SeedType.pumpkin]: {
+      [GrowthStage.seedling]: 'assets/icons/plant.svg',
+      [GrowthStage.young]: 'assets/icons/pumpkin_growing.svg',
+      [GrowthStage.mature]: 'assets/icons/pumpkin_growing.svg',
+      [GrowthStage.ready]: 'assets/icons/pumpkin_ready.svg',
+    },
   };
 
   // ============================================
@@ -208,7 +203,7 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
   // ============================================
 
   get firstEmptyFieldId(): number | null {
-    const emptyField = this.fields.find(f => f.status === 'empty');
+    const emptyField = this.fields.find(f => f.status === FieldStatus.empty);
     return emptyField ? emptyField.id : null;
   }
 
@@ -218,12 +213,12 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
 
   isPlanted(fieldId: number): boolean {
     const field = this.fields.find(f => f.id === fieldId);
-    return field ? field.status !== 'empty' : false;
+    return field ? field.status !== FieldStatus.empty : false;
   }
 
   isReady(fieldId: number): boolean {
     const field = this.fields.find(f => f.id === fieldId);
-    return field ? field.status === 'ready' : false;
+    return field ? field.status === FieldStatus.ready : false;
   }
 
   getField(fieldId: number): Field | undefined {
@@ -233,12 +228,12 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
   getPlantIcon(fieldId: number): string {
     const field = this.getField(fieldId);
 
-    if (!field || field.status === 'empty' || !field.seedType) {
+    if (!field || field.status === FieldStatus.empty || !field.seedType) {
       return '';
     }
 
     const seedType = field.seedType;
-    const growthStage = field.growthStage || 'seedling';
+    const growthStage = field.growthStage || GrowthStage.seedling;
 
     if (this.seedIcons[seedType] && this.seedIcons[seedType][growthStage]) {
       return this.seedIcons[seedType][growthStage];
@@ -263,7 +258,7 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     const field = this.getField(fieldId);
     if (!field) return '';
 
-    if (field.status === 'empty') return 'Empty';
+    if (field.status === FieldStatus.empty) return 'Empty';
 
     return `${field.status} (${field.growthStage}) - ${field.seedType}`;
   }
@@ -282,12 +277,12 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
   openFieldDetailsModal(fieldId: number) {
     const field = this.getField(fieldId);
 
-    if (field && field.status === 'ready') {
+    if (field && field.status === FieldStatus.ready) {
       this.openHarvestModal(fieldId);
       return;
     }
 
-    if (field && field.status !== 'empty') {
+    if (field && field.status !== FieldStatus.empty) {
       this.selectedFieldId = fieldId;
       this.isDetailsModalOpen = true;
     }
@@ -317,7 +312,7 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     this.harvestDate = '';
   }
 
-  selectSeedType(seedType: string) {
+  selectSeedType(seedType: SeedType) {
     this.selectedSeedType = seedType;
   }
 
@@ -344,32 +339,27 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     if (this.selectedFieldId) {
       const fieldIndex = this.fields.findIndex(f => f.id === this.selectedFieldId);
       if (fieldIndex !== -1) {
-        // this.fields[fieldIndex] = {
-        //   ...this.fields[fieldIndex],
-        //   status: 'planted',
-        //   seedType: this.selectedSeedType!,
-        //   plantedDate: new Date(this.sowingDate),
-        //   growthStage: 'seedling'
-        // };
-
+ 
         const fieldUpdate = {
           id: this.selectedFieldId,
-          status: 'planted',
+          status: FieldStatus.planted,
           seedType: this.selectedSeedType!,
           plantedDate: new Date(this.sowingDate),
-          growthStage: GrowthStage.Seedling
+          growthStage: GrowthStage.seedling
         };
 
-        this.farmService.updateField(fieldUpdate)?.subscribe();
-        this.farmService.loadFarms().subscribe();
-
-        // Success notification
-        // @ts-ignore
-        const seedName = this.selectedSeedType.replace('_', ' ');
-        this.toastr.success(
-          `${seedName.charAt(0).toUpperCase() + seedName.slice(1)} planted successfully`,
-          `Field ${this.selectedFieldId} Planted`
-        );
+        this.farmService.updateField(fieldUpdate).subscribe({
+          next: () => {
+            // Success notification
+            // @ts-ignore
+            const seedName = this.selectedSeedType.replace('_', ' ');
+            this.toastr.success(
+              `${seedName.charAt(0).toUpperCase() + seedName.slice(1)} planted successfully`,
+              `Field ${this.selectedFieldId} Planted`
+            );
+          },
+          error: () => this.toastr.error('Update failed')
+        });
       }
     }
     this.closeModal();
@@ -394,7 +384,7 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
 
         this.fields[fieldIndex] = {
           id: this.selectedFieldId,
-          status: 'empty'
+          status: FieldStatus.empty
         };
 
         // Success notification
@@ -414,30 +404,30 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
 
   advanceGrowth(fieldId: number) {
     const field = this.getField(fieldId);
-    if (!field || field.status === 'empty') return;
+    if (!field || field.status === FieldStatus.empty) return;
 
     const fieldIndex = this.fields.findIndex(f => f.id === fieldId);
 
-    if (field.status === 'planted' && field.growthStage === 'seedling') {
+    if (field.status === FieldStatus.planted && field.growthStage === GrowthStage.seedling) {
       this.fields[fieldIndex] = {
         ...field,
-        status: 'growing',
-        growthStage: 'young'
+        status: FieldStatus.growing,
+        growthStage: GrowthStage.young
       };
       this.toastr.info(`Field ${fieldId} is now growing`, 'Growth Stage: Young');
 
-    } else if (field.status === 'growing' && field.growthStage === 'young') {
+    } else if (field.status === FieldStatus.growing && field.growthStage === GrowthStage.young) {
       this.fields[fieldIndex] = {
         ...field,
-        growthStage: 'mature'
+        growthStage: GrowthStage.mature
       };
       this.toastr.info(`Field ${fieldId} is maturing`, 'Growth Stage: Mature');
 
-    } else if (field.status === 'growing' && field.growthStage === 'mature') {
+    } else if (field.status === FieldStatus.growing && field.growthStage === GrowthStage.mature) {
       this.fields[fieldIndex] = {
         ...field,
-        status: 'ready',
-        growthStage: 'ready'
+        status: FieldStatus.ready,
+        growthStage: GrowthStage.ready
       };
       const cropName = field.seedType?.replace('_', ' ');
       this.toastr.success(
@@ -451,12 +441,12 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     const field = this.getField(fieldId);
     const fieldIndex = this.fields.findIndex(f => f.id === fieldId);
 
-    if (fieldIndex !== -1 && field && field.status !== 'empty') {
+    if (fieldIndex !== -1 && field && field.status !== FieldStatus.empty) {
       const cropName = field.seedType?.replace('_', ' ');
 
       this.fields[fieldIndex] = {
         id: fieldId,
-        status: 'empty'
+        status: FieldStatus.empty
       };
 
       this.toastr.info(

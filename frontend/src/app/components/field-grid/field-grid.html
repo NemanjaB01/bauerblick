@@ -8,13 +8,13 @@
         <button
           class="dev-btn advance"
           (click)="advanceGrowth(field.id)"
-          [disabled]="field.status === 'empty' || field.status === 'ready'">
+          [disabled]="field.status === FieldStatus.empty || field.status === FieldStatus.ready">
           Advance
         </button>
         <button
           class="dev-btn reset"
           (click)="resetField(field.id)"
-          [disabled]="field.status === 'empty'">
+          [disabled]="field.status === FieldStatus.empty">
           Reset
         </button>
       </div>
@@ -36,7 +36,7 @@
         class="field"
         [class.has-plus]="hasPlus(field.id)"
         [class.planted]="isPlanted(field.id)"
-        [class.growing]="field.status === 'growing'"
+        [class.growing]="field.status === FieldStatus.growing"
         [class.ready]="isReady(field.id)"
         [class.clickable]="isPlanted(field.id)"
         [attr.data-field]="field.id"
@@ -84,7 +84,7 @@
         [class.planted]="isPlanted(field.id)"
         [class.ready]="isReady(field.id)"
         [class.clickable]="isPlanted(field.id)"
-        [class.growing]="field.status === 'growing'"
+        [class.growing]="field.status === FieldStatus.growing"
         [attr.data-field]="field.id"
         (click)="isPlanted(field.id) && openFieldDetailsModal(field.id)">
 
@@ -137,8 +137,8 @@
         <!-- Wheat -->
         <div
           class="seed-option"
-          [class.selected]="selectedSeedType === 'WHEAT'"
-          (click)="selectSeedType('WHEAT')">
+          [class.selected]="selectedSeedType === SeedType.wheat"
+          (click)="selectSeedType(SeedType.wheat)">
           <img src="assets/icons/wheat.svg" alt="Wheat" />
           <span>Wheat</span>
         </div>
@@ -146,8 +146,8 @@
         <!-- Corn -->
         <div
           class="seed-option"
-          [class.selected]="selectedSeedType === 'CORN'"
-          (click)="selectSeedType('CORN')">
+          [class.selected]="selectedSeedType === SeedType.corn"
+          (click)="selectSeedType(SeedType.corn)">
           <img src="assets/icons/corn.svg" alt="Corn" />
           <span>Corn</span>
         </div>
@@ -155,8 +155,8 @@
         <!-- Barley -->
         <div
           class="seed-option"
-          [class.selected]="selectedSeedType === 'BARLEY'"
-          (click)="selectSeedType('BARLEY')">
+          [class.selected]="selectedSeedType === SeedType.barley"
+          (click)="selectSeedType(SeedType.barley)">
           <img src="assets/icons/barely.svg" alt="Barley" />
           <span>Barley</span>
         </div>
@@ -164,8 +164,8 @@
         <!-- White Grape -->
         <div
           class="seed-option"
-          [class.selected]="selectedSeedType === 'WHITE_GRAPES'"
-          (click)="selectSeedType('WHITE_GRAPES')">
+          [class.selected]="selectedSeedType === SeedType.whiteGrapes"
+          (click)="selectSeedType(SeedType.whiteGrapes)">
           <img src="assets/icons/white_grape.svg" alt="White Grapes" />
           <span>White Grapes</span>
         </div>
@@ -173,8 +173,8 @@
         <!-- Red Grape -->
         <div
           class="seed-option"
-          [class.selected]="selectedSeedType === 'BLACK_GRAPES'"
-          (click)="selectSeedType('BLACK_GRAPES')">
+          [class.selected]="selectedSeedType === SeedType.blackGrapes"
+          (click)="selectSeedType(SeedType.blackGrapes)">
           <img src="assets/icons/grape.svg" alt="Black Grapes" />
           <span>Black Grapes</span>
         </div>
@@ -182,8 +182,8 @@
         <!-- Pumpkin -->
         <div
           class="seed-option"
-          [class.selected]="selectedSeedType === 'PUMPKIN'"
-          (click)="selectSeedType('PUMPKIN')">
+          [class.selected]="selectedSeedType === SeedType.pumpkin"
+          (click)="selectSeedType(SeedType.pumpkin)">
           <img src="assets/icons/pumpkin.svg" alt="Pumpkin" />
           <span>Pumpkin</span>
         </div>

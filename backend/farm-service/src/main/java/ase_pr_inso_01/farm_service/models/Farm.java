@@ -13,7 +13,6 @@ public class Farm {
     @Id
     private String id;
     private String name;
-    private String location;
     private Float latitude;
     private Float longitude;
     private SoilType soilType;

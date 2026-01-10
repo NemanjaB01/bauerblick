@@ -1,6 +1,7 @@
 package ase_pr_inso_01.farm_service.service.impl;
 
 import ase_pr_inso_01.farm_service.controller.dto.farm.*;
+import ase_pr_inso_01.farm_service.mapper.FarmMapper;
 import ase_pr_inso_01.farm_service.models.Farm;
 import ase_pr_inso_01.farm_service.models.Field;
 import ase_pr_inso_01.farm_service.repository.FarmRepository;
@@ -8,6 +9,7 @@ import ase_pr_inso_01.farm_service.service.FarmService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,11 +17,27 @@ import java.util.Optional;
 public class FarmServiceImpl implements FarmService {
 
     private final FarmRepository farmRepository;
+    private final FarmMapper farmMapper;
     private final RestTemplate restTemplate;
 
-    public FarmServiceImpl(FarmRepository farmRepository, RestTemplate restTemplate) {
+    public FarmServiceImpl(FarmRepository farmRepository, FarmMapper farmMapper, RestTemplate restTemplate) {
         this.farmRepository = farmRepository;
+        this.farmMapper = farmMapper;
         this.restTemplate = restTemplate;
+    }
+
+    @Override
+    public FarmDetailsDto createFarm(FarmCreateDto farm, String email) throws Exception {
+        UserDetailsDto user = this.getUserDetails(email);
+
+        if (farmRepository.existsByNameAndUserId(farm.name(), user.getId())) {
+            throw new RuntimeException("You already have a farm with this name");
+        }
+
+        Farm createdFarm = farmMapper.farmCreateDtoToFarm(farm, user.getId());
+        farmRepository.save(createdFarm);
+
+        return farmMapper.farmToFarmDetailsDto(createdFarm);
     }
 
     /**
@@ -37,58 +55,13 @@ public class FarmServiceImpl implements FarmService {
     }
 
     @Override
-    public Farm createFarm(FarmCreateDto dto, String email) throws Exception {
-        UserDetailsDto user = this.getUserDetails(email);
-
-        if (farmRepository.existsByNameAndUserId(dto.getName(), user.getId())) {
-            throw new RuntimeException("You already have a farm with this name");
-        }
-
-        Farm farm = new Farm();
-        farm.setName(dto.getName());
-        farm.setLatitude(dto.getLatitude());
-        farm.setLongitude(dto.getLongitude());
-        farm.setSoilType(dto.getSoilType());
-        farm.setFields(dto.getFields());
-        farm.setUserId(user.getId());
-
-        return farmRepository.save(farm);
-    }
-
-    @Override
-    public Farm getFarmByName(String name) {
-        return null;
-    }
-
-    @Override
     public List<FarmDetailsDto> getFarmsByUserEmail(String email) throws Exception {
         UserDetailsDto user = this.getUserDetails(email);
         return this.getFarmsByUserId(user.getId());
     }
 
-
-
     @Override
-    public List<FarmDetailsDto> getFarmsByUserId(String userId) {
-        List<Farm> farms = farmRepository.findByUserId(userId);
-
-        return farms.stream()
-                .map(f -> new FarmDetailsDto(
-                        f.getId(),
-                        f.getName(),
-                        f.getLocation(),
-                        f.getLatitude(),
-                        f.getLongitude(),
-                        f.getSoilType(),
-                        f.getFields(),
-                        f.getRecommendations(),
-                        f.getUserId()
-                ))
-                .toList();
-    }
-
-    @Override
-    public void updateField(String farmId, FieldUpdateDto fieldUpdate, String email) throws Exception {
+    public FarmDetailsDto updateField(String farmId, FieldDetailsDto fieldUpdate, String email) throws Exception {
         UserDetailsDto user = this.getUserDetails(email);
 
         // Fetch the farm by ID
@@ -105,24 +78,24 @@ public class FarmServiceImpl implements FarmService {
             throw new RuntimeException("Unauthorized: This farm does not belong to you");
         }
 
-        List<Field> fields = List.of(farm.getFields());
+        Field[] fields = farm.getFields();
 
         // Find the field to update
-        Field fieldToUpdate = fields.stream()
-                .filter(f -> f.getId().equals(fieldUpdate.getId()))
+        Field fieldToUpdate = Arrays.stream(fields)
+                .filter(f -> f.getId().equals(fieldUpdate.id()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Field not found with ID: " + fieldUpdate.getId()));
+                .orElseThrow(() -> new RuntimeException("Field not found with ID: " + fieldUpdate.id()));
 
         // Update the found field
-        fieldToUpdate.setStatus(fieldUpdate.getStatus());
-        fieldToUpdate.setSeedType(fieldUpdate.getSeedType());
-        fieldToUpdate.setPlantedDate(fieldUpdate.getPlantedDate());
-        fieldToUpdate.setGrowthStage(fieldUpdate.getGrowthStage());
+        fieldToUpdate.setStatus(fieldUpdate.status());
+        fieldToUpdate.setSeedType(fieldUpdate.seedType());
+        fieldToUpdate.setPlantedDate(fieldUpdate.plantedDate());
+        fieldToUpdate.setGrowthStage(fieldUpdate.growthStage());
 
-        // Save the updated farm
-        farmRepository.save(farm);
+        // Save the changes
+        Farm updatedFarm = farmRepository.save(farm);
+        return farmMapper.farmToFarmDetailsDto(updatedFarm);
     }
-
 
     @Override
     public FarmDetailsDto getFarmById(String farmId, String email) throws Exception {
@@ -141,17 +114,7 @@ public class FarmServiceImpl implements FarmService {
             throw new RuntimeException("Unauthorized: This farm does not belong to you");
         }
 
-        return new FarmDetailsDto(
-                farm.getId(),
-                farm.getName(),
-                farm.getLocation(),
-                farm.getLatitude(),
-                farm.getLongitude(),
-                farm.getSoilType(),
-                farm.getFields(),
-                farm.getRecommendations(),
-                farm.getUserId()
-        );
+        return farmMapper.farmToFarmDetailsDto(farm);
     }
 
     @Override
@@ -188,5 +151,11 @@ public class FarmServiceImpl implements FarmService {
         } catch (Exception e) {
             throw new Exception("User not found: " + email);
         }
+    }
+
+    private List<FarmDetailsDto> getFarmsByUserId(String userId) {
+        return farmRepository.findByUserId(userId).stream()
+                .map(farmMapper::farmToFarmDetailsDto)
+                .toList();
     }
 }

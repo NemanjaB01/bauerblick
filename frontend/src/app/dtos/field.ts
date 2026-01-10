@@ -1,25 +1,17 @@
 import { FieldStatus } from "../models/FieldStatus";
 import { GrowthStage } from "../models/GrowthStage";
-import { SeedType } from "../models/Seed";
+import { SeedType } from "../models/SeedType";
 
 export class FieldDetailsDto {
   id!: number;
-  status!: string; //TODO: enum / type
-  seedType?: string; //TODO: enum / type
+  status!: FieldStatus;
+  seedType?: SeedType;
   plantedDate?: Date;
   harvestDate?: Date;
   growthStage?: GrowthStage;
 }
 
-export class FieldUpdateDto {
-  id!: number;
-  status!: string; //TODO: enum / type
-  seedType!: string; //TODO: enum / type
-  plantedDate!: Date;
-  growthStage?: GrowthStage;
-}
-
 export class FieldCreateDto {
   id!: number;
-  status: FieldStatus = 0; // Default to Empty
+  status!: FieldStatus;
 }

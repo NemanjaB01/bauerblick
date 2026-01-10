@@ -1,7 +1,6 @@
 import { Recommendation } from "../models/Recommendation";
 import { SoilType } from "../models/SoilType";
 import { FieldCreateDto, FieldDetailsDto } from "./field";
-import { Field } from "../models/Field";
 
 export class FarmDetailsDto {
     id!: string;
@@ -9,7 +8,7 @@ export class FarmDetailsDto {
     latitude!: number;
     longitude!: number;
     soilType!: SoilType;
-    fields!: Field[]; // FieldDetailsDto[]; // TODO: Dto
+    fields!: FieldDetailsDto[];
     recommendations!: Recommendation[]; //TODO: Dto
     userId!: string;
 }
@@ -19,7 +18,7 @@ export class FarmCreateDto {
     latitude!: number;
     longitude!: number;
     soilType!: SoilType;
-    fields!: Field[]; //FieldCreateDto[]; //TODO: Dto
+    fields!: FieldCreateDto[];
 }
 
 export interface FarmCheckResponse {

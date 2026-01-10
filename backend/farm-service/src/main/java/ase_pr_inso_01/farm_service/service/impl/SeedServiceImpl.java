@@ -35,18 +35,18 @@ public class SeedServiceImpl implements SeedService {
 
     @Override
     public SeedDto getByDisplayName(String displayName) {
-        SeedType type = Arrays.stream(SeedType.values())
-                .filter(t -> t.getDisplayName().equalsIgnoreCase(displayName))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No SeedType with displayName: " + displayName));
-
-        Optional<Seed> seedOpt = seedRepository.findBySeedType(type);
-
-        if (seedOpt.isEmpty()) {
-            throw new RuntimeException("No Seed found for SeedType: " + displayName);
-        }
-
-        return mapToDto(seedOpt.get());
+//        SeedType type = Arrays.stream(SeedType.values())
+//                .filter(t -> t.getDisplayName().equalsIgnoreCase(displayName))
+//                .findFirst()
+//                .orElseThrow(() -> new RuntimeException("No SeedType with displayName: " + displayName));
+//
+//        Optional<Seed> seedOpt = seedRepository.findBySeedType(type);
+//
+//        if (seedOpt.isEmpty()) {
+//            throw new RuntimeException("No Seed found for SeedType: " + displayName);
+//        }
+        return new SeedDto();// TODO
+//        return mapToDto(seedOpt.get());
     }
 
     private SeedDto mapToDto(Seed seed) {
@@ -55,11 +55,11 @@ public class SeedServiceImpl implements SeedService {
         dto.setId(seed.getId());
         dto.setSeedType(seed.getSeedType());
 
-        if (seed.getDisplayName() != null) {
-            dto.setDisplayName(seed.getDisplayName());
-        } else if (seed.getSeedType() != null) {
-            dto.setDisplayName(seed.getSeedType().getDisplayName());
-        }
+//        if (seed.getDisplayName() != null) {
+//            dto.setDisplayName(seed.getDisplayName());
+//        } else if (seed.getSeedType() != null) {
+//            dto.setDisplayName(seed.getSeedType()); //TODO
+//        }
 
         dto.setScientificName(seed.getScientificName());
 

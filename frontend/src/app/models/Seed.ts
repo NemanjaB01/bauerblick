@@ -1,11 +1,4 @@
-
-export type SeedType =
-  | 'WHEAT'
-  | 'CORN'
-  | 'BARLEY'
-  | 'PUMPKIN'
-  | 'BLACK_GRAPES'
-  | 'WHITE_GRAPES';
+import { SeedType } from "./SeedType";
 
 export interface Seed {
   id: string;

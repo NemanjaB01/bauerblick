@@ -142,6 +142,9 @@ public class WeatherMessageListener {
 
             if (dto.getTime() != null) {
                 daily.setDate(parseDateTime(dto.getTime()));
+            } else {
+                log.warn("Missing date in forecast DTO, defaulting to NOW");
+                daily.setDate(LocalDateTime.now());
             }
             dailyList.add(daily);
         }

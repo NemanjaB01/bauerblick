@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import {Subscription} from 'rxjs';
 import { take } from 'rxjs/operators';
 import { RecommendationsWebSocketService, RecommendationData, ConnectionStatus } from '../../services/websocket-service/recommendations-websocket.service';
+import { NotificationService } from '../../services/notification-service/notification-service';
 import { UserService } from '../../services/user-service/user-service';
 import { FarmService } from '../../services/farm-service/farm-service';
 
@@ -41,7 +42,8 @@ export class Recommendations implements OnInit, OnDestroy {
   constructor(
     private recommendationsService: RecommendationsWebSocketService,
     private userService: UserService,
-    private farmService: FarmService
+    private farmService: FarmService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -74,6 +76,43 @@ export class Recommendations implements OnInit, OnDestroy {
         console.error('Recommendations: Failed to fetch profile', err);
       }
     });
+
+    this.mainSubscription = this.farmService.selectedFarm$.subscribe(farm => {
+      if (farm && farm.id) {
+        this.currentFarm = farm;
+
+        this.notificationService.getAlertHistory(farm.id).subscribe({
+          next: (history) => {
+            const recsHistory = history.filter(h =>
+              h.recommendationType === 'IRRIGATE_SOON' ||
+              h.recommendationType === 'DELAY_IRRIGATION'  ||
+              h.recommendationType === 'MONITOR_CONDITIONS'  ||
+              h.recommendationType === 'CONTINUE_NORMAL'  ||
+              h.recommendationType === 'DELAY_OPERATIONS'  ||
+              h.recommendationType === 'DISEASE_PREVENTION'  ||
+              h.recommendationType === 'NUTRIENT_CHECK'  ||
+              h.recommendationType === 'PLANNING_ALERT'  ||
+              h.recommendationType === 'HEAT_STRESS_PREVENTION'  ||
+              h.recommendationType === 'PEST_RISK'
+
+            );
+
+            this.recommendations = recsHistory.map(h => ({
+              id: h.id,
+              userId: h.userId,
+              farmId: h.farmId,
+              recommendedSeed: '',
+              recommendationType: h.recommendationType,
+              advice: h.message,
+              reasoning: h.reasoning,
+              weatherTimestamp: h.createdAt,
+              metrics: {},
+              receivedAt: h.createdAt
+            }));
+          }
+        });
+      }
+    });
   }
 
   private subscribeToFarmChanges() {
@@ -103,27 +142,11 @@ export class Recommendations implements OnInit, OnDestroy {
     this.recommendationsSubscription = this.recommendationsService.getRecommendationUpdates().subscribe({
       next: (data: RecommendationData) => {
         if (this.currentFarm && data.farmId === this.currentFarm.id) {
-          console.log('New recommendation received for current farm:', data);
+          this.recommendations.unshift(data);
+          console.log('New recommendation received and added:', data);
         }
       },
       error: (error) => console.error('Error in recommendation updates:', error)
-    });
-
-    this.listSubscription = this.recommendationsService.getAllRecommendations().subscribe({
-      next: (recommendations: RecommendationData[]) => {
-        if (this.currentFarm) {
-          this.recommendations = recommendations.filter(r => r.farmId === this.currentFarm?.id);
-        } else {
-          this.recommendations = [];
-        }
-
-        console.log('Recommendations list updated:', this.recommendations.length);
-
-        if (this.isModalOpen && this.currentRecommendationIndex >= this.recommendations.length) {
-          this.currentRecommendationIndex = Math.max(0, this.recommendations.length - 1);
-        }
-      },
-      error: (error) => console.error('Error in recommendations list:', error)
     });
 
     this.statusSubscription = this.recommendationsService.getConnectionStatus().subscribe({
@@ -381,6 +404,10 @@ export class Recommendations implements OnInit, OnDestroy {
    * Clear all recommendations
    */
   clearAllRecommendations(): void {
+    this.recommendations.forEach(rec => {
+      this.notificationService.markAsRead(rec.id).subscribe();
+    });
+
     this.recommendationsService.clearRecommendations();
     this.recommendations = [];
     this.closeModal();
@@ -389,20 +416,29 @@ export class Recommendations implements OnInit, OnDestroy {
   /**
    * Delete current recommendation
    */
-  deleteCurrentRecommendation(): void {
+  deleteCurrentRecommendation(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
     const current = this.getCurrentRecommendation();
     if (current) {
-      this.recommendationsService.removeRecommendation(current.id);
+      this.notificationService.markAsRead(current.id).subscribe({
+        next: () => {
+          console.log(`Recommendation ${current.id} marked as read/deleted`);
 
-      this.recommendations = this.recommendations.filter(r => r.id !== current.id);
+          this.recommendations = this.recommendations.filter(r => r.id !== current.id);
 
-      if (this.currentRecommendationIndex >= this.recommendations.length && this.recommendations.length > 0) {
-        this.currentRecommendationIndex = this.recommendations.length - 1;
-      }
+          if (this.currentRecommendationIndex >= this.recommendations.length) {
+            this.currentRecommendationIndex = Math.max(0, this.recommendations.length - 1);
+          }
 
-      if (this.recommendations.length === 0) {
-        this.closeModal();
-      }
+          if (this.recommendations.length === 0) {
+            this.closeModal();
+          }
+        },
+        error: (err) => console.error('Error deleting recommendation:', err)
+      });
     }
   }
 }

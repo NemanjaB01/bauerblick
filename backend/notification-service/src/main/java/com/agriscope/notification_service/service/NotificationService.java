@@ -1,6 +1,8 @@
 package com.agriscope.notification_service.service;
 
+import com.agriscope.notification_service.model.NotificationDocument;
 import com.agriscope.notification_service.model.Recommendation;
+import com.agriscope.notification_service.repository.NotificationRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +53,7 @@ public class NotificationService {
             "HEAT_STRESS_PREVENTION",
             "PEST_RISK"
     };
+    private final NotificationRepository notificationRepository;
 
     public void processIncomingRecommendation(Recommendation newRec) {
         String farmId = newRec.getFarmId();
@@ -63,19 +67,20 @@ public class NotificationService {
                 newRec.getRecommendationType(),
                 newRec.getRecommendedSeed());
 
-        Recommendation lastRec = lastSentCache.getIfPresent(uniqueKey);
-
-        if (lastRec == null) {
-            sendAndCache(uniqueKey, newRec);
-            return;
-        }
-
-        if (isSignificantChange(lastRec, newRec)) {
-            log.info("Significant change detected, sending update for {}.", newRec.getRecommendationType());
-            sendAndCache(uniqueKey, newRec);
-        } else {
-            log.info("Duplicate alert suppressed (insignificant change).");
-        }
+//        Recommendation lastRec = lastSentCache.getIfPresent(uniqueKey);
+//
+//        if (lastRec == null) {
+//            sendAndCache(uniqueKey, newRec);
+//            return;
+//        }
+//
+//        if (isSignificantChange(lastRec, newRec)) {
+//            log.info("Significant change detected, sending update for {}.", newRec.getRecommendationType());
+//            sendAndCache(uniqueKey, newRec);
+//        } else {
+//            log.info("Duplicate alert suppressed (insignificant change).");
+//        }
+        sendAndCache(uniqueKey, newRec);
     }
 
     private void sendAndCache(String key, Recommendation rec) {
@@ -94,7 +99,25 @@ public class NotificationService {
             webSocketService.sendRecommendationToFarm(rec.getFarmId(), rec);
         }
 
-//        lastSentCache.put(key, rec);
+        try {
+            NotificationDocument doc = new NotificationDocument();
+            doc.setId(null);
+            doc.setFarmId(rec.getFarmId());
+            doc.setUserId(rec.getUserId());
+            doc.setRecommendationType(rec.getRecommendationType());
+            doc.setMessage(rec.getAdvice());
+            doc.setReasoning(rec.getReasoning());
+            doc.setCreatedAt(LocalDateTime.now());
+            doc.setExpiryDate(LocalDateTime.now());
+            doc.setRead(false);
+
+            notificationRepository.save(doc);
+            log.info("Alert saved to DB for farm: {}", rec.getFarmId());
+        } catch (Exception e) {
+            log.error("Failed to save alert to DB", e);
+        }
+
+        lastSentCache.put(key, rec);
     }
 
     public void markAsDelivered(String messageId) {

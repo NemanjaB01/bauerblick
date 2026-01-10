@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { NotificationService } from '../../services/notification-service/notification-service';
 import { WeatherWebSocketService, WeatherData, ConnectionStatus } from '../../services/websocket-service/weather-websocket.service';
 import { UserService } from '../../services/user-service/user-service';
 import { FarmService } from '../../services/farm-service/farm-service';
@@ -38,12 +39,12 @@ export class WeatherWidget implements OnInit, OnDestroy {
   private userId: string | null = null;
   private currentFarm: Farm | null = null;
 
-  private readonly MAX_CACHE_AGE = 10 * 60 * 1000;
 
   constructor(
     private weatherService: WeatherWebSocketService,
     private userService: UserService,
-    private farmService: FarmService
+    private farmService: FarmService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -102,22 +103,31 @@ export class WeatherWidget implements OnInit, OnDestroy {
   private subscribeToFarmChanges() {
     this.mainSubscription = this.farmService.selectedFarm$.subscribe(farm => {
       if (farm && farm.id) {
-        console.log('WeatherWidget: Farm changed to', farm.name);
-
-        if (this.currentFarm && this.currentFarm.id !== farm.id) {
-          this.weatherService.disconnect();
-        }
-
-        this.currentFarm = farm;
         this.locationName = `Loading weather for ${farm.name}...`;
+        this.currentFarm = farm;
 
-        this.loadCachedData();
-        this.connectWebSocket();
-      } else {
-        console.log('WeatherWidget: No farm selected');
-        this.locationName = 'Select a farm';
-        this.weatherData = null;
-        this.weatherInfo = null;
+        this.weatherService.setFarmForUser(this.userId!, farm.id);
+
+        this.notificationService.getLatestWeather(farm.id).subscribe({
+          next: (data) => {
+            if (data) {
+              console.log('Loaded weather from DB:', data);
+
+              const mappedData: WeatherData = {
+                user_id: data.userId,
+                farm_id: data.farmId,
+                time: data.timestamp,
+                lat: 0,
+                lon: 0,
+                weather_code: data.weatherCode,
+                temp: data.temp
+              };
+
+              this.handleWeatherData(mappedData);
+            }
+          },
+          error: (err) => console.log('No weather history yet or error:', err)
+        });
       }
     });
   }
@@ -160,35 +170,6 @@ export class WeatherWidget implements OnInit, OnDestroy {
     }
   }
 
-  private getCacheKey(): string {
-    if (!this.userId || !this.currentFarm) return 'weather_cache_temp';
-    return `weather_cache_${this.userId}_${this.currentFarm.id}`;
-  }
-
-  private loadCachedData(): void {
-    try {
-      const key = this.getCacheKey();
-      const cached = localStorage.getItem(key);
-      if (cached) {
-        const cacheData = JSON.parse(cached);
-        const age = new Date().getTime() - new Date(cacheData.timestamp).getTime();
-
-        if (age < this.MAX_CACHE_AGE) {
-          this.weatherData = cacheData.weatherData;
-          this.lastUpdated = new Date(cacheData.timestamp);
-          this.weatherInfo = cacheData.weatherInfo;
-
-          if (this.currentFarm?.name) {
-            this.locationName = this.currentFarm.name;
-          } else {
-            this.locationName = cacheData.locationName || 'Unknown Location';
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Cache load error:', error);
-    }
-  }
 
   handleWeatherData(data: WeatherData) {
     if (!this.currentFarm || data.farm_id !== this.currentFarm.id) {
@@ -201,24 +182,6 @@ export class WeatherWidget implements OnInit, OnDestroy {
 
     if (this.currentFarm) {
       this.locationName = this.currentFarm.name;
-    }
-
-    this.saveToCache(data, this.locationName, this.weatherInfo || undefined);
-  }
-
-  private saveToCache(data: WeatherData, locationName?: string, weatherInfo?: WeatherInfo): void {
-    try {
-      const cacheData = {
-        weatherData: data,
-        weatherInfo: weatherInfo,
-        locationName: locationName,
-        timestamp: new Date().toISOString(),
-        userId: this.userId,
-        farmId: this.currentFarm?.id
-      };
-      localStorage.setItem(this.getCacheKey(), JSON.stringify(cacheData));
-    } catch (error) {
-      console.error(`Error saving cache:`, error);
     }
   }
 

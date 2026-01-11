@@ -105,6 +105,10 @@ services:
       - spring.profiles.active=prod
       - spring.data.mongodb.uri=mongodb://seeds-db:27017/seedsdb
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - spring.rabbitmq.host=rabbitmq
+      - spring.rabbitmq.port=5672
 
   # Notification Service
   notification-service:

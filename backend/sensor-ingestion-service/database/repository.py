@@ -37,7 +37,8 @@ def get_all_users_with_farms():
 
                 if "fields" in farm:
                     for field in farm["fields"]:
-                        if field.get("status") == "planted" and "seedType" in field:
+                        status = field.get("status", "").upper()
+                        if status == "PLANTED" and "seedType" in field:
                             raw_seed = field["seedType"]
 
                             crops.append(raw_seed)

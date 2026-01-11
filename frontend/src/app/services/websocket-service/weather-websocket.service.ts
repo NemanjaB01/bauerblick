@@ -34,31 +34,25 @@ export class WeatherWebSocketService {
   private currentUserId: string | null = null;
   private currentFarmId: string | null = null;
 
+  private weatherSubscription: any = null;
+
   constructor() {}
 
   setFarmForUser(userId: string, farmId: string): void {
     console.log(`Setting user ${userId}, farm ${farmId} - Connecting to WebSocket`);
     this.currentUserId = userId;
     this.currentFarmId = farmId;
-    this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
-    this.connectToWebSocket(farmId);
-  }
-
-  setUserId(userId: string): void {
-    console.warn('setUserId is deprecated. Use setFarmForUser(userId, farmId) instead.');
-  }
-
-  setFarmId(farmId: string): void {
-    console.log(`Setting farm ${farmId} (assuming userId is known from context)`);
-    if (!this.currentUserId) {
-      console.error('Cannot set farmId without userId. Call setFarmForUser first.');
-      return;
+    if (this.isConnected()) {
+      console.log('Already connected, switching subscription to new farm...');
+      this.subscribeToWeather(farmId);
+    } else {
+      this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
+      this.connectToWebSocket(farmId);
     }
-    this.setFarmForUser(this.currentUserId, farmId);
   }
 
   private connectToWebSocket(farmId: string): void {
-    if (this.isConnecting || this.stompClient?.connected) {
+    if (this.isConnecting || this.isConnected()) {
       console.log('Already connecting or connected');
       return;
     }
@@ -117,13 +111,18 @@ export class WeatherWebSocketService {
       return;
     }
 
+    if (this.weatherSubscription) {
+      console.log('Unsubscribing from previous farm weather...');
+      this.weatherSubscription.unsubscribe();
+      this.weatherSubscription = null;
+    }
+
     const topic = `/topic/weather/${farmId}`;
     console.log(`Subscribing to weather for farm: ${topic}`);
 
     this.stompClient.subscribe(topic, (message) => {
       try {
         const weatherData: WeatherData = JSON.parse(message.body);
-        console.log('Received weather data:', weatherData);
 
         if (weatherData.farm_id === this.currentFarmId) {
           this.weatherSubject.next(weatherData);
@@ -146,20 +145,6 @@ export class WeatherWebSocketService {
    */
   getConnectionStatus(): Observable<ConnectionStatus> {
     return this.connectionStatusSubject.asObservable();
-  }
-
-  /**
-   * Get current user ID
-   */
-  getCurrentUserId(): string | null {
-    return this.currentUserId;
-  }
-
-  /**
-   * Get current farm ID
-   */
-  getCurrentFarmId(): string | null {
-    return this.currentFarmId;
   }
 
   /**
@@ -200,5 +185,12 @@ export class WeatherWebSocketService {
 
     this.connectionStatusSubject.next(ConnectionStatus.DISCONNECTED);
     this.isConnecting = false;
+  }
+
+  /**
+   * Check if connected
+   */
+  public isConnected(): boolean {
+    return this.stompClient?.connected || false;
   }
 }

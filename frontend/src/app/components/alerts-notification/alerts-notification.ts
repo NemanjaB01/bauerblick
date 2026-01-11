@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { AlertsWebSocketService, AlertData, ConnectionStatus } from '../../services/websocket-service/ alert-websocket.service';
+import { NotificationService } from '../../services/notification-service/notification-service';
 import { UserService } from '../../services/user-service/user-service';
 import { FarmService } from '../../services/farm-service/farm-service';
 
@@ -37,30 +38,34 @@ export class AlertsNotification implements OnInit, OnDestroy {
   constructor(
     private alertsService: AlertsWebSocketService,
     private userService: UserService,
-    private farmService: FarmService
+    private farmService: FarmService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
-    this.setupWebSocketSubscriptions();
-    this.initializeDataStream();
-  }
+    this.userService.getProfile().pipe(take(1)).subscribe({
+      next: (profile) => {
+        if (profile && profile.email) {
+          console.log('User email set as ID:', profile.email);
+          this.userId = profile.email;
 
-  private initializeDataStream() {
-    this.userService.getProfile().pipe(
-      take(1)
-    ).subscribe({
-      next: (userProfile) => {
-        if (userProfile && userProfile.email) {
-          this.userId = userProfile.email;
-          console.log('AlertsNotification: User identified via email:', this.userId);
-
-          this.subscribeToFarmChanges();
-        } else {
-          console.error('AlertsNotification: Could not load User Email');
+          this.setupWebSocketSubscriptions();
+          this.subscribeToFarmUpdates();
         }
       },
-      error: (err) => {
-        console.error('AlertsNotification: Failed to fetch profile', err);
+      error: (err) => console.error('Error fetching profile:', err)
+    });
+  }
+
+  private subscribeToFarmUpdates() {
+    this.mainSubscription = this.farmService.selectedFarm$.subscribe(farm => {
+      if (farm && farm.id && this.userId) {
+        console.log('Farm switched/loaded:', farm.name);
+        this.currentFarm = farm;
+
+        this.alertsService.setFarmForUser(this.userId, farm.id);
+
+        this.loadHistoryFromBackend(farm.id);
       }
     });
   }
@@ -70,69 +75,53 @@ export class AlertsNotification implements OnInit, OnDestroy {
     this.disconnectWebSocket();
   }
 
-  private subscribeToFarmChanges() {
-    this.mainSubscription = this.farmService.selectedFarm$.subscribe(farm => {
-      if (farm && farm.id) {
-        console.log('AlertsNotification: Farm changed to', farm.name);
+  private loadHistoryFromBackend(farmId: string) {
+    this.notificationService.getAlertHistory(farmId).subscribe({
+      next: (history) => {
+        console.log('Loaded alerts history:', history.length);
 
-        if (this.currentFarm && this.currentFarm.id !== farm.id) {
-          this.alertsService.disconnect();
-          this.alertsService.clearAlerts();
-        }
+        const alertsHistory = history.filter(h =>
+          h.recommendationType.includes('FROST_ALERT') ||
+          h.recommendationType === 'IRRIGATE_NOW' ||
+          h.recommendationType === 'HEAT_ALERT'   ||
+          h.recommendationType === 'SAFETY_ALERT' ||
+          h.recommendationType === 'STORM_ALERT'
+        );
 
-        this.currentFarm = farm;
-        this.connectWebSocket();
-      } else {
-        console.log('AlertsNotification: No farm selected');
-        this.alertsService.disconnect();
-        this.alerts = [];
-      }
+        const mappedHistory = alertsHistory.map(h => ({
+          id: h.id,
+          userId: h.userId,
+          farmId: h.farmId,
+          recommendedSeed: '',
+          recommendationType: h.recommendationType,
+          advice: h.message,
+          reasoning: h.reasoning,
+          weatherTimestamp: h.createdAt,
+          metrics: {},
+          receivedAt: h.createdAt,
+          isRead: h.read
+        }));
+
+        this.alerts = mappedHistory;
+      },
+      error: (err) => console.error('Failed to load history', err)
     });
   }
 
-  private setupWebSocketSubscriptions(): void {
-    this.alertsSubscription = this.alertsService.getAlertUpdates().subscribe({
-      next: (alert: AlertData) => {
-        if (this.currentFarm && alert.farmId === this.currentFarm.id) {
-          console.log('New alert received for current farm:', alert);
-        }
-      },
-      error: (error) => console.error('Error in alert updates:', error)
-    });
+  private setupWebSocketSubscriptions() {
+    this.statusSubscription = this.alertsService.getConnectionStatus()
+      .subscribe(status => this.connectionStatus = status);
 
-    this.listSubscription = this.alertsService.getAllAlerts().subscribe({
-      next: (alerts: AlertData[]) => {
-        if (this.currentFarm) {
-          this.alerts = alerts.filter(a => a.farmId === this.currentFarm?.id);
-        } else {
-          this.alerts = [];
-        }
-      },
-      error: (error) => console.error('Error in alerts list:', error)
-    });
+    this.listSubscription = this.alertsService.getAllAlerts()
+      .subscribe(alerts => {
+      });
 
-    this.statusSubscription = this.alertsService.getConnectionStatus().subscribe({
-      next: (status: ConnectionStatus) => {
-        this.connectionStatus = status;
-
-        if (status === ConnectionStatus.DISCONNECTED && this.userId && this.currentFarm) {
-          setTimeout(() => {
-            if (this.connectionStatus === ConnectionStatus.DISCONNECTED) {
-              this.reconnectWebSocket();
-            }
-          }, 5000);
-        }
-      },
-      error: (error) => console.error('Error in connection status:', error)
-    });
+    this.alertsSubscription = this.alertsService.getAlertUpdates()
+      .subscribe(newAlert => {
+        this.alerts = [newAlert, ...this.alerts];
+      });
   }
 
-  private connectWebSocket(): void {
-    if (!this.userId || !this.currentFarm) return;
-
-    console.log(`Connecting alerts for user ${this.userId}, farm ${this.currentFarm.id}`);
-    this.alertsService.setFarmForUser(this.userId, this.currentFarm.id);
-  }
 
   private reconnectWebSocket(): void {
     console.log('Reconnecting alerts WebSocket...');
@@ -269,11 +258,24 @@ export class AlertsNotification implements OnInit, OnDestroy {
   }
 
   dismissAlert(alertId: string): void {
-    this.alertsService.removeAlert(alertId);
+    this.notificationService.markAsRead(alertId).subscribe({
+      next: () => {
+        console.log(`Alert ${alertId} marked as read in DB`);
+
+        this.alertsService.removeAlert(alertId);
+        this.alerts = this.alerts.filter(a => a.id !== alertId);
+      },
+      error: (err) => console.error('Failed to mark alert as read', err)
+    });
   }
 
   clearAllAlerts(): void {
+    this.alerts.forEach(alert => {
+      this.notificationService.markAsRead(alert.id).subscribe();
+    });
+
     this.alertsService.clearAlerts();
+    this.alerts = [];
     this.closeDropdown();
   }
 }

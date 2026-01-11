@@ -50,8 +50,14 @@ export class AlertsWebSocketService implements OnDestroy {
     console.log(`Alerts: Setting user ${userId}, farm ${farmId} - Connecting to WebSocket`);
     this.currentUserId = userId;
     this.currentFarmId = farmId;
-    this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
-    this.connectToWebSocket(farmId);
+    if (this.isConnected()) {
+      console.log('Already connected to alerts, switching subscription...');
+      this.disconnect();
+      setTimeout(() => this.connectToWebSocket(farmId), 100);
+    } else {
+      this.connectionStatusSubject.next(ConnectionStatus.CONNECTING);
+      this.connectToWebSocket(farmId);
+    }
   }
 
   private sendAck(alertId: string, farmId: string): void {

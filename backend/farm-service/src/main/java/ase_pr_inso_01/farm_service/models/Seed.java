@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
-@Document(collection = "seeds")
+@Document(collection = "seed")
 @Getter
 @Setter
 public class Seed {

@@ -51,6 +51,10 @@ export class Sidebar {
     this.router.navigate(["home"])
   }
 
+  goToFeedback() {
+    this.router.navigate(["feedback"])
+  }
+
   selectFarm(farm: Farm) {
     this.selectedFarm = farm;
     this.farmService.selectFarm(farm);

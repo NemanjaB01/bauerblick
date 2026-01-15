@@ -1,0 +1,172 @@
+<div class="page-container">
+
+  <app-topbar
+    [showFarmTitle]="false">
+  </app-topbar>
+
+  <div class="body-container">
+
+    <app-sidebar class="sidebar"></app-sidebar>
+
+    <div class="content-area">
+      <div class="feedback-container">
+        <!-- Harvest Cards Grid -->
+        <div class="harvests-grid">
+          <div *ngFor="let harvest of harvests"
+               [ngClass]="getCardClass(harvest.status)"
+               (click)="harvest.status === 'ready' ? openFeedbackModal(harvest) : null">
+
+            <!-- Crop Icon -->
+            <div class="crop-icon">
+              <img [src]="'assets/icons/' + harvest.cropIcon" [alt]="harvest.cropType" />
+            </div>
+
+            <!-- Card Content -->
+            <div class="card-content">
+              <h3 class="crop-title" [class.locked-text]="harvest.status === 'locked'">
+                {{ harvest.cropType }} harvest
+              </h3>
+
+              <div class="card-details">
+                <p class="detail-item" [class.locked-text]="harvest.status === 'locked'">
+                  <strong>Farm name:</strong> {{ harvest.farmName }}
+                </p>
+
+                <p class="detail-item" *ngIf="harvest.status !== 'locked'">
+                  <strong>Harvest date:</strong> {{ harvest.harvestDate }}
+                </p>
+
+                <p class="detail-item" *ngIf="harvest.status === 'locked'" [class.locked-text]="true">
+                  <strong>Estimated harvest:</strong> {{ harvest.estimatedHarvest }}
+                </p>
+              </div>
+
+              <!-- Lock Overlay for Locked Harvests -->
+              <div *ngIf="harvest.status === 'locked'" class="lock-overlay">
+                <div class="lock-icon">
+                  <img src="assets/icons/lock.svg" alt="Locked" />
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="card-actions">
+                <button *ngIf="harvest.status === 'ready'"
+                        class="btn btn-write-feedback"
+                        (click)="openFeedbackModal(harvest); $event.stopPropagation()">
+                  Write a feedback
+                </button>
+
+                <button *ngIf="harvest.status === 'completed'"
+                        class="btn btn-view-feedback"
+                        (click)="viewFeedback(harvest); $event.stopPropagation()">
+                  See your feedback
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div *ngIf="showFeedbackModal" class="modal-overlay" (click)="closeFeedbackModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="modal-title-section">
+            <div class="modal-icon">
+              <img [src]="'assets/icons/' + selectedHarvest?.cropIcon" [alt]="selectedHarvest?.cropType" />
+            </div>
+            <h2 class="modal-title">{{ selectedHarvest?.cropType }} harvest</h2>
+          </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <h3 class="feedback-question">How was the harvest?</h3>
+
+          <!-- Rating Categories -->
+          <div class="rating-section">
+            <!-- Seed Quality -->
+            <div class="rating-row">
+              <label class="rating-label">Seed quality:</label>
+              <div class="stars">
+              <span *ngFor="let star of getStarArray(5); let i = index"
+                    class="star"
+                    [class.filled]="i < seedQuality"
+                    [class.readonly]="isReadOnly()"
+                    (click)="setRating('seedQuality', i + 1)">
+                {{ i < seedQuality ? '★' : '☆' }}
+              </span>
+              </div>
+            </div>
+
+            <!-- Irrigation -->
+            <div class="rating-row">
+              <label class="rating-label">Irrigation:</label>
+              <div class="stars">
+              <span *ngFor="let star of getStarArray(5); let i = index"
+                    class="star"
+                    [class.filled]="i < irrigation"
+                    [class.readonly]="isReadOnly()"
+                    (click)="setRating('irrigation', i + 1)">
+                {{ i < irrigation ? '★' : '☆' }}
+              </span>
+              </div>
+            </div>
+
+            <!-- App Recommendations -->
+            <div class="rating-row">
+              <label class="rating-label">App recommendations:</label>
+              <div class="stars">
+              <span *ngFor="let star of getStarArray(5); let i = index"
+                    class="star"
+                    [class.filled]="i < appRecommendations"
+                    [class.readonly]="isReadOnly()"
+                    (click)="setRating('appRecommendations', i + 1)">
+                {{ i < appRecommendations ? '★' : '☆' }}
+              </span>
+              </div>
+            </div>
+
+            <!-- Overall Experience -->
+            <div class="rating-row">
+              <label class="rating-label">Overall experience:</label>
+              <div class="stars">
+              <span *ngFor="let star of getStarArray(5); let i = index"
+                    class="star"
+                    [class.filled]="i < overallExperience"
+                    [class.readonly]="isReadOnly()"
+                    (click)="setRating('overallExperience', i + 1)">
+                {{ i < overallExperience ? '★' : '☆' }}
+              </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comment Section -->
+          <div class="comment-section">
+          <textarea
+            class="comment-textarea"
+            [(ngModel)]="comment"
+            [readonly]="isReadOnly()"
+            placeholder="Enter your comment here...">
+          </textarea>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+          <button *ngIf="!isReadOnly()"
+                  class="btn btn-submit"
+                  (click)="submitFeedback()">
+            Submit
+          </button>
+          <button class="btn btn-cancel" (click)="closeFeedbackModal()">
+            {{ isReadOnly() ? 'Close' : 'Cancel' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

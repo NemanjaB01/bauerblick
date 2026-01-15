@@ -8,6 +8,7 @@ import { NewFarmComponent } from './components/new-farm-component/new-farm-compo
 import { LandingPageComponent } from './components/landing-page/landing-page';
 import { SeedsComponent } from './components/seeds/seeds';
 import { Profile } from './components/profile/profile';
+import {Feedback} from './components/feedback/feedback';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -16,5 +17,6 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'new-farm', component: NewFarmComponent, canActivate: [AuthGuard] },
   { path: 'seeds', component: SeedsComponent, canActivate: [AuthGuard] },
-  { path: 'profile', component: Profile, canActivate: [AuthGuard] }
+  { path: 'profile', component: Profile, canActivate: [AuthGuard] },
+  { path: 'feedback', component: Feedback, canActivate: [AuthGuard] }
 ];

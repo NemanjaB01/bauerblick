@@ -27,4 +27,8 @@ public class Seed {
     private Double minSoilMoisture;
     private Double allowedWaterDeficit;
     private Double seedCoefficient;
+
+    private Integer daysToYoung;
+    private Integer daysToMature;
+    private Integer daysToReady;
 }

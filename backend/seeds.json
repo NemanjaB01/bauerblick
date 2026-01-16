@@ -2,6 +2,9 @@
   {
     "seedType": "WHEAT",
     "displayName": "Wheat",
+    "daysToYoung": 30,
+    "daysToMature": 70,
+    "daysToReady": 110,
     "scientificName": "Triticum aestivum",
     "minTemperature": 3.0,
     "maxTemperature": 30.0,
@@ -30,6 +33,9 @@
   },
   {
     "seedType": "CORN",
+    "daysToYoung": 25,
+    "daysToMature": 60,
+    "daysToReady": 100,
     "displayName": "Corn",
     "scientificName": "Zea mays",
     "minTemperature": 2.0,
@@ -61,6 +67,9 @@
   {
     "seedType": "BARLEY",
     "displayName": "Barley",
+    "daysToYoung": 25,
+    "daysToMature": 60,
+    "daysToReady": 90,
     "scientificName": "Hordeum vulgare",
     "minTemperature": 2.0,
     "maxTemperature": 28.0,
@@ -92,6 +101,9 @@
   {
     "seedType": "PUMPKIN",
     "displayName": "Pumpkin",
+    "daysToYoung": 20,
+    "daysToMature": 50,
+    "daysToReady": 90,
     "scientificName": "Cucurbita pepo",
     "minTemperature": 5.0,
     "maxTemperature": 32.0,
@@ -122,6 +134,9 @@
   {
     "seedType": "BLACK_GRAPES",
     "displayName": "Black Grapes",
+    "daysToYoung": 45,
+    "daysToMature": 90,
+    "daysToReady": 135,
     "scientificName": "Vitis vinifera",
     "minTemperature": 2.0,
     "maxTemperature": 35.0,
@@ -154,6 +169,9 @@
   {
     "seedType": "WHITE_GRAPES",
     "displayName": "White Grapes",
+    "daysToYoung": 45,
+    "daysToMature": 90,
+    "daysToReady": 135,
     "scientificName": "Vitis vinifera",
     "minTemperature": 1.0,
     "maxTemperature": 32.0,

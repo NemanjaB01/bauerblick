@@ -8,8 +8,11 @@ import ase_pr_inso_01.farm_service.repository.FarmRepository;
 import ase_pr_inso_01.farm_service.service.FarmService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,11 +22,13 @@ public class FarmServiceImpl implements FarmService {
     private final FarmRepository farmRepository;
     private final FarmMapper farmMapper;
     private final RestTemplate restTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
-    public FarmServiceImpl(FarmRepository farmRepository, FarmMapper farmMapper, RestTemplate restTemplate) {
+    public FarmServiceImpl(FarmRepository farmRepository, FarmMapper farmMapper, RestTemplate restTemplate, RabbitTemplate rabbitTemplate) {
         this.farmRepository = farmRepository;
         this.farmMapper = farmMapper;
         this.restTemplate = restTemplate;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
@@ -36,6 +41,9 @@ public class FarmServiceImpl implements FarmService {
 
         Farm createdFarm = farmMapper.farmCreateDtoToFarm(farm, user.getId());
         farmRepository.save(createdFarm);
+
+        FarmDetailsDto farmDto = farmMapper.farmToFarmDetailsDto(createdFarm);
+        sendFarmEvent(user.getId(), email, farmDto, "farm.created");
 
         return farmMapper.farmToFarmDetailsDto(createdFarm);
     }
@@ -94,6 +102,8 @@ public class FarmServiceImpl implements FarmService {
 
         // Save the changes
         Farm updatedFarm = farmRepository.save(farm);
+        FarmDetailsDto farmDto = farmMapper.farmToFarmDetailsDto(updatedFarm);
+        sendFarmEvent(user.getId(), email, farmDto, "farm.updated");
         return farmMapper.farmToFarmDetailsDto(updatedFarm);
     }
 
@@ -157,5 +167,24 @@ public class FarmServiceImpl implements FarmService {
         return farmRepository.findByUserId(userId).stream()
                 .map(farmMapper::farmToFarmDetailsDto)
                 .toList();
+    }
+
+    private void sendFarmEvent(String userId, String email, FarmDetailsDto farmDto, String routingKey) {
+        try {
+            Map<String, Object> message = new HashMap<>();
+            message.put("user_id", userId);
+            message.put("email", email);
+            message.put("farm", farmDto);
+
+            rabbitTemplate.convertAndSend(
+                    "farm_events",
+                    routingKey,
+                    message
+            );
+
+            System.out.println("Sent RabbitMQ event: " + routingKey + " for farm: " + farmDto.id());
+        } catch (Exception e) {
+            System.err.println("Failed to send RabbitMQ event (" + routingKey + "): " + e.getMessage());
+        }
     }
 }

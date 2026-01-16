@@ -86,9 +86,9 @@ rule "Irrigation - WHEAT - Urgent"
 
         if ($stage == GrowthStage.MATURE) {
             urgency = "CRITICAL";
-            context = "Grain filling stage (Nalijevanje zrna): Water stress now reduces kernel weight directly.";
+            context = "Water stress now reduces kernel weight directly.";
         } else if ($stage == GrowthStage.YOUNG) {
-            context = "Stem elongation (Vlatanje): Needs consistent moisture for biomass.";
+            context = "Stem elongation : Needs consistent moisture for biomass.";
         } else if ($stage == GrowthStage.SEEDLING) {
             context = "Seedling stage: Ensure establishment but avoid waterlogging.";
         } else {

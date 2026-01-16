@@ -67,20 +67,19 @@ public class NotificationService {
                 newRec.getRecommendationType(),
                 newRec.getRecommendedSeed());
 
-//        Recommendation lastRec = lastSentCache.getIfPresent(uniqueKey);
-//
-//        if (lastRec == null) {
-//            sendAndCache(uniqueKey, newRec);
-//            return;
-//        }
-//
-//        if (isSignificantChange(lastRec, newRec)) {
-//            log.info("Significant change detected, sending update for {}.", newRec.getRecommendationType());
-//            sendAndCache(uniqueKey, newRec);
-//        } else {
-//            log.info("Duplicate alert suppressed (insignificant change).");
-//        }
-        sendAndCache(uniqueKey, newRec);
+        Recommendation lastRec = lastSentCache.getIfPresent(uniqueKey);
+
+        if (lastRec == null) {
+            sendAndCache(uniqueKey, newRec);
+            return;
+        }
+
+        if (isSignificantChange(lastRec, newRec)) {
+            log.info("Significant change detected, sending update for {}.", newRec.getRecommendationType());
+            sendAndCache(uniqueKey, newRec);
+        } else {
+            log.info("Duplicate alert suppressed (insignificant change).");
+        }
     }
 
     private void sendAndCache(String key, Recommendation rec) {
@@ -101,14 +100,14 @@ public class NotificationService {
 
         try {
             NotificationDocument doc = new NotificationDocument();
-            doc.setId(null);
+            doc.setId(rec.getId());
             doc.setFarmId(rec.getFarmId());
             doc.setUserId(rec.getUserId());
             doc.setRecommendationType(rec.getRecommendationType());
             doc.setMessage(rec.getAdvice());
             doc.setReasoning(rec.getReasoning());
             doc.setCreatedAt(LocalDateTime.now());
-            doc.setExpiryDate(LocalDateTime.now());
+            doc.setExpiryDate(LocalDateTime.now().plusDays(7));
             doc.setRead(false);
 
             notificationRepository.save(doc);

@@ -86,7 +86,7 @@ rule "Irrigation - BLACK GRAPES - Urgent"
 
         if ($stage == GrowthStage.MATURE) {
             urgency = "IMPORTANT";
-            context = "Veraison/Ripening: Excessive stress is now risking leaf loss and sunburn on berries.";
+            context = "Veraison: Excessive stress is now risking leaf loss and sunburn on berries.";
         } else if ($stage == GrowthStage.YOUNG) {
             context = "Vegetative growth: Canopy needs water to establish.";
         } else {

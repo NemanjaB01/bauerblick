@@ -47,6 +47,9 @@ public class RuleEvaluationService {
                 log.warn("No seeds defined for farm {}, skipping seed insertion", weatherData.getFarmId());
             } else {
                 for (FieldDTO field : fields) {
+                    if (field.getSeed_type() == null) {
+                        continue;
+                    }
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         Seed seed = seedService.getSeed(type);
@@ -112,6 +115,9 @@ public class RuleEvaluationService {
             log.info("Inserted {} hours of forecast for General Safety evaluation.", safetyCheckLimit);
             if (fields != null) {
                 for (FieldDTO field : fields) {
+                    if (field.getSeed_type() == null) {
+                        continue;
+                    }
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         Seed seed = seedService.getSeed(type);
@@ -208,6 +214,11 @@ public class RuleEvaluationService {
 
             if (fields != null) {
                 for (FieldDTO field : fields) {
+                    log.info("Processing field: {}", field);
+                    log.info("Field seed: {}", field.getSeed_type());
+                    if (field.getSeed_type() == null) {
+                        continue;
+                    }
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         Seed seed = seedService.getSeed(type);

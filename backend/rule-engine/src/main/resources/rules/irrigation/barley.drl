@@ -86,7 +86,7 @@ rule "Irrigation - BARLEY - Urgent"
 
         if ($stage == GrowthStage.MATURE) {
             urgency = "CRITICAL";
-            context = "Grain filling stage (Nalijevanje zrna): Water stress now reduces yield and quality (protein content issues).";
+            context = "Grain filling stage: Water stress now reduces yield and quality .";
         } else if ($stage == GrowthStage.YOUNG) {
             context = "Stem elongation: Consistent moisture required for optimal head formation.";
         } else if ($stage == GrowthStage.SEEDLING) {

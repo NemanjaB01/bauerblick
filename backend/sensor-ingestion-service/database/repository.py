@@ -52,8 +52,8 @@ def get_all_users_with_farms():
                 transformed_farm = {
                     "id": str(farm["_id"]),
                     "name": farm.get("name", "Unknown Farm"),
-                    "lat": farm.get("latitude"),
-                    "lon": farm.get("longitude"),
+                    "latitude": farm.get("latitude"),
+                    "longitude": farm.get("longitude"),
                     "crops": list(set(crops)),
                     "fields": active_fields
                 }

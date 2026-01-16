@@ -53,6 +53,7 @@ services:
     depends_on:
       - service-registry
       - users-db
+      - farm-service
     environment:
       - spring.profiles.active=prod
       - spring.data.mongodb.uri=mongodb://users-db:27017/usersdb
@@ -66,12 +67,22 @@ services:
       - "8082:8082"
       - "5006:5006"   # expose debug port to host
     depends_on:
-      - service-registry
-      - farms-db
+      service-registry:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      seeds-db:
+        condition: service_started
+      farms-db:
+        condition: service_started
     environment:
       - spring.profiles.active=prod
       - spring.data.mongodb.uri=mongodb://farms-db:27017/farmsdb
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - spring.rabbitmq.host=rabbitmq
+      - spring.rabbitmq.port=5672
 
   # API Gateway
   api-gateway:

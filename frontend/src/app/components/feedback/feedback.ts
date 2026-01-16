@@ -18,12 +18,27 @@ interface HarvestFeedback {
 }
 
 interface FeedbackDetails {
-  seedQuality: number;
-  irrigation: number;
-  appRecommendations: number;
-  overallExperience: number;
-  comment?: string;
-  submittedAt?: Date;
+  submittedAt: Date;
+  answers: FeedbackAnswer[];
+}
+
+interface FeedbackQuestion {
+  id: string;
+  question: string;
+  targetParameter: string;
+  description: string;
+  options: FeedbackOption[];
+}
+
+interface FeedbackOption {
+  label: string;
+  value: number;
+  multiplier: number;
+}
+
+interface FeedbackAnswer {
+  questionId: string;
+  selectedOption: FeedbackOption;
 }
 
 @Component({
@@ -41,21 +56,79 @@ interface FeedbackDetails {
 export class Feedback implements OnInit {
   harvests: HarvestFeedback[] = [];
   showFeedbackModal = false;
+  showViewFeedbackModal = false;
   selectedHarvest: HarvestFeedback | null = null;
 
-  // Rating values for the modal
-  seedQuality = 0;
-  irrigation = 0;
-  appRecommendations = 0;
-  overallExperience = 0;
-  comment = '';
+  // Question-based feedback
+  feedbackQuestions: FeedbackQuestion[] = [];
+  currentQuestionIndex = 0;
+  userAnswers: FeedbackAnswer[] = [];
+  selectedOption: FeedbackOption | null = null;
 
   ngOnInit(): void {
+    this.loadFeedbackQuestions();
     this.loadMockData();
   }
 
   /**
-   * Load mock data - replace later with  API call
+   * Load feedback questions from JSON
+   * TODO: Replace with actual API call to load questions
+   */
+  loadFeedbackQuestions(): void {
+    this.feedbackQuestions = [
+      {
+        id: "timing_urgency",
+        question: "Did the irrigation recommendation arrive on time?",
+        targetParameter: "urgent_deficit_factor",
+        description: "Adjusts how early the system triggers the 'Irrigate Now' alert.",
+        options: [
+          { label: "Late, plants were already wilting", value: -2, multiplier: 0.90 },
+          { label: "Slightly late", value: -1, multiplier: 0.95 },
+          { label: "Right on time", value: 0, multiplier: 1.00 },
+          { label: "Too early, soil was still moist", value: 1, multiplier: 1.05 },
+          { label: "Way too early / Unnecessary", value: 2, multiplier: 1.10 }
+        ]
+      },
+      {
+        id: "moisture_perception",
+        question: "How did the soil moisture feel to the touch when the alert arrived?",
+        targetParameter: "urgent_moisture_factor",
+        description: "Adjusts the system's sensitivity to soil moisture sensor readings.",
+        options: [
+          { label: "Completely dry / Dusty", value: 2, multiplier: 1.10 },
+          { label: "Drier than expected", value: 1, multiplier: 1.05 },
+          { label: "Expected / Normal", value: 0, multiplier: 1.00 },
+          { label: "Wet / Muddy", value: -2, multiplier: 0.90 }
+        ]
+      },
+      {
+        id: "plant_health_visual",
+        question: "How did the plants look visually before irrigation?",
+        targetParameter: "allowedWaterDeficit",
+        description: "Adjusts the general water holding capacity allowance for the plant.",
+        options: [
+          { label: "Lifeless / Yellowing", value: -2, multiplier: 0.90 },
+          { label: "Slight wilting", value: -1, multiplier: 0.95 },
+          { label: "Healthy and firm", value: 0, multiplier: 1.00 },
+          { label: "Lush and green (despite no water)", value: 1, multiplier: 1.05 }
+        ]
+      },
+      {
+        id: "general_growth",
+        question: "In general, how do you rate the plant growth this season?",
+        targetParameter: "seedCoefficient",
+        description: "Adjusts the overall water requirement coefficient for the seed.",
+        options: [
+          { label: "Slow / Stunted growth", value: -1, multiplier: 1.05 },
+          { label: "Normal growth", value: 0, multiplier: 1.00 },
+          { label: "Too fast / Watery", value: 1, multiplier: 0.95 }
+        ]
+      }
+    ];
+  }
+
+  /**
+   * Load mock harvest data with question-based feedback
    */
   loadMockData(): void {
     this.harvests = [
@@ -75,12 +148,25 @@ export class Feedback implements OnInit {
         harvestDate: 'dd/mm/yyyy',
         status: 'completed',
         feedback: {
-          seedQuality: 4,
-          irrigation: 3,
-          appRecommendations: 5,
-          overallExperience: 4,
-          comment: 'Great harvest this season!',
-          submittedAt: new Date('2024-10-15')
+          submittedAt: new Date('2024-10-15'),
+          answers: [
+            {
+              questionId: 'timing_urgency',
+              selectedOption: this.feedbackQuestions[0].options[2] // "Right on time"
+            },
+            {
+              questionId: 'moisture_perception',
+              selectedOption: this.feedbackQuestions[1].options[2] // "Expected / Normal"
+            },
+            {
+              questionId: 'plant_health_visual',
+              selectedOption: this.feedbackQuestions[2].options[2] // "Healthy and firm"
+            },
+            {
+              questionId: 'general_growth',
+              selectedOption: this.feedbackQuestions[3].options[1] // "Normal growth"
+            }
+          ]
         }
       },
       {
@@ -97,6 +183,30 @@ export class Feedback implements OnInit {
   }
 
   /**
+   * Get current question
+   */
+  getCurrentQuestion(): FeedbackQuestion | null {
+    if (this.currentQuestionIndex < this.feedbackQuestions.length) {
+      return this.feedbackQuestions[this.currentQuestionIndex];
+    }
+    return null;
+  }
+
+  /**
+   * Check if answer was already given for current question
+   */
+  getPreviousAnswer(): FeedbackOption | null {
+    const currentQuestion = this.getCurrentQuestion();
+    if (!currentQuestion) return null;
+
+    const previousAnswer = this.userAnswers.find(
+      answer => answer.questionId === currentQuestion.id
+    );
+
+    return previousAnswer ? previousAnswer.selectedOption : null;
+  }
+
+  /**
    * Get CSS class for card based on status
    */
   getCardClass(status: string): string {
@@ -109,71 +219,116 @@ export class Feedback implements OnInit {
   }
 
   /**
-   * Open feedback modal for ready harvests
+   * Open feedback modal for adding new feedback
    */
   openFeedbackModal(harvest: HarvestFeedback): void {
     if (harvest.status === 'ready') {
       this.selectedHarvest = harvest;
       this.showFeedbackModal = true;
-      this.resetRatings();
+      this.currentQuestionIndex = 0;
+      this.userAnswers = [];
+      this.selectedOption = this.getPreviousAnswer();
     }
   }
 
   /**
-   * View feedback for completed harvests
+   * View completed feedback (questions and answers)
    */
   viewFeedback(harvest: HarvestFeedback): void {
     if (harvest.status === 'completed' && harvest.feedback) {
       this.selectedHarvest = harvest;
-      this.seedQuality = harvest.feedback.seedQuality;
-      this.irrigation = harvest.feedback.irrigation;
-      this.appRecommendations = harvest.feedback.appRecommendations;
-      this.overallExperience = harvest.feedback.overallExperience;
-      this.comment = harvest.feedback.comment || '';
-      this.showFeedbackModal = true;
+      this.showViewFeedbackModal = true;
     }
   }
 
   /**
-   * Close feedback modal
+   * Close feedback modals
    */
   closeFeedbackModal(): void {
     this.showFeedbackModal = false;
+    this.showViewFeedbackModal = false;
     this.selectedHarvest = null;
-    this.resetRatings();
+    this.currentQuestionIndex = 0;
+    this.userAnswers = [];
+    this.selectedOption = null;
   }
 
   /**
-   * Reset all rating values
+   * Select an option for current question
    */
-  resetRatings(): void {
-    this.seedQuality = 0;
-    this.irrigation = 0;
-    this.appRecommendations = 0;
-    this.overallExperience = 0;
-    this.comment = '';
+  selectOption(option: FeedbackOption): void {
+    this.selectedOption = option;
   }
 
   /**
-   * Set rating for a specific category
+   * Check if option is selected
    */
-  setRating(category: string, rating: number): void {
-    if (this.selectedHarvest?.status === 'completed') return;
+  isOptionSelected(option: FeedbackOption): boolean {
+    return this.selectedOption === option;
+  }
 
-    switch(category) {
-      case 'seedQuality':
-        this.seedQuality = rating;
-        break;
-      case 'irrigation':
-        this.irrigation = rating;
-        break;
-      case 'appRecommendations':
-        this.appRecommendations = rating;
-        break;
-      case 'overallExperience':
-        this.overallExperience = rating;
-        break;
+  /**
+   * Save current answer and go to next question
+   */
+  nextQuestion(): void {
+    if (!this.selectedOption) return;
+
+    const currentQuestion = this.getCurrentQuestion();
+    if (!currentQuestion) return;
+
+    // Save or update answer
+    const existingAnswerIndex = this.userAnswers.findIndex(
+      answer => answer.questionId === currentQuestion.id
+    );
+
+    if (existingAnswerIndex >= 0) {
+      this.userAnswers[existingAnswerIndex].selectedOption = this.selectedOption;
+    } else {
+      this.userAnswers.push({
+        questionId: currentQuestion.id,
+        selectedOption: this.selectedOption
+      });
     }
+
+    // Move to next question
+    if (this.currentQuestionIndex < this.feedbackQuestions.length - 1) {
+      this.currentQuestionIndex++;
+      this.selectedOption = this.getPreviousAnswer();
+    } else {
+      // Last question - submit
+      this.submitFeedback();
+    }
+  }
+
+  /**
+   * Go to previous question
+   */
+  previousQuestion(): void {
+    if (this.currentQuestionIndex > 0) {
+      this.currentQuestionIndex--;
+      this.selectedOption = this.getPreviousAnswer();
+    }
+  }
+
+  /**
+   * Check if we're on first question
+   */
+  isFirstQuestion(): boolean {
+    return this.currentQuestionIndex === 0;
+  }
+
+  /**
+   * Check if we're on last question
+   */
+  isLastQuestion(): boolean {
+    return this.currentQuestionIndex === this.feedbackQuestions.length - 1;
+  }
+
+  /**
+   * Get progress percentage
+   */
+  getProgressPercentage(): number {
+    return ((this.currentQuestionIndex + 1) / this.feedbackQuestions.length) * 100;
   }
 
   /**
@@ -181,45 +336,47 @@ export class Feedback implements OnInit {
    */
   submitFeedback(): void {
     if (this.selectedHarvest && this.selectedHarvest.status === 'ready') {
-      const feedback: FeedbackDetails = {
-        seedQuality: this.seedQuality,
-        irrigation: this.irrigation,
-        appRecommendations: this.appRecommendations,
-        overallExperience: this.overallExperience,
-        comment: this.comment,
-        submittedAt: new Date()
-      };
-
-      console.log('Submitting feedback:', feedback);
+      console.log('Submitting feedback:', {
+        harvestId: this.selectedHarvest.id,
+        answers: this.userAnswers
+      });
 
       // TODO: Replace with actual API call
-      // this.feedbackService.submitFeedback(this.selectedHarvest.id, feedback).subscribe({
+      // this.feedbackService.submitFeedback(this.selectedHarvest.id, this.userAnswers).subscribe({
       //   next: (response) => {
       //     this.selectedHarvest!.status = 'completed';
-      //     this.selectedHarvest!.feedback = feedback;
       //     this.closeFeedbackModal();
       //   },
       //   error: (error) => console.error('Error submitting feedback:', error)
       // });
 
-      // For now, update locally
+      // For now, update locally and save answers
+      this.selectedHarvest.feedback = {
+        submittedAt: new Date(),
+        answers: this.userAnswers
+      };
       this.selectedHarvest.status = 'completed';
-      this.selectedHarvest.feedback = feedback;
       this.closeFeedbackModal();
+
+      // Show success message (optional)
+      alert('Feedback submitted successfully!');
     }
   }
 
   /**
-   * Check if feedback is read-only (completed status)
+   * Get questions and answers for viewing feedback
    */
-  isReadOnly(): boolean {
-    return this.selectedHarvest?.status === 'completed';
-  }
+  getQuestionsAndAnswers(): Array<{question: string, answer: string}> {
+    if (!this.selectedHarvest?.feedback?.answers) {
+      return [];
+    }
 
-  /**
-   * Get array for star rendering
-   */
-  getStarArray(count: number): number[] {
-    return Array(count).fill(0);
+    return this.selectedHarvest.feedback.answers.map(answer => {
+      const question = this.feedbackQuestions.find(q => q.id === answer.questionId);
+      return {
+        question: question?.question || 'Unknown question',
+        answer: answer.selectedOption.label
+      };
+    });
   }
 }

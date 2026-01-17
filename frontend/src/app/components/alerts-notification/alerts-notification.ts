@@ -92,12 +92,12 @@ export class AlertsNotification implements OnInit, OnDestroy {
           id: h.id,
           userId: h.userId,
           farmId: h.farmId,
-          recommendedSeed: '',
+          recommendedSeed: h.recommendedSeed || h.seedType || 'Seed',
           recommendationType: h.recommendationType,
           advice: h.message,
           reasoning: h.reasoning,
           weatherTimestamp: h.createdAt,
-          metrics: {},
+          metrics: h.metrics ? h.metrics : { temperature: h.temperature },
           receivedAt: h.createdAt,
           isRead: h.read
         }));
@@ -170,9 +170,8 @@ export class AlertsNotification implements OnInit, OnDestroy {
       'wheat': 'assets/icons/wheat.svg',
       'corn': 'assets/icons/corn.svg',
       'barley': 'assets/icons/barely.svg',
-      'white_grape': 'assets/icons/white_grape.svg',
-      'red_grape': 'assets/icons/grape.svg',
-      'grape': 'assets/icons/grape.svg',
+      'white_grapes': 'assets/icons/white_grape.svg',
+      'black_grapes': 'assets/icons/grape.svg',
       'pumpkin': 'assets/icons/pumpkin.svg'
     };
     return iconMap[seed] || 'assets/icons/wheat.svg';
@@ -180,36 +179,11 @@ export class AlertsNotification implements OnInit, OnDestroy {
 
   getAlertTypeInfo(type: string): AlertTypeInfo {
     const typeMap: { [key: string]: AlertTypeInfo } = {
-      'FROST_ALERT': {
-        icon: '❄️',
-        color: '#3B82F6',
-        label: 'Frost Alert'
-      },
-      'WEATHER_WARNING': {
-        icon: '⚠️',
-        color: '#F97316',
-        label: 'Weather Warning'
-      },
-      'HEAT_ALERT': {
-        icon: '🌡️',
-        color: '#EF4444',
-        label: 'Heat Alert'
-      },
-      'PEST_WARNING': {
-        icon: '🐛',
-        color: '#EF4444',
-        label: 'Pest Warning'
-      },
-      'SAFETY_ALERT': {
-        icon: '⚠️',
-        color: '#EF4444',
-        label: 'Safety Alert'
-      },
-      'CONTINUE_NORMAL': {
-        icon: '✅',
-        color: '#10B981',
-        label: 'Continue Normal'
-      }
+      'FROST_ALERT': { icon: '❄️', color: '#3B82F6', label: 'Frost Alert' },
+      'HEAT_ALERT': { icon: '🌡️', color: '#EF4444', label: 'Heat Alert' },
+      'SAFETY_ALERT': { icon: '⚠️', color: '#EF4444', label: 'Safety Alert' },
+      'STORM_ALERT': { icon: '⛈️', color: '#1F2937', label: 'Storm Alert' },
+      'IRRIGATE_NOW': { icon: '💧', color: '#2563EB', label: 'Irrigate Now' },
     };
 
     return typeMap[type] || {
@@ -226,6 +200,18 @@ export class AlertsNotification implements OnInit, OnDestroy {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
     return formatted;
+  }
+
+  formatExactTime(dateInput?: string | Date): string {
+    if (!dateInput) return '';
+    const date = new Date(dateInput);
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
   formatAdviceTitle(advice: string): string {

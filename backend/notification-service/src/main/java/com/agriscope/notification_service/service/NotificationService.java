@@ -51,7 +51,8 @@ public class NotificationService {
             "NUTRIENT_CHECK",
             "PLANNING_ALERT",
             "HEAT_STRESS_PREVENTION",
-            "PEST_RISK"
+            "PEST_RISK",
+            "READY_TO_HARVEST"
     };
     private final NotificationRepository notificationRepository;
 
@@ -104,6 +105,7 @@ public class NotificationService {
             doc.setFarmId(rec.getFarmId());
             doc.setUserId(rec.getUserId());
             doc.setRecommendationType(rec.getRecommendationType());
+            doc.setRecommendedSeed(rec.getRecommendedSeed());
             doc.setMessage(rec.getAdvice());
             doc.setReasoning(rec.getReasoning());
             doc.setCreatedAt(LocalDateTime.now());
@@ -161,24 +163,30 @@ public class NotificationService {
     private boolean isSignificantChange(Recommendation oldRec, Recommendation newRec) {
         String type = newRec.getRecommendationType();
 
-        if (type.equals("MONITOR_CONDITIONS") || type.equals("CONTINUE_NORMAL")) {
+        if (type.equals("MONITOR_CONDITIONS") ||
+                type.equals("CONTINUE_NORMAL") ||
+                type.equals("READY_TO_HARVEST") ||
+                type.equals("DISEASE_PREVENTION") ||
+                type.equals("PEST_RISK") ||
+                type.equals("NUTRIENT_CHECK") ||
+                type.equals("PLANNING_ALERT") ||
+                type.equals("HEAT_STRESS_PREVENTION")) {
             return false;
         }
 
         double oldValue = getRelevantMetricValue(oldRec, type);
         double newValue = getRelevantMetricValue(newRec, type);
-
         double diff = Math.abs(newValue - oldValue);
 
         if (type.equals("FROST_ALERT") || type.equals("HEAT_ALERT")) {
             return diff >= TEMP_CHANGE_THRESHOLD;
         }
 
-        if (type.equals("IRRIGATE_NOW") || type.equals("IRRIGATE_SOON")) {
+        if (type.equals("IRRIGATE_NOW") || type.equals("IRRIGATE_SOON") || type.equals("DELAY_IRRIGATION")) {
             return diff >= DEFICIT_CHANGE_THRESHOLD;
         }
 
-        return true;
+        return false;
     }
 
     private double getRelevantMetricValue(Recommendation rec, String type) {

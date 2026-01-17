@@ -4,13 +4,15 @@ import com.agriscope.rule_engine.domain.model.Seed;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.model.Recommendation;
 import com.agriscope.rule_engine.domain.enums.RecommendationType;
+import com.agriscope.rule_engine.domain.model.FieldStatus
+import com.agriscope.rule_engine.domain.enums.GrowthStage
 
 global java.util.List recommendations;
 
 rule "Wheat - Disease Risk (Fusarium) Dynamic"
     when
         $seed : Seed(seedType == SeedType.WHEAT)
-
+        $field : FieldStatus(seedType == SeedType.WHEAT, stage != GrowthStage.READY)
         $rainLimit : Number() from $seed.diseaseRainThreshold * $seed.getParam("disease_rain_factor", 1.0)
         $minTemp   : Number() from $seed.diseaseRiskMinTemp + $seed.getParam("disease_temp_offset", 0.0)
 
@@ -36,6 +38,7 @@ end
 rule "Wheat - Nutrient Loss Warning"
     when
         $seed : Seed(seedType == SeedType.WHEAT)
+        $field : FieldStatus(seedType == SeedType.WHEAT, stage != GrowthStage.READY)
         $day : DailyWeatherData(
             rain_sum > $seed.heavyRainThreshold
         )

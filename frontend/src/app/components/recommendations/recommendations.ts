@@ -93,15 +93,15 @@ export class Recommendations implements OnInit, OnDestroy {
               h.recommendationType === 'NUTRIENT_CHECK'  ||
               h.recommendationType === 'PLANNING_ALERT'  ||
               h.recommendationType === 'HEAT_STRESS_PREVENTION'  ||
-              h.recommendationType === 'PEST_RISK'
-
+              h.recommendationType === 'PEST_RISK' ||
+              h.recommendationType === 'READY_TO_HARVEST'
             );
 
             this.recommendations = recsHistory.map(h => ({
               id: h.id,
               userId: h.userId,
               farmId: h.farmId,
-              recommendedSeed: '',
+              recommendedSeed: h.recommendedSeed || h.seedType || 'Seed',
               recommendationType: h.recommendationType,
               advice: h.message,
               reasoning: h.reasoning,
@@ -215,6 +215,20 @@ export class Recommendations implements OnInit, OnDestroy {
     return this.recommendations.length;
   }
 
+  getExactDate(recommendation: RecommendationData): string {
+    if (!recommendation.receivedAt) return '';
+
+    const date = new Date(recommendation.receivedAt);
+
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   /**
    * Check if there are any recommendations
    */
@@ -288,9 +302,8 @@ export class Recommendations implements OnInit, OnDestroy {
       'wheat': 'assets/icons/wheat.svg',
       'corn': 'assets/icons/corn.svg',
       'barley': 'assets/icons/barely.svg',
-      'white_grape': 'assets/icons/white_grape.svg',
-      'red_grape': 'assets/icons/grape.svg',
-      'grape': 'assets/icons/grape.svg',
+      'white_grapes': 'assets/icons/white_grape.svg',
+      'black_grapes': 'assets/icons/grape.svg',
       'pumpkin': 'assets/icons/pumpkin.svg'
     };
 
@@ -302,48 +315,24 @@ export class Recommendations implements OnInit, OnDestroy {
    */
   getRecommendationTypeInfo(type: string): RecommendationTypeInfo {
     const typeMap: { [key: string]: RecommendationTypeInfo } = {
+      'MONITOR_CONDITIONS': { icon: '👁️', color: '#10B981', label: 'Monitor Conditions' },
+      'CONTINUE_NORMAL': { icon: '✅', color: '#10B981', label: 'Continue Normal' },
+      'DELAY_OPERATIONS': { icon: '⏸️', color: '#F97316', label: 'Delay Operations' },
 
-      'MONITOR_CONDITIONS': {
-        icon: '👁️',
-        color: '#10B981',
-        label: 'Monitor Conditions'
-      },
-      'IRRIGATION_NEEDED': {
-        icon: '💧',
-        color: '#0EA5E9',
-        label: 'Irrigation Needed'
-      },
-      'IRRIGATE_NOW': {
-        icon: '💧',
-        color: '#0EA5E9',
-        label: 'Irrigate Now'
-      },
-      'HEAT_ALERT': {
-        icon: '🌡️',
-        color: '#EF4444',
-        label: 'Heat Alert'
-      },
-      'CONTINUE_NORMAL': {
-        icon: '✅',
-        color: '#10B981',
-        label: 'Continue Normal'
-      },
-      'SAFETY_ALERT': {
-        icon: '⚠️',
-        color: '#EF4444',
-        label: 'Safety Alert'
-      },
-      'DELAY_OPERATIONS': {
-        icon: '⏸️',
-        color: '#F97316',
-        label: 'Delay Operations'
-      }
+      'IRRIGATE_SOON': { icon: '💧', color: '#3B82F6', label: 'Irrigate Soon' },
+      'DELAY_IRRIGATION': { icon: '⏳', color: '#F59E0B', label: 'Delay Irrigation' },
+      'DISEASE_PREVENTION': { icon: '🦠', color: '#8B5CF6', label: 'Disease Risk' },
+      'PEST_RISK': { icon: '🐛', color: '#EF4444', label: 'Pest Risk' },
+      'NUTRIENT_CHECK': { icon: '🧪', color: '#10B981', label: 'Nutrient Check' },
+      'PLANNING_ALERT': { icon: '📅', color: '#6366F1', label: 'Planning Advice' },
+      'HEAT_STRESS_PREVENTION': { icon: '☂️', color: '#F97316', label: 'Heat Prevention' },
+      'READY_TO_HARVEST': { icon: '🚜', color: '#EAB308', label: 'Ready to Harvest' }
     };
 
     return typeMap[type] || {
       icon: 'ℹ️',
       color: '#6B7280',
-      label: 'General Recommendation'
+      label: 'General Advice'
     };
   }
 
@@ -357,10 +346,13 @@ export class Recommendations implements OnInit, OnDestroy {
       'CONTINUE_NORMAL': 'assets/icons/happy_farmer.svg',
       'MONITOR_CONDITIONS': 'assets/icons/monitoring_farmer.svg',
       'SAFETY_ALERT': 'assets/icons/alert_farmer.svg',
-      'DELAY_OPERATIONS': 'assets/icons/farmer-delay.svg',
+      'DELAY_OPERATIONS': 'assets/icons/farmer_delayed.svg',
       'IRRIGATE_NOW': 'assets/icons/farmer_irrigate.svg',
       'IRRIGATION_NEEDED': 'assets/icons/farmer_irrigate.svg',
       'RAIN_ALERT': 'assets/icons/rainy_farmer.svg',
+      'READY_TO_HARVEST': 'assets/icons/happy_farmer.svg',
+      'DISEASE_PREVENTION': 'assets/icons/alert_farmer.svg',
+      'PEST_RISK': 'assets/icons/alert_farmer.svg'
     };
 
     return iconMap[type] || 'assets/icons/alert_farmer.svg';
@@ -411,6 +403,17 @@ export class Recommendations implements OnInit, OnDestroy {
     this.recommendationsService.clearRecommendations();
     this.recommendations = [];
     this.closeModal();
+  }
+
+  formatExactTime(dateInput?: string | Date): string {
+    if (!dateInput) return '';
+    const date = new Date(dateInput);
+    return date.toLocaleTimeString([], {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit' });
   }
 
   /**

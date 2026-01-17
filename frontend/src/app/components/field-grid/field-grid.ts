@@ -34,6 +34,15 @@ export class FieldGrid {
   sowingDate: string = '';
   harvestDate: string = '';
 
+  private seedGrowthRules: Record<string, { young: number, mature: number, ready: number }> = {
+    [SeedType.wheat]: { young: 30, mature: 70, ready: 110 },
+    [SeedType.corn]: { young: 25, mature: 60, ready: 100 },
+    [SeedType.barley]: { young: 25, mature: 60, ready: 90 },
+    [SeedType.pumpkin]: { young: 20, mature: 50, ready: 90 },
+    [SeedType.whiteGrapes]: { young: 45, mature: 90, ready: 135 },
+    [SeedType.blackGrapes]: { young: 45, mature: 90, ready: 135 }
+  };
+
 
 constructor(private farmService: FarmService, private toastr: ToastrService) {
   this.farmService.selectedFarm$.subscribe(farm => {
@@ -96,6 +105,31 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
       };
     }
     return { valid: true };
+  }
+
+  private calculateInitialGrowthStage(seedType: SeedType, sowingDateStr: string): GrowthStage {
+    const planted = new Date(sowingDateStr);
+    const now = new Date();
+
+    planted.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    const diffTime = now.getTime() - planted.getTime();
+    const daysElapsed = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    const rules = this.seedGrowthRules[seedType];
+
+    if (!rules) return GrowthStage.seedling;
+
+    if (daysElapsed >= rules.ready) {
+      return GrowthStage.ready;
+    } else if (daysElapsed >= rules.mature) {
+      return GrowthStage.mature;
+    } else if (daysElapsed >= rules.young) {
+      return GrowthStage.young;
+    } else {
+      return GrowthStage.seedling;
+    }
   }
 
   private validateSowingDate(dateString: string): { valid: boolean; message?: string; title?: string } {
@@ -339,13 +373,18 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     if (this.selectedFieldId) {
       const fieldIndex = this.fields.findIndex(f => f.id === this.selectedFieldId);
       if (fieldIndex !== -1) {
- 
+
+        const calculatedStage = this.calculateInitialGrowthStage(
+          this.selectedSeedType!,
+          this.sowingDate
+        );
+
         const fieldUpdate = {
           id: this.selectedFieldId,
-          status: FieldStatus.planted,
+          status: calculatedStage === GrowthStage.ready ? FieldStatus.ready : FieldStatus.planted,
           seedType: this.selectedSeedType!,
           plantedDate: new Date(this.sowingDate),
-          growthStage: GrowthStage.seedling
+          growthStage: calculatedStage
         };
 
         this.farmService.updateField(fieldUpdate).subscribe({

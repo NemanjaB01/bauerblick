@@ -22,6 +22,7 @@ public class NotificationDocument {
     private String userId;
 
     private String recommendationType;
+    private String recommendedSeed;
     private String message;
     private String reasoning;
     @Field("isRead")

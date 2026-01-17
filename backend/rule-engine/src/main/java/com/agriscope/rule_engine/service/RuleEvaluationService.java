@@ -46,17 +46,24 @@ public class RuleEvaluationService {
             if (fields == null || fields.isEmpty()) {
                 log.warn("No seeds defined for farm {}, skipping seed insertion", weatherData.getFarmId());
             } else {
+                java.util.Set<SeedType> processedSeeds = new java.util.HashSet<>();
                 for (FieldDTO field : fields) {
-                    if (field.getSeed_type() == null) {
-                        continue;
-                    }
+                    if (field.getSeed_type() == null) continue;
+
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
-                        Seed seed = seedService.getSeed(type);
-                        if (seed != null) {
-                            kieSession.insert(seed);
-                            log.debug("Inserted seed: {}", type);
+                        if (!processedSeeds.contains(type)) {
+                            Seed seed = seedService.getSeed(type);
+                            if (seed != null) {
+                                kieSession.insert(seed);
+                                processedSeeds.add(type);
+                                log.debug("Inserted distinct seed type: {}", type);
+                            }
                         }
+
+                        GrowthStage stage = mapGrowthStage(field.getGrowth_stage());
+                        kieSession.insert(new FieldStatus(field.getField_id(), type, stage));
+                        log.debug("Inserted field status for current evaluation: {} - {}", field.getField_id(), stage);
                     } catch (IllegalArgumentException e) {
                         log.warn("Unknown seed type received: {}", field.getSeed_type());
                     }
@@ -114,15 +121,19 @@ public class RuleEvaluationService {
             }
             log.info("Inserted {} hours of forecast for General Safety evaluation.", safetyCheckLimit);
             if (fields != null) {
+                java.util.Set<SeedType> processedSeeds = new java.util.HashSet<>();
                 for (FieldDTO field : fields) {
                     if (field.getSeed_type() == null) {
                         continue;
                     }
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
-                        Seed seed = seedService.getSeed(type);
-                        if (seed != null) {
-                            kieSession.insert(seed);
+                        if (!processedSeeds.contains(type)) {
+                            Seed seed = seedService.getSeed(type);
+                            if (seed != null) {
+                                kieSession.insert(seed);
+                                processedSeeds.add(type);
+                            }
                         }
                         GrowthStage stage = mapGrowthStage(field.getGrowth_stage());
                         kieSession.insert(new FieldStatus(field.getField_id(), type, stage));
@@ -145,14 +156,20 @@ public class RuleEvaluationService {
     }
 
     private GrowthStage mapGrowthStage(String stageRaw) {
+        log.info("Mapping growth stage: {}", stageRaw);
         if (stageRaw == null) return GrowthStage.YOUNG;
 
-        switch (stageRaw) {
-            case "0": return GrowthStage.SEEDLING;
-            case "1": return GrowthStage.YOUNG;
-            case "2": return GrowthStage.MATURE;
-            case "3": return GrowthStage.READY;
-            default:  return GrowthStage.MATURE;
+        try {
+            log.info("Trying to map growth stage: {}", stageRaw.toUpperCase());
+            return GrowthStage.valueOf(stageRaw.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            switch (stageRaw) {
+                case "0": return GrowthStage.SEEDLING;
+                case "1": return GrowthStage.YOUNG;
+                case "2": return GrowthStage.MATURE;
+                case "3": return GrowthStage.READY;
+                default:  return GrowthStage.MATURE;
+            }
         }
     }
 
@@ -213,6 +230,7 @@ public class RuleEvaluationService {
             }
 
             if (fields != null) {
+                java.util.Set<SeedType> processedSeeds = new java.util.HashSet<>();
                 for (FieldDTO field : fields) {
                     log.info("Processing field: {}", field);
                     log.info("Field seed: {}", field.getSeed_type());
@@ -221,8 +239,13 @@ public class RuleEvaluationService {
                     }
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
-                        Seed seed = seedService.getSeed(type);
-                        if (seed != null) kieSession.insert(seed);
+                        if (!processedSeeds.contains(type)) {
+                            Seed seed = seedService.getSeed(type);
+                            if (seed != null) {
+                                kieSession.insert(seed);
+                                processedSeeds.add(type);
+                            }
+                        }
                         GrowthStage stage = mapGrowthStage(field.getGrowth_stage());
                         kieSession.insert(new FieldStatus(field.getField_id(), type, stage));
                     } catch (Exception e) {

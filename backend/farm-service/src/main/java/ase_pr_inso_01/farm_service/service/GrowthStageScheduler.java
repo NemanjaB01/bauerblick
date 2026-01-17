@@ -28,10 +28,9 @@ public class GrowthStageScheduler {
 
     private final FarmRepository farmRepository;
     private final SeedRepository seedRepository;
-    private final SeedService seedService;
 
-    @Scheduled(cron = "0 0 0 * * ?")
-//    @Scheduled(fixedRate = 60000)
+//    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(fixedRate = 6000) // test
     public void updateGrowthStages() {
         log.info("Starting daily growth stage update...");
 
@@ -53,7 +52,6 @@ public class GrowthStageScheduler {
                     if (seedRule == null) continue;
 
                     long daysElapsed = calculateDaysElapsed(field.getPlantedDate());
-
                     GrowthStage newStage = determineStage(daysElapsed, seedRule);
 
                     if (newStage != field.getGrowthStage()) {

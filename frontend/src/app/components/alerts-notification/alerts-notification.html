@@ -32,8 +32,6 @@
           <div class="alert-info">
             <img [src]="getSeedIcon(alert.recommendedSeed)" class="seed-icon-mini" />
             <span class="seed-name">{{ formatSeedName(alert.recommendedSeed) }}</span>
-            <span class="separator">•</span>
-            <span class="farm-id">{{ alert.farmId }}</span>
           </div>
           <h4 class="alert-title">{{ formatAdviceTitle(alert.advice) }}</h4>
 
@@ -45,7 +43,7 @@
           </div>
 
           <div class="alert-footer">
-            <span class="alert-time">{{ getTimeSince(alert) }}</span>
+            <span class="alert-time">{{ formatExactTime(alert.receivedAt) }}</span>
             <button class="dismiss-btn" (click)="dismissAlert(alert.id)">Dismiss</button>
           </div>
         </div>

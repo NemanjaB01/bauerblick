@@ -1,0 +1,189 @@
+<div class="page-container">
+
+  <app-topbar [showFarmTitle]="false"></app-topbar>
+
+  <div class="body-container">
+
+    <app-sidebar class="sidebar"></app-sidebar>
+
+    <div class="content-area">
+      <div class="feedback-container">
+        <!-- Harvest Cards Grid -->
+        <div class="harvests-grid">
+          <div *ngFor="let harvest of harvests"
+               [ngClass]="getCardClass(harvest.status)"
+               (click)="harvest.status === 'ready' ? openFeedbackModal(harvest) : null">
+
+            <!-- Crop Icon -->
+            <div class="crop-icon">
+              <img [src]="'assets/icons/' + harvest.cropIcon" [alt]="harvest.cropType" />
+            </div>
+
+            <!-- Card Content -->
+            <div class="card-content">
+              <h3 class="crop-title" [class.locked-text]="harvest.status === 'locked'">
+                {{ harvest.cropType }} harvest
+              </h3>
+
+              <div class="card-details">
+                <p class="detail-item" [class.locked-text]="harvest.status === 'locked'">
+                  <strong>Farm name:</strong> {{ harvest.farmName }}
+                </p>
+
+                <p class="detail-item" *ngIf="harvest.status !== 'locked'">
+                  <strong>Harvest date:</strong> {{ harvest.harvestDate }}
+                </p>
+
+                <p class="detail-item" *ngIf="harvest.status === 'locked'" [class.locked-text]="true">
+                  <strong>Estimated harvest:</strong> {{ harvest.estimatedHarvest }}
+                </p>
+              </div>
+
+              <!-- Lock Overlay for Locked Harvests -->
+              <div *ngIf="harvest.status === 'locked'" class="lock-overlay">
+                <div class="lock-icon">
+                  <img src="assets/icons/lock.svg" alt="Locked" />
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="card-actions">
+                <button *ngIf="harvest.status === 'ready'"
+                        class="btn btn-write-feedback"
+                        (click)="openFeedbackModal(harvest); $event.stopPropagation()">
+                  Write a feedback
+                </button>
+
+                <button *ngIf="harvest.status === 'completed'"
+                        class="btn btn-view-feedback"
+                        (click)="viewFeedback(harvest); $event.stopPropagation()">
+                  See your feedback
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============== -->
+    <!-- FEEDBACK MODAL  -->
+    <!-- =============== -->
+    <div *ngIf="showFeedbackModal" class="modal-overlay" (click)="closeFeedbackModal()">
+      <div class="modal-content-question" (click)="$event.stopPropagation()">
+
+        <div class="modal-header-question">
+          <div class="modal-title-section">
+            <div class="modal-icon">
+              <img [src]="'assets/icons/' + selectedHarvest?.cropIcon" [alt]="selectedHarvest?.cropType" />
+            </div>
+            <h2 class="modal-title">{{ selectedHarvest?.cropType }} harvest feedback</h2>
+          </div>
+          <button class="close-button" (click)="closeFeedbackModal()" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body-question" *ngIf="getCurrentQuestion() as question">
+
+          <div class="question-number">Question {{ currentQuestionIndex + 1 }} of {{ feedbackQuestions.length }}</div>
+
+          <!-- Question -->
+          <h3 class="question-title">{{ question.question }}</h3>
+
+          <!-- Description -->
+          <div class="question-description">
+            <svg class="info-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 7.5V11.5M8 5.5V5.51" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>{{ question.description }}</span>
+          </div>
+
+          <!-- Options -->
+          <div class="options-container">
+            <button
+              *ngFor="let option of question.options"
+              class="option-button"
+              [class.selected]="isOptionSelected(option)"
+              (click)="selectOption(option)">
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer-question">
+          <button
+            class="btn btn-secondary"
+            [disabled]="isFirstQuestion()"
+            (click)="previousQuestion()">
+            ← Previous
+          </button>
+
+          <button
+            class="btn"
+            [class.btn-next]="!isLastQuestion()"
+            [class.btn-submit]="isLastQuestion()"
+            [disabled]="!selectedOption"
+            (click)="nextQuestion()">
+            {{ isLastQuestion() ? 'Submit ✓' : 'Next →' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================== -->
+    <!-- VIEW FEEDBACK MODAL -->
+    <!-- =================== -->
+    <div *ngIf="showViewFeedbackModal" class="modal-overlay" (click)="closeFeedbackModal()">
+      <div class="modal-content-view" (click)="$event.stopPropagation()">
+
+        <!-- Modal Header -->
+        <div class="modal-header-view">
+          <div class="modal-title-section">
+            <div class="modal-icon">
+              <img [src]="'assets/icons/' + selectedHarvest?.cropIcon" [alt]="selectedHarvest?.cropType" />
+            </div>
+            <h2 class="modal-title">{{ selectedHarvest?.cropType }} harvest feedback</h2>
+          </div>
+          <button class="close-button" (click)="closeFeedbackModal()" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body-view">
+          <h3 class="view-title">Your Feedback Summary</h3>
+
+          <!-- Questions and Answers List -->
+          <div class="feedback-list">
+            <div *ngFor="let qa of getQuestionsAndAnswers(); let i = index" class="feedback-item">
+              <div class="feedback-item-header">
+                <span class="feedback-number">Q{{ i + 1 }}</span>
+                <h4 class="feedback-question-text">{{ qa.question }}</h4>
+              </div>
+              <div class="feedback-answer">
+                <svg class="answer-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13 4L6 11L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="answer-text">{{ qa.answer }}</span>
+              </div>
+            </div>
+          </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer-view">
+          <button class="btn btn-close" (click)="closeFeedbackModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>

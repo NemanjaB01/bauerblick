@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 
 import { TopbarComponent } from '../topbar/topbar';
 import { Sidebar } from '../sidebar/sidebar';
+import {FarmService} from '../../services/farm-service/farm-service';
+import {take} from 'rxjs/operators';
 
 interface HarvestFeedback {
   id: string;
@@ -64,10 +66,12 @@ export class Feedback implements OnInit {
   currentQuestionIndex = 0;
   userAnswers: FeedbackAnswer[] = [];
   selectedOption: FeedbackOption | null = null;
+  constructor(private farmService: FarmService) {}
 
   ngOnInit(): void {
     this.loadFeedbackQuestions();
-    this.loadMockData();
+    // this.loadMockData();
+    this.loadRealData();
   }
 
   /**
@@ -75,56 +79,13 @@ export class Feedback implements OnInit {
    * TODO: Replace with actual API call to load questions
    */
   loadFeedbackQuestions(): void {
-    this.feedbackQuestions = [
-      {
-        id: "timing_urgency",
-        question: "Did the irrigation recommendation arrive on time?",
-        targetParameter: "urgent_deficit_factor",
-        description: "Adjusts how early the system triggers the 'Irrigate Now' alert.",
-        options: [
-          { label: "Late, plants were already wilting", value: -2, multiplier: 0.90 },
-          { label: "Slightly late", value: -1, multiplier: 0.95 },
-          { label: "Right on time", value: 0, multiplier: 1.00 },
-          { label: "Too early, soil was still moist", value: 1, multiplier: 1.05 },
-          { label: "Way too early / Unnecessary", value: 2, multiplier: 1.10 }
-        ]
+    this.farmService.getFeedbackQuestions().subscribe({
+      next: (data) => {
+        this.feedbackQuestions = data;
+        console.log('Questions loaded:', this.feedbackQuestions);
       },
-      {
-        id: "moisture_perception",
-        question: "How did the soil moisture feel to the touch when the alert arrived?",
-        targetParameter: "urgent_moisture_factor",
-        description: "Adjusts the system's sensitivity to soil moisture sensor readings.",
-        options: [
-          { label: "Completely dry / Dusty", value: 2, multiplier: 1.10 },
-          { label: "Drier than expected", value: 1, multiplier: 1.05 },
-          { label: "Expected / Normal", value: 0, multiplier: 1.00 },
-          { label: "Wet / Muddy", value: -2, multiplier: 0.90 }
-        ]
-      },
-      {
-        id: "plant_health_visual",
-        question: "How did the plants look visually before irrigation?",
-        targetParameter: "allowedWaterDeficit",
-        description: "Adjusts the general water holding capacity allowance for the plant.",
-        options: [
-          { label: "Lifeless / Yellowing", value: -2, multiplier: 0.90 },
-          { label: "Slight wilting", value: -1, multiplier: 0.95 },
-          { label: "Healthy and firm", value: 0, multiplier: 1.00 },
-          { label: "Lush and green (despite no water)", value: 1, multiplier: 1.05 }
-        ]
-      },
-      {
-        id: "general_growth",
-        question: "In general, how do you rate the plant growth this season?",
-        targetParameter: "seedCoefficient",
-        description: "Adjusts the overall water requirement coefficient for the seed.",
-        options: [
-          { label: "Slow / Stunted growth", value: -1, multiplier: 1.05 },
-          { label: "Normal growth", value: 0, multiplier: 1.00 },
-          { label: "Too fast / Watery", value: 1, multiplier: 0.95 }
-        ]
-      }
-    ];
+      error: (err) => console.error('Could not load feedback questions', err)
+    });
   }
 
   /**
@@ -300,6 +261,95 @@ export class Feedback implements OnInit {
     }
   }
 
+
+  loadRealData(): void {
+    this.farmService.selectedFarm$.pipe(take(1)).subscribe(farm => {
+      if (farm && farm.id) {
+
+        this.farmService.getHarvestHistory(farm.id).subscribe({
+          next: (historyData) => {
+            console.log('Harvest History loaded:', historyData);
+
+            const historyHarvests: HarvestFeedback[] = historyData.map(h => {
+              const hasFeedback = h.feedbackAnswers && h.feedbackAnswers.length > 0;
+              return {
+                id: h.id,
+                farmName: farm.name,
+                cropType: this.formatSeedName(h.seedType),
+                cropIcon: this.getIconForSeed(h.seedType),
+                harvestDate: new Date(h.harvestDate).toLocaleDateString('en-GB'),
+                status: hasFeedback ? 'completed' : 'ready',
+                feedback: hasFeedback ? {
+                  submittedAt: new Date(),
+                  answers: h.feedbackAnswers.map((ans: any) => ({
+                    questionId: ans.questionId,
+                    selectedOption: {
+                      label: ans.answerLabel,
+                      value: ans.answerValue,
+                      multiplier: ans.multiplier
+                    }
+                  }))
+                } : undefined
+              };
+            });
+
+            const activeFields: HarvestFeedback[] = (farm.fields || [])
+              .filter(f => f.status !== 'EMPTY')
+              .map(f => {
+                return {
+                  id: `field-${f.id}`,
+                  farmName: farm.name,
+                  cropType: this.formatSeedName(f.seedType || ''),
+                  cropIcon: this.getIconForSeed(this.formatSeedName(f.seedType as string)),
+                  harvestDate: '',
+                  status: 'locked',
+                  estimatedHarvest: f.plantedDate ?
+                    `Planted: ${new Date(f.plantedDate).toLocaleDateString('en-GB')}` :
+                    'Growing...',
+                  lockedUntil: 'TBD'
+                } as HarvestFeedback;
+              });
+
+            this.harvests = [...activeFields, ...historyHarvests];
+
+          },
+          error: (err) => console.error('Failed to load harvest history', err)
+        });
+      }
+    });
+  }
+
+  private getIconForSeed(seedType: string): string {
+    if (!seedType) return 'plant.svg';
+    console.log('Seed type:', seedType.toLowerCase());
+    switch (seedType.toLowerCase()) {
+      case 'wheat':
+        return 'wheat.svg';
+      case 'corn':
+        return 'corn.svg';
+      case 'barley':
+        return 'barely.svg';
+      case 'pumpkin':
+        return 'pumpkin.svg';
+      case 'white grapes':
+        return 'white_grape.svg';
+      case 'black grapes':
+        return 'grape.svg';
+
+
+      default:
+        return 'plant.svg';
+    }
+  }
+
+  // Helper za ime
+  private formatSeedName(seedType: string): string {
+    if (!seedType) return 'Crop';
+    return seedType.replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
   /**
    * Go to previous question
    */
@@ -341,25 +391,32 @@ export class Feedback implements OnInit {
         answers: this.userAnswers
       });
 
-      // TODO: Replace with actual API call
-      // this.feedbackService.submitFeedback(this.selectedHarvest.id, this.userAnswers).subscribe({
-      //   next: (response) => {
-      //     this.selectedHarvest!.status = 'completed';
-      //     this.closeFeedbackModal();
-      //   },
-      //   error: (error) => console.error('Error submitting feedback:', error)
-      // });
+      const answersToSend = this.userAnswers.map(ans => ({
+        questionId: ans.questionId,
+        selectedOption: {
+          label: ans.selectedOption.label,
+          value: ans.selectedOption.value,
+          multiplier: ans.selectedOption.multiplier
+        }
+      }));
 
-      // For now, update locally and save answers
-      this.selectedHarvest.feedback = {
-        submittedAt: new Date(),
-        answers: this.userAnswers
-      };
-      this.selectedHarvest.status = 'completed';
-      this.closeFeedbackModal();
+      this.farmService.submitFeedback(this.selectedHarvest.id, answersToSend).subscribe({
+        next: () => {
+          // Ažuriraj UI nakon uspjeha
+          this.selectedHarvest!.status = 'completed';
+          this.selectedHarvest!.feedback = {
+            submittedAt: new Date(),
+            answers: this.userAnswers
+          };
 
-      // Show success message (optional)
-      alert('Feedback submitted successfully!');
+          this.closeFeedbackModal();
+          alert('Feedback submitted successfully!');
+        },
+        error: (err) => {
+          console.error('Error submitting feedback', err);
+          alert('Failed to submit feedback. Try again.');
+        }
+      });
     }
   }
 

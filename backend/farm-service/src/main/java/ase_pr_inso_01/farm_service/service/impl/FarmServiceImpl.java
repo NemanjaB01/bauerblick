@@ -4,8 +4,15 @@ import ase_pr_inso_01.farm_service.controller.dto.farm.*;
 import ase_pr_inso_01.farm_service.mapper.FarmMapper;
 import ase_pr_inso_01.farm_service.models.Farm;
 import ase_pr_inso_01.farm_service.models.Field;
+import ase_pr_inso_01.farm_service.models.HarvestFeedbackAnswer;
+import ase_pr_inso_01.farm_service.models.HarvestHistory;
+import ase_pr_inso_01.farm_service.models.dto.FeedbackAnswerDTO;
+import ase_pr_inso_01.farm_service.models.dto.HarvestRequestDTO;
+import ase_pr_inso_01.farm_service.models.enums.FieldStatus;
 import ase_pr_inso_01.farm_service.repository.FarmRepository;
+import ase_pr_inso_01.farm_service.repository.HarvestHistoryRepository;
 import ase_pr_inso_01.farm_service.service.FarmService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,12 +30,14 @@ public class FarmServiceImpl implements FarmService {
     private final FarmMapper farmMapper;
     private final RestTemplate restTemplate;
     private final RabbitTemplate rabbitTemplate;
+    private final HarvestHistoryRepository harvestHistoryRepository;
 
-    public FarmServiceImpl(FarmRepository farmRepository, FarmMapper farmMapper, RestTemplate restTemplate, RabbitTemplate rabbitTemplate) {
+    public FarmServiceImpl(FarmRepository farmRepository, FarmMapper farmMapper, RestTemplate restTemplate, RabbitTemplate rabbitTemplate, HarvestHistoryRepository harvestHistoryRepository) {
         this.farmRepository = farmRepository;
         this.farmMapper = farmMapper;
         this.restTemplate = restTemplate;
         this.rabbitTemplate = rabbitTemplate;
+        this.harvestHistoryRepository = harvestHistoryRepository;
     }
 
     @Override
@@ -86,10 +95,9 @@ public class FarmServiceImpl implements FarmService {
             throw new RuntimeException("Unauthorized: This farm does not belong to you");
         }
 
-        Field[] fields = farm.getFields();
 
         // Find the field to update
-        Field fieldToUpdate = Arrays.stream(fields)
+        Field fieldToUpdate = Arrays.stream(farm.getFields())
                 .filter(f -> f.getId().equals(fieldUpdate.id()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Field not found with ID: " + fieldUpdate.id()));
@@ -186,5 +194,73 @@ public class FarmServiceImpl implements FarmService {
         } catch (Exception e) {
             System.err.println("Failed to send RabbitMQ event (" + routingKey + "): " + e.getMessage());
         }
+    }
+
+    public void harvestField(String farmId, Integer fieldId, HarvestRequestDTO request) {
+        Farm farm = farmRepository.findById(farmId)
+                .orElseThrow(() -> new RuntimeException("Farm not found"));
+
+        Field field = Arrays.stream(farm.getFields())
+                .filter(f -> f.getId().equals(fieldId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Field not found"));
+
+        if (field.getStatus() == FieldStatus.EMPTY) {
+            throw new RuntimeException("Cannot harvest an empty field");
+        }
+
+        HarvestHistory history = new HarvestHistory();
+        history.setFarmId(farmId);
+        history.setOriginalFieldId(fieldId);
+        history.setSeedType(field.getSeedType());
+        history.setPlantedDate(field.getPlantedDate());
+        history.setHarvestDate(request.getHarvestDate());
+
+        if (request.getAnswers() != null) {
+            for (FeedbackAnswerDTO dto : request.getAnswers()) {
+                HarvestFeedbackAnswer answer = new HarvestFeedbackAnswer();
+                answer.setQuestionId(dto.getQuestionId());
+                answer.setAnswerLabel(dto.getSelectedOption().getLabel());
+                answer.setAnswerValue(dto.getSelectedOption().getValue());
+                answer.setMultiplier(dto.getSelectedOption().getMultiplier());
+
+                history.getFeedbackAnswers().add(answer);
+            }
+        }
+
+        harvestHistoryRepository.save(history);
+
+        field.setStatus(FieldStatus.EMPTY);
+        field.setSeedType(null);
+        field.setPlantedDate(null);
+        field.setGrowthStage(null);
+
+        farmRepository.save(farm);
+    }
+
+    public void submitFeedback(String historyId, List<FeedbackAnswerDTO> answers) {
+        HarvestHistory history = harvestHistoryRepository.findById(historyId)
+                .orElseThrow(() -> new RuntimeException("Harvest history not found"));
+
+        history.getFeedbackAnswers().clear();
+
+        if (answers != null) {
+            for (FeedbackAnswerDTO dto : answers) {
+                HarvestFeedbackAnswer answer = new HarvestFeedbackAnswer();
+                answer.setQuestionId(dto.getQuestionId());
+                answer.setAnswerLabel(dto.getSelectedOption().getLabel());
+                answer.setAnswerValue(dto.getSelectedOption().getValue());
+                answer.setMultiplier(dto.getSelectedOption().getMultiplier());
+
+                history.getFeedbackAnswers().add(answer);
+            }
+        }
+
+        harvestHistoryRepository.save(history);
+    }
+
+
+    public List<HarvestHistory> getHarvestHistory(String farmId) {
+        return harvestHistoryRepository.findByFarmId(farmId);
     }
 }

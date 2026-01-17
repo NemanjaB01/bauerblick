@@ -2,15 +2,17 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { FarmService } from '../../services/farm-service/farm-service';
+import {FarmService, HarvestRequest} from '../../services/farm-service/farm-service';
 import { FieldStatus } from '../../models/FieldStatus';
 import { GrowthStage } from '../../models/GrowthStage';
 import { Field } from '../../models/Field';
 import { SeedType } from '../../models/SeedType';
+import {take} from 'rxjs/operators';
 
 
 type GrowthStageIcons = Record<GrowthStage, string>;
 type SeedIconMap = Record<SeedType, GrowthStageIcons>;
+
 
 @Component({
   selector: 'app-field-grid',
@@ -245,6 +247,11 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     return this.firstEmptyFieldId === fieldId;
   }
 
+  onAnswerChange(questionId: string, event: any) {
+    const selectedValue = event.target.value;
+
+  }
+
   isPlanted(fieldId: number): boolean {
     const field = this.fields.find(f => f.id === fieldId);
     return field ? field.status !== FieldStatus.empty : false;
@@ -410,31 +417,46 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
 
       // Validate harvest date
       const dateValidation = this.validateHarvestDate(this.harvestDate, field?.plantedDate);
-      if (!dateValidation.valid) {
-        this.toastr.error(dateValidation.message!, dateValidation.title!);
-        return;
-      }
+      // if (!dateValidation.valid) {
+      //   this.toastr.error(dateValidation.message!, dateValidation.title!);
+      //   return;
+      // }
 
       // All validations passed - harvest the field
-      const fieldIndex = this.fields.findIndex(f => f.id === this.selectedFieldId);
-      if (fieldIndex !== -1 && field) {
-        const cropType = field.seedType;
-        const cropName = cropType?.replace('_', ' ');
+      this.farmService.selectedFarm$.pipe(take(1)).subscribe(farm => {
+        if (farm) {
 
-        this.fields[fieldIndex] = {
-          id: this.selectedFieldId,
-          status: FieldStatus.empty
-        };
+          const harvestPayload: HarvestRequest = {
+            harvestDate: new Date(this.harvestDate),
+            answers: []
+          };
 
-        // Success notification
-        this.toastr.success(
-          `${cropName?.charAt(0).toUpperCase()}${cropName?.slice(1)} harvested successfully`,
-          `Field ${this.selectedFieldId} Harvested`
-        );
-      }
+          this.farmService.harvestField(farm.id, this.selectedFieldId!, harvestPayload).subscribe({
+            next: () => {
+              const cropName = field?.seedType?.replace('_', ' ');
+              this.toastr.success(
+                `${cropName} harvested! Check Feedback page later.`,
+                `Field ${this.selectedFieldId} Reset`
+              );
+
+              const index = this.fields.findIndex(f => f.id === this.selectedFieldId);
+              if (index !== -1) {
+                this.fields[index] = {
+                  id: this.selectedFieldId!,
+                  status: FieldStatus.empty,
+                };
+              }
+
+              this.closeHarvestModal();
+            },
+            error: (err) => {
+              console.error(err);
+              this.toastr.error('Failed to record harvest', 'Error');
+            }
+          });
+        }
+      });
     }
-
-    this.closeHarvestModal();
   }
 
   // ============================================

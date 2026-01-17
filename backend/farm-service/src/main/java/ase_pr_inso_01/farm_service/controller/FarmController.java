@@ -4,6 +4,9 @@ import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCheckDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCreateDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmDetailsDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FieldDetailsDto;
+import ase_pr_inso_01.farm_service.models.HarvestHistory;
+import ase_pr_inso_01.farm_service.models.dto.FeedbackAnswerDTO;
+import ase_pr_inso_01.farm_service.models.dto.HarvestRequestDTO;
 import ase_pr_inso_01.farm_service.service.FarmService;
 
 
@@ -94,5 +97,36 @@ public class FarmController {
 
         FarmDetailsDto updatedFarm = farmService.updateField(farmId, field, email);
         return ResponseEntity.ok(updatedFarm);
+    }
+
+    @PostMapping("/{farmId}/fields/{fieldId}/harvest")
+    public ResponseEntity<Void> harvestField(
+            @PathVariable String farmId,
+            @PathVariable Integer fieldId,
+            @RequestBody HarvestRequestDTO harvestRequest) {
+
+        farmService.harvestField(farmId, fieldId, harvestRequest);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/harvest-history/{historyId}/feedback")
+    public ResponseEntity<Void> submitFeedback(
+            @PathVariable String historyId,
+            @RequestBody List<FeedbackAnswerDTO> answers) {
+
+        farmService.submitFeedback(historyId, answers);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{farmId}/harvest-history")
+    public ResponseEntity<List<HarvestHistory>> getHarvestHistory(@PathVariable String farmId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        List<HarvestHistory> history = farmService.getHarvestHistory(farmId);
+        return ResponseEntity.ok(history);
     }
 }

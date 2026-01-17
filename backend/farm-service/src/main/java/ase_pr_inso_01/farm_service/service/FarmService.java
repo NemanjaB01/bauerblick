@@ -4,6 +4,9 @@ import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCheckDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCreateDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmDetailsDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FieldDetailsDto;
+import ase_pr_inso_01.farm_service.models.HarvestHistory;
+import ase_pr_inso_01.farm_service.models.dto.FeedbackAnswerDTO;
+import ase_pr_inso_01.farm_service.models.dto.HarvestRequestDTO;
 
 import java.util.List;
 
@@ -20,4 +23,10 @@ public interface FarmService {
     FarmDetailsDto updateField(String farmId, FieldDetailsDto fieldUpdate, String email) throws Exception;
 
     void deleteFarm(String farmId, String email) throws Exception;
+
+    void harvestField(String farmId, Integer fieldId, HarvestRequestDTO request);
+
+    void submitFeedback(String historyId, List<FeedbackAnswerDTO> answers);
+
+    List<HarvestHistory> getHarvestHistory(String farmId);
 }

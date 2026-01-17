@@ -8,6 +8,12 @@ import { Globals } from '../../global/globals';
 import { FieldStatus } from '../../models/FieldStatus';
 import { FieldDetailsDto } from '../../dtos/field';
 
+
+export interface HarvestRequest {
+  harvestDate: Date;
+  answers: any[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -62,6 +68,22 @@ export class FarmService {
         this.selectFarm(newFarm);
       })
     );
+  }
+
+  harvestField(farmId: string, fieldId: number, data: HarvestRequest): Observable<void> {
+    return this.httpClient.post<void>(`${this.farmsBaseUri}/${farmId}/fields/${fieldId}/harvest`, data);
+  }
+
+  submitFeedback(historyId: string, answers: any[]): Observable<void> {
+    return this.httpClient.post<void>(`${this.farmsBaseUri}/harvest-history/${historyId}/feedback`, answers);
+  }
+
+  getHarvestHistory(farmId: string): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.farmsBaseUri}/${farmId}/harvest-history`);
+  }
+
+  getFeedbackQuestions(): Observable<any[]> {
+    return this.httpClient.get<any[]>('assets/data/feedback-questions.json');
   }
 
   // Fetch farms from the backend

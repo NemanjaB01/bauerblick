@@ -13,6 +13,7 @@ def fetch_and_publish_for_farm(user_id, email, farm_data, forecast_type: Forecas
     lat = farm_data.get("latitude")
     lon = farm_data.get("longitude")
     crops = farm_data.get("crops", [])
+    soil_type = farm_data.get("soilType")
     raw_fields = farm_data.get("fields", [])
     transformed_fields = []
     for f in raw_fields:
@@ -53,6 +54,7 @@ def fetch_and_publish_for_farm(user_id, email, farm_data, forecast_type: Forecas
             "farm_id": farm_id,
             "farm_name": farm_name,
             "crops": crops,
+            "soil_type": soil_type,
             "fields": transformed_fields,
             "lat": lat,
             "lon": lon,

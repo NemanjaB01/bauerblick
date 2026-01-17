@@ -18,9 +18,10 @@ rule "Black Grapes - Ready - Stop Irrigation"
     activation-group "blackgrapes-irrigation"
     when
         $seed   : Seed(seedType == SeedType.BLACK_GRAPES)
-        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, stage == GrowthStage.READY)
+        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, stage == GrowthStage.READY, $fid : fieldId)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
         rec.setAdvice("STOP Irrigation - Harvest Approaching");
@@ -33,12 +34,13 @@ rule "Delay Irrigation - BLACK GRAPES"
     salience 99
     activation-group "blackgrapes-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage, $fid : fieldId)
         $farm   : FarmDetails($soil : soilType)
         $seed   : Seed(seedType == SeedType.BLACK_GRAPES)
 
         $calc   : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("delay_deficit_factor", 1.1)
         )
 
@@ -48,6 +50,7 @@ rule "Delay Irrigation - BLACK GRAPES"
         )
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.DELAY_IRRIGATION);
         rec.setAdvice("Delay Irrigation (" + $stage + ") - Rain Forecast");
@@ -62,12 +65,13 @@ rule "Irrigation - BLACK GRAPES - Urgent"
     salience 50
     activation-group "blackgrapes-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage, $fid : fieldId)
         $farm   : FarmDetails($soil : soilType)
         $seed   : Seed(seedType == SeedType.BLACK_GRAPES)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("urgent_deficit_factor", 1.2)
         )
 
@@ -78,6 +82,7 @@ rule "Irrigation - BLACK GRAPES - Urgent"
         not DailyAnalysis(totalRain > $seed.heavyRainThreshold)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
 
@@ -107,11 +112,12 @@ rule "Irrigation Soon Warning - BLACK GRAPES"
     salience 40
     activation-group "blackgrapes-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage, $fid : fieldId)
         $seed   : Seed(seedType == SeedType.BLACK_GRAPES)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("soon_deficit_min", 0.8),
             deficit <= $seed.allowedWaterDeficit * $seed.getParam("soon_deficit_max", 1.2)
         )
@@ -124,6 +130,7 @@ rule "Irrigation Soon Warning - BLACK GRAPES"
         not DailyAnalysis(totalRain > $seed.heavyRainThreshold)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
         rec.setAdvice("Monitor/Plan Irrigation (" + $stage + ")");
@@ -138,11 +145,12 @@ rule "No Action Needed - BLACK GRAPES"
     salience 10
     activation-group "blackgrapes-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage, $fid : fieldId)
         $seed   : Seed(seedType == SeedType.BLACK_GRAPES)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit <= $seed.allowedWaterDeficit * $seed.getParam("normal_deficit_limit", 0.75)
         )
         $analysis : DailyAnalysis(
@@ -150,6 +158,7 @@ rule "No Action Needed - BLACK GRAPES"
         )
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
         rec.setAdvice("Black Grapes Conditions Optimal (" + $stage + ")");
@@ -164,11 +173,12 @@ rule "Monitor Conditions - BLACK GRAPES (Fallback)"
     activation-group "blackgrapes-irrigation"
     when
         $seed   : Seed(seedType == SeedType.BLACK_GRAPES)
-        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage)
-        $calc   : WaterDeficitResult(seed == $seed)
+        $status : FieldStatus(seedType == SeedType.BLACK_GRAPES, $stage : stage, $fid : fieldId)
+        $calc   : WaterDeficitResult(seed == $seed, fieldId == $fid)
         $analysis : DailyAnalysis()
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.MONITOR_CONDITIONS);
         rec.setAdvice("Monitor Black Grapes Conditions (" + $stage + ")");

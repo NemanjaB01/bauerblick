@@ -16,10 +16,11 @@ public class RecommendationConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.ALERT_QUEUE)
     public void handleRecommendation(Recommendation recommendation) {
-        log.info("Received recommendation id={}, farmId={}, type={}",
+        log.info("Received recommendation id={}, farmId={}, type={}, fieldId={}",
                 recommendation.getId(),
                 recommendation.getFarmId(),
-                recommendation.getRecommendationType());
+                recommendation.getRecommendationType(),
+                recommendation.getFieldId());
 
         try {
             notificationService.processIncomingRecommendation(recommendation);

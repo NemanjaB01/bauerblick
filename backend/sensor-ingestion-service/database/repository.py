@@ -54,6 +54,7 @@ def get_all_users_with_farms():
                     "name": farm.get("name", "Unknown Farm"),
                     "latitude": farm.get("latitude"),
                     "longitude": farm.get("longitude"),
+                    "soilType": farm.get("soilType"),
                     "crops": list(set(crops)),
                     "fields": active_fields
                 }

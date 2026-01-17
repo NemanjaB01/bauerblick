@@ -63,8 +63,11 @@ public class NotificationService {
             return;
         }
 
-        String uniqueKey = String.format("%s_%s_%s",
+        log.info("Field id: ", newRec.getFieldId());
+        String fieldIdentifier = newRec.getFieldId() != null ? newRec.getFieldId() : "FARM_WIDE";
+        String uniqueKey = String.format("%s_%s_%s_%s",
                 farmId,
+                fieldIdentifier,
                 newRec.getRecommendationType(),
                 newRec.getRecommendedSeed());
 
@@ -103,6 +106,7 @@ public class NotificationService {
             NotificationDocument doc = new NotificationDocument();
             doc.setId(rec.getId());
             doc.setFarmId(rec.getFarmId());
+            doc.setFieldId(rec.getFieldId());
             doc.setUserId(rec.getUserId());
             doc.setRecommendationType(rec.getRecommendationType());
             doc.setRecommendedSeed(rec.getRecommendedSeed());

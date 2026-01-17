@@ -5,6 +5,7 @@ import com.agriscope.rule_engine.domain.dto.FieldDTO;
 import com.agriscope.rule_engine.domain.dto.WeatherForecastDTO;
 import com.agriscope.rule_engine.domain.dto.WeatherMessageDTO;
 import com.agriscope.rule_engine.domain.enums.ForecastType;
+import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.enums.SoilType;
 import com.agriscope.rule_engine.domain.model.CurrentWeatherData;
 import com.agriscope.rule_engine.domain.model.FarmDetails;
@@ -38,6 +39,7 @@ public class WeatherMessageListener {
             String email = message.getEmail();
             String farmId = message.getFarmId();
             String type = message.getType();
+            String soilType = message.getSoil_type();
             List<WeatherForecastDTO> forecast = message.getForecast();
             List<FieldDTO> fields = message.getFields();
 
@@ -46,7 +48,7 @@ public class WeatherMessageListener {
                 return;
             }
 
-            processForecastByType(forecast, type, userId, email, farmId, fields);
+            processForecastByType(forecast, type, userId, email, farmId, fields, soilType);
 
 
         } catch (Exception e) {
@@ -60,13 +62,14 @@ public class WeatherMessageListener {
                                        String userId,
                                        String email,
                                        String farmId,
-                                       List<FieldDTO> fields) {
+                                       List<FieldDTO> fields,
+                                       String soilType) {
         switch (forecastType.toUpperCase()) {
             case "CURRENT":
                 processCurrentForecast(forecastData, userId, email, farmId, fields);
                 break;
             case "HOURLY":
-                processHourlyForecast(forecastData, userId, email, farmId, fields);
+                processHourlyForecast(forecastData, userId, email, farmId, fields, soilType);
                 break;
             case "DAILY":
                 processDailyForecast(forecastData, userId, email, farmId, fields);
@@ -104,7 +107,8 @@ public class WeatherMessageListener {
                                        String userId,
                                        String email,
                                        String farmId,
-                                       List<FieldDTO> fields) {
+                                       List<FieldDTO> fields,
+                                       String soilType) {
         List<HourlyWeatherData> hourlyList = new ArrayList<>();
 
         for (WeatherForecastDTO dto : forecastData) {
@@ -114,6 +118,7 @@ public class WeatherMessageListener {
         FarmDetails farm = new FarmDetails();
         farm.setFarmId(farmId);
         farm.setHasIrrigationSystem(true);
+        farm.setSoilType(soilType != null ? SoilType.valueOf(soilType) : null);
 
         log.info("Processing Irrigation logic for {} hours of data", hourlyList.size());
 

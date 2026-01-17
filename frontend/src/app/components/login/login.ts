@@ -63,7 +63,7 @@ export class Login {
         } else {
           // User has no farms → Force Add New Farm
           console.log('User has no farms, routing to add-farm');
-          this.router.navigate(['/add-farm'], {
+          this.router.navigate(['/new-farm'], {
             queryParams: { firstFarm: 'true' }
           });
         }

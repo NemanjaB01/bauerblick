@@ -106,61 +106,54 @@ public class RuleEvaluationService {
                 .currentSoilMoisture(currentMoisture)
                 .build();
 
-        KieSession kieSession = kieContainer.newKieSession();
         List<Recommendation> recommendations = new ArrayList<>();
 
-        try {
-            kieSession.setGlobal("recommendations", recommendations);
-            kieSession.insert(farm);
-            kieSession.insert(analysis);
+        if (fields != null) {
+            for (FieldDTO field : fields) {
+                if (field.getSeed_type() == null) continue;
 
-            int safetyCheckLimit = Math.min(hourlyData.size(), 3);
+                KieSession kieSession = kieContainer.newKieSession();
+                try {
+                    kieSession.setGlobal("recommendations", recommendations);
+                    kieSession.insert(farm);
+                    kieSession.insert(analysis);
 
-            for (int i = 0; i < safetyCheckLimit; i++) {
-                kieSession.insert(hourlyData.get(i));
-            }
-            log.info("Inserted {} hours of forecast for General Safety evaluation.", safetyCheckLimit);
-            if (fields != null) {
-                java.util.Set<SeedType> processedSeeds = new java.util.HashSet<>();
-                for (FieldDTO field : fields) {
-                    if (field.getSeed_type() == null) {
-                        continue;
+                    int safetyCheckLimit = Math.min(hourlyData.size(), 3);
+                    for (int i = 0; i < safetyCheckLimit; i++) {
+                        kieSession.insert(hourlyData.get(i));
                     }
+
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
-                        if (!processedSeeds.contains(type)) {
-                            Seed seed = seedService.getSeed(type);
-                            if (seed != null) {
-                                kieSession.insert(seed);
-                                processedSeeds.add(type);
-                            }
+                        Seed seed = seedService.getSeed(type);
+
+                        if (seed != null) {
+                            kieSession.insert(seed);
                         }
+
                         GrowthStage stage = mapGrowthStage(field.getGrowth_stage());
                         kieSession.insert(new FieldStatus(field.getField_id(), type, stage));
 
-                        log.debug("Inserted field: {} with seed {} at stage {}", field.getField_id(), type, stage);
+                        kieSession.fireAllRules();
+
                     } catch (Exception e) {
-                        log.warn("Error processing field {}: {}", field.getField_id(), e.getMessage());                    }
+                        log.warn("Error processing field {}: {}", field.getField_id(), e.getMessage());
+                    }
+
+                } finally {
+                    kieSession.dispose();
                 }
             }
-
-            int firedRules = kieSession.fireAllRules();
-            log.info("Fired {} HOURLY rules", firedRules);
-
-            processHourlyRecommendations(recommendations, userId, email, farm.getFarmId(), avgTemperature);
-
-        } finally {
-            kieSession.dispose();
         }
+
+        processHourlyRecommendations(recommendations, userId, email, farm.getFarmId(), avgTemperature);
 
     }
 
     private GrowthStage mapGrowthStage(String stageRaw) {
-        log.info("Mapping growth stage: {}", stageRaw);
         if (stageRaw == null) return GrowthStage.YOUNG;
 
         try {
-            log.info("Trying to map growth stage: {}", stageRaw.toUpperCase());
             return GrowthStage.valueOf(stageRaw.toUpperCase());
         } catch (IllegalArgumentException e) {
             switch (stageRaw) {
@@ -202,11 +195,12 @@ public class RuleEvaluationService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-
         for (Recommendation rec : recommendations) {
             rec.setUserId(userId);
             rec.setEmail(email);
             rec.setFarmId(farmId);
+            rec.setFieldId(rec.getFieldId() != null ? rec.getFieldId() : "N/A");
+            log.info("Field id: {}", rec.getFieldId());
             rec.setWeatherTimestamp(now);
 
             rec.getMetrics().put("temperature", avgTemperature);

@@ -21,6 +21,9 @@ public class NotificationDocument {
     @Indexed
     private String userId;
 
+    private String fieldId;
+
+
     private String recommendationType;
     private String recommendedSeed;
     private String message;

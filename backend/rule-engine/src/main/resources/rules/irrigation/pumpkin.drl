@@ -18,9 +18,10 @@ rule "Pumpkin - Ready to Harvest "
     activation-group "pumpkin-irrigation"
     when
         $seed   : Seed(seedType == SeedType.PUMPKIN)
-        $status : FieldStatus(seedType == SeedType.PUMPKIN, stage == GrowthStage.READY)
+        $status : FieldStatus(seedType == SeedType.PUMPKIN, stage == GrowthStage.READY, $fid : fieldId)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
         rec.setAdvice(" STOP Irrigation - Prevent Fruit Rot");
@@ -32,12 +33,13 @@ rule "Delay Irrigation - PUMPKIN"
     salience 99
     activation-group "pumpkin-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage, $fid : fieldId)
         $farm   : FarmDetails($soil : soilType)
         $seed   : Seed(seedType == SeedType.PUMPKIN)
 
         $calc   : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("delay_deficit_factor", 0.6)
         )
 
@@ -47,6 +49,7 @@ rule "Delay Irrigation - PUMPKIN"
         )
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.DELAY_IRRIGATION);
         rec.setAdvice("Delay Irrigation (" + $stage + ") - Heavy Rain Forecast");
@@ -61,12 +64,13 @@ rule "Irrigation - PUMPKIN - Urgent"
     salience 50
     activation-group "pumpkin-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage, $fid : fieldId)
         $farm   : FarmDetails($soil : soilType)
         $seed   : Seed(seedType == SeedType.PUMPKIN)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("urgent_deficit_factor", 0.8)
         )
 
@@ -77,6 +81,7 @@ rule "Irrigation - PUMPKIN - Urgent"
         not DailyAnalysis(totalRain > $seed.heavyRainThreshold)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
 
@@ -108,11 +113,12 @@ rule "Irrigation Soon Warning - PUMPKIN"
     salience 40
     activation-group "pumpkin-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage, $fid : fieldId)
         $seed   : Seed(seedType == SeedType.PUMPKIN)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("soon_deficit_min", 0.5),
             deficit <= $seed.allowedWaterDeficit * $seed.getParam("soon_deficit_max", 0.8)
         )
@@ -125,6 +131,7 @@ rule "Irrigation Soon Warning - PUMPKIN"
         not DailyAnalysis(totalRain > $seed.heavyRainThreshold)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
         rec.setAdvice("Prepare Irrigation for Pumpkin (" + $stage + ")");
@@ -139,11 +146,12 @@ rule "No Action Needed - PUMPKIN"
     salience 10
     activation-group "pumpkin-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage, $fid : fieldId)
         $seed   : Seed(seedType == SeedType.PUMPKIN)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit <= $seed.allowedWaterDeficit * $seed.getParam("normal_deficit_limit", 0.5)
         )
         $analysis : DailyAnalysis(
@@ -151,6 +159,7 @@ rule "No Action Needed - PUMPKIN"
         )
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
         rec.setAdvice("Pumpkin Conditions Optimal (" + $stage + ")");
@@ -167,11 +176,12 @@ rule "Monitor Conditions - PUMPKIN (Fallback)"
     activation-group "pumpkin-irrigation"
     when
         $seed   : Seed(seedType == SeedType.PUMPKIN)
-        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage)
-        $calc   : WaterDeficitResult(seed == $seed)
+        $status : FieldStatus(seedType == SeedType.PUMPKIN, $stage : stage, $fid : fieldId)
+        $calc   : WaterDeficitResult(seed == $seed, fieldId == $fid)
         $analysis : DailyAnalysis()
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.MONITOR_CONDITIONS);
         rec.setAdvice("Monitor Pumpkin Conditions (" + $stage + ")");

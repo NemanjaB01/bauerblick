@@ -12,9 +12,12 @@ import ase_pr_inso_01.user_service.repository.UserRepository;
 import ase_pr_inso_01.user_service.security.JwtUtils;
 import ase_pr_inso_01.user_service.service.UserService;
 import ase_pr_inso_01.user_service.validation.UserValidator;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,7 @@ public class UserServiceImpl implements UserService {
         // secure password hashing
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setPassword2(passwordEncoder.encode(dto.getPassword2()));
+        user.setDeleted_at(LocalDate.now());
 
         return userRepository.save(user);
     }
@@ -108,6 +112,14 @@ public class UserServiceImpl implements UserService {
         }
         User updatedUser = userRepository.save(user);
         return updatedUser;
+    }
+   @Override
+   public User deleteUser(String email) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found: " + email));
+
+        user.setDeleted_at(LocalDate.now());
+        return user;
     }
 
 

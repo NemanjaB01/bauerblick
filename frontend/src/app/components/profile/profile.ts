@@ -291,11 +291,25 @@ export class Profile implements OnInit {
   deleteProfile() {
     this.showDeleteModal = false;
 
-    // TODO: Add API call to delete profile
     console.log('Deleting profile...');
 
-    // Show confirmation and redirect
-    this.toastr.error('Profile deleted successfully');
-    this.router.navigate(['/login']);
+    this.userService.deleteProfile().subscribe({
+      next: (deletedUser) => {
+        console.log('Deletion successful', deletedUser);
+        this.toastr.success('Profile deleted successfully!');
+        localStorage.removeItem("authToken");
+        this.router.navigate(['/login']);
+
+      },
+      error: (err) => {
+        console.error('Deletion failed', err);
+
+        if (err.status === 400) {
+          this.toastr.error(typeof err.error === 'string' ? err.error : 'Deletion failed.');
+        } else {
+          this.toastr.error('An unexpected error occurred. Please try again.');
+        }
+      }
+    });
   }
 }

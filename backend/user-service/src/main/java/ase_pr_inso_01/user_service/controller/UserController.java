@@ -68,4 +68,20 @@ public class UserController {
             return ResponseEntity.internalServerError().body("An error occurred while updating profile");
         }
     }
+
+    @PutMapping("/me/delete")
+    public ResponseEntity<?> deleteProfile(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            String email = principal.getName();
+            User deleteUser = userService.deleteUser(email);
+            return ResponseEntity.ok(deleteUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An error occurred while deleting profile");
+        }
+    }
 }

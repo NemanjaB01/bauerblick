@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @Document(collection = "users")
 @Getter
@@ -19,6 +20,7 @@ public class User {
   private String password;
   private String password2;
   private String role = "USER";
+  private LocalDate deleted_at;
 
   //TODO: enhance this to also include login attempts and security question!
 }

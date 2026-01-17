@@ -19,4 +19,8 @@ export class UserService {
   editProfile(data: EditUserDto): Observable<UserProfileDetail> {
     return this.httpClient.put<UserProfileDetail>(this.profileDataUri, data);
   }
+
+  deleteProfile(): Observable<any>{
+    return this.httpClient.put(this.globals.backendUri + "/users/delete", {})
+  }
 }

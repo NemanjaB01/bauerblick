@@ -81,30 +81,32 @@ rule "Irrigation - BLACK GRAPES - Urgent"
 
         not DailyAnalysis(totalRain > $seed.heavyRainThreshold)
     then
-        Recommendation rec = new Recommendation();
-        rec.setFieldId($fid);
-        rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
-        rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
+       Recommendation rec = new Recommendation();
+       rec.setFieldId($fid);
+       rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
+       rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
 
-        String urgency = "URGENT";
-        String context = "";
+       String urgency = "URGENT";
+       String context = "";
+       if ($stage == GrowthStage.MATURE) {
+           urgency = "IMPORTANT";
+           context = "Veraison: Excessive stress is now risking leaf loss and sunburn on berries.";
+       } else if ($stage == GrowthStage.YOUNG) {
+           context = "Vegetative growth: Canopy needs water to establish.";
+       } else {
+            context = "Vines are severely stressed.";
+       }
 
-        if ($stage == GrowthStage.MATURE) {
-            urgency = "IMPORTANT";
-            context = "Veraison: Excessive stress is now risking leaf loss and sunburn on berries.";
-        } else if ($stage == GrowthStage.YOUNG) {
-            context = "Vegetative growth: Canopy needs water to establish.";
-        } else {
-             context = "Vines are severely stressed.";
-        }
+       double threshold = $seed.getAllowedWaterDeficit() * $seed.getParam("urgent_deficit_factor", 1.2);
 
-        rec.setAdvice(urgency + ": Irrigate Black Grapes (" + $stage + ")");
-        rec.setReasoning(context + " Deficit: " + String.format("%.1f", $calc.getDeficit()) +
-                         " mm. Avoid heavy irrigation to prevent vigorous growth.");
+       rec.setAdvice(urgency + ": Irrigate Black Grapes (" + $stage + ")");
 
-        rec.getMetrics().put("deficit_amount", $calc.getDeficit());
-        rec.getMetrics().put("crop_stage", $stage.toString());
-        recommendations.add(rec);
+       rec.setReasoning(context + " Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                        " mm (Threshold: " + String.format("%.1f", threshold) + " mm). Avoid heavy irrigation.");
+
+       rec.getMetrics().put("deficit_amount", $calc.getDeficit());
+       rec.getMetrics().put("crop_stage", $stage.toString());
+       recommendations.add(rec);
 end
 
 
@@ -133,9 +135,15 @@ rule "Irrigation Soon Warning - BLACK GRAPES"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
+
+        double minThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_min", 0.8);
+        double maxThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_max", 1.2);
+
         rec.setAdvice("Monitor/Plan Irrigation (" + $stage + ")");
-        rec.setReasoning("Vines are in optimal stress zone for quality (RDI). Monitor if deficit exceeds limit. " +
-            "Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+
+        rec.setReasoning("Vines in optimal stress zone (RDI). Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm. Warning Range: " + String.format("%.1f", minThr) + " - " + String.format("%.1f", maxThr) + " mm.");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end
@@ -161,8 +169,14 @@ rule "No Action Needed - BLACK GRAPES"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+
+        double limit = $seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.75);
+
         rec.setAdvice("Black Grapes Conditions Optimal (" + $stage + ")");
-        rec.setReasoning("Moisture levels ideal for quality production. No action needed.");
+
+        rec.setReasoning("Moisture levels ideal. Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm (Safe below: " + String.format("%.1f", limit) + " mm). No action needed.");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end

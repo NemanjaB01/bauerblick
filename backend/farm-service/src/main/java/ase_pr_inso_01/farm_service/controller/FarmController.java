@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -128,5 +129,10 @@ public class FarmController {
 
         List<HarvestHistory> history = farmService.getHarvestHistory(farmId);
         return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/{farmId}/feedback-factors")
+    public Map<String, Double> calculateFeedbackFactors(@PathVariable String farmId) {
+        return farmService.calculateFeedbackFactors(farmId);
     }
 }

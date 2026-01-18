@@ -216,4 +216,21 @@ public class NotificationService {
         }
         return 0.0;
     }
+
+    public void clearCacheForField(String farmId, String fieldId) {
+        String prefix = farmId + "_" + fieldId + "_";
+        java.util.List<String> keysToRemove = new java.util.ArrayList<>();
+
+        lastSentCache.asMap().keySet().forEach(key -> {
+            if (key.startsWith(prefix)) {
+                keysToRemove.add(key);
+            }
+        });
+
+        if (!keysToRemove.isEmpty()) {
+            lastSentCache.invalidateAll(keysToRemove);
+            log.info("Cleared {} cached notifications for farm {} field {} due to Harvest.",
+                    keysToRemove.size(), farmId, fieldId);
+        }
+    }
 }

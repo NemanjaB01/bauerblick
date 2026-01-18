@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FarmServiceImpl implements FarmService {
@@ -51,10 +52,11 @@ public class FarmServiceImpl implements FarmService {
         Farm createdFarm = farmMapper.farmCreateDtoToFarm(farm, user.getId());
         farmRepository.save(createdFarm);
 
-        FarmDetailsDto farmDto = farmMapper.farmToFarmDetailsDto(createdFarm);
+        Map<String, Double> factors = this.calculateFeedbackFactors(createdFarm.getId());
+        FarmDetailsDto farmDto = farmMapper.farmToFarmDetailsDto(createdFarm, factors);
         sendFarmEvent(user.getId(), email, farmDto, "farm.created");
 
-        return farmMapper.farmToFarmDetailsDto(createdFarm);
+        return farmMapper.farmToFarmDetailsDto(createdFarm, factors);
     }
 
     /**
@@ -110,9 +112,10 @@ public class FarmServiceImpl implements FarmService {
 
         // Save the changes
         Farm updatedFarm = farmRepository.save(farm);
-        FarmDetailsDto farmDto = farmMapper.farmToFarmDetailsDto(updatedFarm);
+        Map<String, Double> factors = this.calculateFeedbackFactors(farmId);
+        FarmDetailsDto farmDto = farmMapper.farmToFarmDetailsDto(updatedFarm, factors);
         sendFarmEvent(user.getId(), email, farmDto, "farm.updated");
-        return farmMapper.farmToFarmDetailsDto(updatedFarm);
+        return farmMapper.farmToFarmDetailsDto(updatedFarm, factors);
     }
 
     @Override
@@ -120,19 +123,18 @@ public class FarmServiceImpl implements FarmService {
         UserDetailsDto user = this.getUserDetails(email);
 
         Optional<Farm> optionalFarm = farmRepository.findById(farmId);
-
         if (optionalFarm.isEmpty()) {
             throw new RuntimeException("Farm not found with ID: " + farmId);
         }
-
         Farm farm = optionalFarm.get();
 
-        // Check if farm belongs to user
         if (!farm.getUserId().equals(user.getId())) {
             throw new RuntimeException("Unauthorized: This farm does not belong to you");
         }
 
-        return farmMapper.farmToFarmDetailsDto(farm);
+        Map<String, Double> factors = this.calculateFeedbackFactors(farmId);
+
+        return farmMapper.farmToFarmDetailsDto(farm, factors);
     }
 
     @Override
@@ -173,7 +175,10 @@ public class FarmServiceImpl implements FarmService {
 
     private List<FarmDetailsDto> getFarmsByUserId(String userId) {
         return farmRepository.findByUserId(userId).stream()
-                .map(farmMapper::farmToFarmDetailsDto)
+                .map(farm -> {
+                    Map<String, Double> factors = this.calculateFeedbackFactors(farm.getId());
+                    return farmMapper.farmToFarmDetailsDto(farm, factors);
+                })
                 .toList();
     }
 
@@ -236,6 +241,25 @@ public class FarmServiceImpl implements FarmService {
         field.setGrowthStage(null);
 
         farmRepository.save(farm);
+        sendHarvestEvent(farmId, fieldId);
+    }
+
+    private void sendHarvestEvent(String farmId, Integer fieldId) {
+        try {
+            Map<String, Object> message = new HashMap<>();
+            message.put("farmId", farmId);
+            message.put("fieldId", String.valueOf(fieldId));
+            message.put("event", "field.harvested");
+
+            rabbitTemplate.convertAndSend(
+                    "farm_events",
+                    "field.harvested",
+                    message
+            );
+            System.out.println("Sent Harvest Event for field: " + fieldId);
+        } catch (Exception e) {
+            System.err.println("Failed to send Harvest event: " + e.getMessage());
+        }
     }
 
     public void submitFeedback(String historyId, List<FeedbackAnswerDTO> answers) {
@@ -248,6 +272,7 @@ public class FarmServiceImpl implements FarmService {
             for (FeedbackAnswerDTO dto : answers) {
                 HarvestFeedbackAnswer answer = new HarvestFeedbackAnswer();
                 answer.setQuestionId(dto.getQuestionId());
+                answer.setTargetParameter(dto.getTargetParameter());
                 answer.setAnswerLabel(dto.getSelectedOption().getLabel());
                 answer.setAnswerValue(dto.getSelectedOption().getValue());
                 answer.setMultiplier(dto.getSelectedOption().getMultiplier());
@@ -262,5 +287,27 @@ public class FarmServiceImpl implements FarmService {
 
     public List<HarvestHistory> getHarvestHistory(String farmId) {
         return harvestHistoryRepository.findByFarmId(farmId);
+    }
+
+    public Map<String, Double> calculateFeedbackFactors(String farmId) {
+        List<HarvestHistory> history = harvestHistoryRepository.findByFarmId(farmId);
+        Map<String, Double> factors = new HashMap<>();
+
+        if (history.isEmpty()) return factors;
+
+        Map<String, List<Double>> groupedMultipliers = history.stream()
+                .flatMap(h -> h.getFeedbackAnswers().stream())
+                .filter(a -> a.getTargetParameter() != null)
+                .collect(Collectors.groupingBy(
+                        HarvestFeedbackAnswer::getTargetParameter,
+                        Collectors.mapping(HarvestFeedbackAnswer::getMultiplier, Collectors.toList())
+                ));
+
+        groupedMultipliers.forEach((param, values) -> {
+            double avg = values.stream().mapToDouble(d -> d).average().orElse(1.0);
+            factors.put(param, avg);
+        });
+
+        return factors;
     }
 }

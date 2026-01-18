@@ -1,7 +1,8 @@
-package com.agriscope.notification_service.service;
+package com.agriscope.notification_service.messaging;
 
 import com.agriscope.notification_service.config.RabbitMQConfig;
 import com.agriscope.notification_service.model.Recommendation;
+import com.agriscope.notification_service.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

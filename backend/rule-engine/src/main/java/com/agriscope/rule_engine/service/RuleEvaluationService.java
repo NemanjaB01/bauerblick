@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalDouble;
 
 @Slf4j
@@ -32,7 +33,7 @@ public class RuleEvaluationService {
     @Autowired
     private RecommendationProducer recommendationProducer;
 
-    public void evaluateCurrentDataForFarm(CurrentWeatherData weatherData, List<FieldDTO> fields) {
+    public void evaluateCurrentDataForFarm(CurrentWeatherData weatherData, List<FieldDTO> fields, Map<String, Double> feedbackFactors) {
         log.info("Evaluating CURRENT rules for user {}, farm {}",
                 weatherData.getUserId(), weatherData.getFarmId());
 
@@ -53,11 +54,12 @@ public class RuleEvaluationService {
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         if (!processedSeeds.contains(type)) {
-                            Seed seed = seedService.getSeed(type);
-                            if (seed != null) {
-                                kieSession.insert(seed);
+                            Seed originalSeed = seedService.getSeed(type);
+                            if (originalSeed != null) {
+                                Seed effectiveSeed = originalSeed.copy();
+                                applyFeedbackAdjustments(effectiveSeed, feedbackFactors);
+                                kieSession.insert(effectiveSeed);
                                 processedSeeds.add(type);
-                                log.debug("Inserted distinct seed type: {}", type);
                             }
                         }
 
@@ -125,10 +127,12 @@ public class RuleEvaluationService {
 
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
-                        Seed seed = seedService.getSeed(type);
+                        Seed originalSeed = seedService.getSeed(type);
 
-                        if (seed != null) {
-                            kieSession.insert(seed);
+                        if (originalSeed != null) {
+                            Seed effectiveSeed = originalSeed.copy();
+                            applyFeedbackAdjustments(effectiveSeed, farm.getFeedbackFactors());
+                            kieSession.insert(effectiveSeed);
                         }
 
                         GrowthStage stage = mapGrowthStage(field.getGrowth_stage());
@@ -145,7 +149,6 @@ public class RuleEvaluationService {
                 }
             }
         }
-
         processHourlyRecommendations(recommendations, userId, email, farm.getFarmId(), avgTemperature);
 
     }
@@ -210,7 +213,7 @@ public class RuleEvaluationService {
         }
     }
 
-    public void evaluateDailyRules(List<DailyWeatherData> dailyList, List<FieldDTO> fields) {
+    public void evaluateDailyRules(List<DailyWeatherData> dailyList, List<FieldDTO> fields, Map<String, Double> feedbackFactors) {
         if (dailyList == null || dailyList.isEmpty()) return;
 
         KieSession kieSession = kieContainer.newKieSession();
@@ -234,9 +237,12 @@ public class RuleEvaluationService {
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
                         if (!processedSeeds.contains(type)) {
-                            Seed seed = seedService.getSeed(type);
-                            if (seed != null) {
-                                kieSession.insert(seed);
+                            Seed originalSeed = seedService.getSeed(type);
+                            if (originalSeed != null) {
+                                Seed effectiveSeed = originalSeed.copy();
+                                applyFeedbackAdjustments(effectiveSeed, feedbackFactors);
+
+                                kieSession.insert(effectiveSeed);
                                 processedSeeds.add(type);
                             }
                         }
@@ -266,5 +272,40 @@ public class RuleEvaluationService {
             log.info("Sending Daily Recommendation for target date: {}", rec.getMetrics().get("forecast_date"));
             recommendationProducer.sendRecommendation(rec);
         }
+    }
+
+    private void applyFeedbackAdjustments(Seed seed, Map<String, Double> factors) {
+        if (factors == null || factors.isEmpty()) return;
+
+        Map<String, Double> params = seed.getRuleParams();
+
+        factors.forEach((paramName, multiplier) -> {
+            if (params.containsKey(paramName)) {
+                double originalValue = params.get(paramName);
+                double adjustedValue = originalValue * multiplier;
+
+                params.put(paramName, adjustedValue);
+
+                log.info("Adjusted param {} for {} from {} to {} (multiplier: {})",
+                        paramName, seed.getSeedType(), originalValue, adjustedValue, multiplier);
+            }
+
+            else if ("minTemperature".equals(paramName)) {
+                seed.setMinTemperature(seed.getMinTemperature() * multiplier);
+            }
+            else if ("maxTemperature".equals(paramName) || "heatStressTemperature".equals(paramName)) {
+                if (seed.getHeatStressTemperature() != null) {
+                    seed.setHeatStressTemperature(seed.getHeatStressTemperature() * multiplier);
+                }
+            }
+            else if ("allowedWaterDeficit".equals(paramName)) {
+                if (seed.getAllowedWaterDeficit() != null) {
+                    double newValue = seed.getAllowedWaterDeficit() * multiplier;
+                    seed.setAllowedWaterDeficit(newValue);
+                    seed.getRuleParams().put("allowedWaterDeficit", newValue);
+                    log.info("Adjusted allowedWaterDeficit for {} (multiplier: {})", seed.getSeedType(), multiplier);
+                }
+            }
+        });
     }
 }

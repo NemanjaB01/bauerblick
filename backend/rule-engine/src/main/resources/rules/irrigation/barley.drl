@@ -88,10 +88,9 @@ rule "Irrigation - BARLEY - Urgent"
 
         String urgency = "URGENT";
         String context = "";
-
         if ($stage == GrowthStage.MATURE) {
             urgency = "CRITICAL";
-            context = "Grain filling stage: Water stress now reduces yield and quality .";
+            context = "Grain filling stage: Water stress now reduces yield and quality.";
         } else if ($stage == GrowthStage.YOUNG) {
             context = "Stem elongation: Consistent moisture required for optimal head formation.";
         } else if ($stage == GrowthStage.SEEDLING) {
@@ -100,9 +99,12 @@ rule "Irrigation - BARLEY - Urgent"
              context = "Soil moisture critically low.";
         }
 
+        double threshold = $seed.getAllowedWaterDeficit() * $seed.getParam("urgent_deficit_factor", 1.0);
+
         rec.setAdvice(urgency + ": Irrigate Barley (" + $stage + ")");
+
         rec.setReasoning(context + " Deficit: " + String.format("%.1f", $calc.getDeficit()) +
-                         " mm on " + $soil + " soil.");
+                         " mm (Threshold: " + String.format("%.1f", threshold) + " mm).");
 
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         rec.getMetrics().put("crop_stage", $stage.toString());
@@ -135,9 +137,15 @@ rule "Irrigation Soon Warning - BARLEY"
         rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
+
+        double minThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_min", 0.7);
+        double maxThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_max", 1.0);
+
         rec.setAdvice("Plan Irrigation for Barley (" + $stage + ")");
-        rec.setReasoning("Moisture levels declining. " + $stage + " stage needs monitoring. " +
-            "Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+
+        rec.setReasoning("Moisture levels declining. Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm. Warning Range: " + String.format("%.1f", minThr) + " - " + String.format("%.1f", maxThr) + " mm.");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end
@@ -163,10 +171,15 @@ rule "No Action Needed - BARLEY"
         rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+
+        double limit = $seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.7);
+
         rec.setAdvice("Barley Conditions Normal (" + $stage + ")");
+
         rec.setReasoning("Barley has adequate moisture (" +
             String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
-            "). Deficit manageable.");
+            "). Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm (Safe below: " + String.format("%.1f", limit) + " mm).");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end

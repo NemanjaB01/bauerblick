@@ -87,21 +87,22 @@ rule "Irrigation - PUMPKIN - Urgent"
 
         String urgency = "URGENT";
         String context = "";
-
         if ($stage == GrowthStage.MATURE) {
             urgency = "CRITICAL";
-            context = "Fruit set/enlargement stage: Water stress now causes fruit abortion or deformation.";
+            context = "Fruit set/enlargement stage: Water stress now causes fruit abortion.";
         } else if ($stage == GrowthStage.YOUNG) {
             context = "Vine running stage: Rapid vegetative growth requires consistent moisture.";
         } else if ($stage == GrowthStage.SEEDLING) {
-            context = "Seedling stage: Maintain moisture but avoid saturation to prevent damping off.";
+            context = "Seedling stage: Maintain moisture but avoid saturation.";
         } else {
              context = "Large leaf area causing rapid water loss.";
         }
 
+        double threshold = $seed.getAllowedWaterDeficit() * $seed.getParam("urgent_deficit_factor", 0.8);
+
         rec.setAdvice(urgency + ": Irrigate Pumpkin (" + $stage + ")");
         rec.setReasoning(context + " Deficit: " + String.format("%.1f", $calc.getDeficit()) +
-                         " mm on " + $soil + " soil.");
+                         " mm (Threshold: " + String.format("%.1f", threshold) + " mm).");
 
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         rec.getMetrics().put("crop_stage", $stage.toString());
@@ -134,9 +135,14 @@ rule "Irrigation Soon Warning - PUMPKIN"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
+
+        double minThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_min", 0.5);
+        double maxThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_max", 0.8);
+
         rec.setAdvice("Prepare Irrigation for Pumpkin (" + $stage + ")");
-        rec.setReasoning("Pumpkins showing early stress signs. Large leaves lose water quickly. " +
-            "Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+        rec.setReasoning("Early stress signs. Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm. Warning Range: " + String.format("%.1f", minThr) + " - " + String.format("%.1f", maxThr) + " mm.");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end
@@ -162,10 +168,13 @@ rule "No Action Needed - PUMPKIN"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+
+        double limit = $seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.5);
+
         rec.setAdvice("Pumpkin Conditions Optimal (" + $stage + ")");
-        rec.setReasoning("Moisture adequate (" +
-            String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
-            ") for fruit development.");
+        rec.setReasoning("Moisture adequate (" + String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
+                         "). Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm (Safe below: " + String.format("%.1f", limit) + " mm).");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end

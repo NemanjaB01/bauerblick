@@ -163,25 +163,30 @@
     ]
   },
   {
-    "id": "general_growth",
-    "question": "In general, how do you rate the plant growth this season?",
-    "targetParameter": "seedCoefficient",
-    "description": "Adjusts the overall water requirement coefficient for the seed.",
+    "id": "disease_alert_accuracy",
+    "question": "Did you observe any disease outbreaks that we missed, or were alerts false?",
+    "targetParameter": "disease_rain_factor",
+    "description": "Adjusts the sensitivity of disease risk models based on rainfall.",
     "options": [
       {
-        "label": "Slow / Stunted growth",
-        "value": -1,
+        "label": "False Alarm - No disease appeared",
+        "value": 2,
+        "multiplier": 1.15
+      },
+      {
+        "label": "Slightly too sensitive",
+        "value": 1,
         "multiplier": 1.05
       },
       {
-        "label": "Normal growth",
+        "label": "Accurate / Normal",
         "value": 0,
         "multiplier": 1.00
       },
       {
-        "label": "Too fast / Watery",
-        "value": 1,
-        "multiplier": 0.95
+        "label": "Missed detection - Disease appeared!",
+        "value": -2,
+        "multiplier": 0.85
       }
     ]
   }

@@ -255,6 +255,26 @@ export class AlertsNotification implements OnInit, OnDestroy {
     });
   }
 
+  isIrrigationAlert(type: string): boolean {
+    return type === 'IRRIGATE_NOW' || type === 'IRRIGATE_SOON' || type === 'DELAY_IRRIGATION';
+  }
+
+  formatDeficit(alert: AlertData): string {
+    let val = alert.metrics?.deficit_amount;
+
+    if (val === undefined || val === null) {
+      const match = alert.reasoning?.match(/Deficit:\s*([\d.]+)\s*mm/i);
+
+      if (match && match[1]) {
+        return `${match[1]} mm`;
+      }
+    } else {
+      return `${Number(val).toFixed(1)} mm`;
+    }
+
+    return 'N/A';
+  }
+
   clearAllAlerts(): void {
     this.alerts.forEach(alert => {
       this.notificationService.markAsRead(alert.id).subscribe();

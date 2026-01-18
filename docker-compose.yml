@@ -113,6 +113,8 @@ services:
         condition: service_started
       notification-service:
         condition: service_started
+      farm-service:
+        condition: service_started
     environment:
       - spring.profiles.active=prod
       - spring.data.mongodb.uri=mongodb://seeds-db:27017/seedsdb

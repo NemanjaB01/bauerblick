@@ -391,14 +391,19 @@ export class Feedback implements OnInit {
         answers: this.userAnswers
       });
 
-      const answersToSend = this.userAnswers.map(ans => ({
-        questionId: ans.questionId,
-        selectedOption: {
-          label: ans.selectedOption.label,
-          value: ans.selectedOption.value,
-          multiplier: ans.selectedOption.multiplier
-        }
-      }));
+      const answersToSend = this.userAnswers.map(ans => {
+        const question = this.feedbackQuestions.find(q => q.id === ans.questionId);
+
+        return {
+          questionId: ans.questionId,
+          targetParameter: question?.targetParameter,
+          selectedOption: {
+            label: ans.selectedOption.label,
+            value: ans.selectedOption.value,
+            multiplier: ans.selectedOption.multiplier
+          }
+        };
+      });
 
       this.farmService.submitFeedback(this.selectedHarvest.id, answersToSend).subscribe({
         next: () => {

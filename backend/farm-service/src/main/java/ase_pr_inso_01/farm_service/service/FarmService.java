@@ -9,6 +9,7 @@ import ase_pr_inso_01.farm_service.models.dto.FeedbackAnswerDTO;
 import ase_pr_inso_01.farm_service.models.dto.HarvestRequestDTO;
 
 import java.util.List;
+import java.util.Map;
 
 //TODO: Add comments
 public interface FarmService {
@@ -29,4 +30,6 @@ public interface FarmService {
     void submitFeedback(String historyId, List<FeedbackAnswerDTO> answers);
 
     List<HarvestHistory> getHarvestHistory(String farmId);
+
+    public Map<String, Double> calculateFeedbackFactors(String farmId);
 }

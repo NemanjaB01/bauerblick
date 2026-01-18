@@ -16,11 +16,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -29,6 +35,11 @@ public class WeatherMessageListener {
 
     @Autowired
     private RuleEvaluationService ruleEvaluationService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private final String FARM_SERVICE_URL = "http://farm-service:8082/api/farms";
 
     @RabbitListener(
             queues = RabbitMQConfig.WEATHER_QUEUE,
@@ -47,10 +58,7 @@ public class WeatherMessageListener {
                 log.warn("Received invalid weather message for userId={}, farmId={}", userId, farmId);
                 return;
             }
-
             processForecastByType(forecast, type, userId, email, farmId, fields, soilType);
-
-
         } catch (Exception e) {
             log.error("Error processing message: {}", e.getMessage(), e);
         }
@@ -99,8 +107,9 @@ public class WeatherMessageListener {
                 weatherData.getTemperature_2m(),
                 weatherData.getRain(),
                 weatherData.getWind_speed_10m());
+        Map<String, Double> feedbackFactors = fetchFeedbackFactors(farmId);
 
-        ruleEvaluationService.evaluateCurrentDataForFarm(weatherData, fields);
+        ruleEvaluationService.evaluateCurrentDataForFarm(weatherData, fields, feedbackFactors);
     }
 
     private void processHourlyForecast(List<WeatherForecastDTO> forecastData,
@@ -114,14 +123,13 @@ public class WeatherMessageListener {
         for (WeatherForecastDTO dto : forecastData) {
             hourlyList.add(convertToHourlyWeatherData(dto, userId, email, farmId));
         }
-
+        Map<String, Double> feedbackFactors = fetchFeedbackFactors(farmId);
         FarmDetails farm = new FarmDetails();
         farm.setFarmId(farmId);
-        farm.setHasIrrigationSystem(true);
         farm.setSoilType(soilType != null ? SoilType.valueOf(soilType) : null);
+        farm.setFeedbackFactors(feedbackFactors);
 
         log.info("Processing Irrigation logic for {} hours of data", hourlyList.size());
-
         ruleEvaluationService.evaluateHourlDataForFarm(hourlyList, farm, fields);
     }
 
@@ -153,9 +161,28 @@ public class WeatherMessageListener {
             }
             dailyList.add(daily);
         }
+        Map<String, Double> feedbackFactors = fetchFeedbackFactors(farmId);
 
         log.info("Processing DAILY rules for {} days forecast", dailyList.size());
-        ruleEvaluationService.evaluateDailyRules(dailyList, fields);
+        ruleEvaluationService.evaluateDailyRules(dailyList, fields, feedbackFactors);
+    }
+
+    private Map<String, Double> fetchFeedbackFactors(String farmId) {
+        try {
+            String url = FARM_SERVICE_URL + "/" + farmId + "/feedback-factors";
+
+            ResponseEntity<Map<String, Double>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Double>>() {}
+            );
+
+            return response.getBody() != null ? response.getBody() : Collections.emptyMap();
+        } catch (Exception e) {
+            log.warn("Could not fetch feedback factors for farm {}: {}", farmId, e.getMessage());
+            return Collections.emptyMap();
+        }
     }
 
     private HourlyWeatherData convertToHourlyWeatherData(WeatherForecastDTO dto, String userId, String email, String farmId) {

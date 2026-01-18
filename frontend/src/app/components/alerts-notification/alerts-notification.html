@@ -37,7 +37,12 @@
 
           <p class="alert-description">{{ alert.reasoning }}</p>
 
-          <div class="alert-metrics" *ngIf="alert.metrics?.temperature !== undefined">
+          <div class="alert-metrics water-metric" *ngIf="isIrrigationAlert(alert.recommendationType)">
+            <span class="metric-icon">💧</span>
+            <span class="metric-value">{{ formatDeficit(alert) }}</span>
+          </div>
+
+          <div class="alert-metrics temp-metric" *ngIf="!isIrrigationAlert(alert.recommendationType) && alert.metrics?.temperature !== undefined">
             <span class="metric-icon">🌡️</span>
             <span class="metric-value">{{ formatTemperature(alert.metrics.temperature) }}</span>
           </div>

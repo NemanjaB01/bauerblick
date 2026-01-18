@@ -86,7 +86,6 @@ rule "Irrigation - WHITE GRAPES - Urgent"
 
         String urgency = "URGENT";
         String context = "";
-
         if ($stage == GrowthStage.MATURE) {
             urgency = "ATTENTION";
             context = "Ripening Phase: Severe stress now can affect berry size and yield.";
@@ -94,9 +93,11 @@ rule "Irrigation - WHITE GRAPES - Urgent"
              context = "Vines are severely stressed.";
         }
 
+        double threshold = $seed.getAllowedWaterDeficit() * $seed.getParam("urgent_deficit_factor", 1.3);
+
         rec.setAdvice(urgency + ": Irrigate White Grapes (" + $stage + ")");
         rec.setReasoning(context + " Deficit: " + String.format("%.1f", $calc.getDeficit()) +
-                         " mm on " + $soil + " soil.");
+                         " mm (Threshold: " + String.format("%.1f", threshold) + " mm).");
 
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         rec.getMetrics().put("crop_stage", $stage.toString());
@@ -128,9 +129,14 @@ rule "Irrigation Soon Warning - WHITE GRAPES"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
+
+        double minThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_min", 0.75);
+        double maxThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_max", 1.3);
+
         rec.setAdvice("Monitor White Grapes (" + $stage + ")");
-        rec.setReasoning("Vines are in the quality window (mild stress). Monitor to ensure deficit doesn't become severe. " +
-            "Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+        rec.setReasoning("Vines in quality window. Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm. Warning Range: " + String.format("%.1f", minThr) + " - " + String.format("%.1f", maxThr) + " mm.");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end
@@ -155,8 +161,13 @@ rule "No Action Needed - WHITE GRAPES"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+
+        double limit = $seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.75);
+
         rec.setAdvice("White Grapes Conditions Optimal (" + $stage + ")");
-        rec.setReasoning("Moisture levels healthy for vegetative growth. Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+        rec.setReasoning("Moisture levels healthy. Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm (Safe below: " + String.format("%.1f", limit) + " mm).");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end

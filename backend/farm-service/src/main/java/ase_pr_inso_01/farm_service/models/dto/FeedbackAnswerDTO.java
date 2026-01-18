@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class FeedbackAnswerDTO {
     private String questionId;
+    private String targetParameter;
     private FeedbackOptionDTO selectedOption;
 }

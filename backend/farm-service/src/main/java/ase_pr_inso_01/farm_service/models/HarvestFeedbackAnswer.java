@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class HarvestFeedbackAnswer {
     private String questionId;
+    private String targetParameter;
     private String answerLabel;
     private Integer answerValue;
     private Double multiplier;

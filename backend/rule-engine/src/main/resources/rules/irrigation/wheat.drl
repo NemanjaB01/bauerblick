@@ -88,21 +88,22 @@ rule "Irrigation - WHEAT - Urgent"
 
         String urgency = "URGENT";
         String context = "";
-
         if ($stage == GrowthStage.MATURE) {
             urgency = "CRITICAL";
             context = "Water stress now reduces kernel weight directly.";
         } else if ($stage == GrowthStage.YOUNG) {
-            context = "Stem elongation : Needs consistent moisture for biomass.";
+            context = "Stem elongation: Needs consistent moisture for biomass.";
         } else if ($stage == GrowthStage.SEEDLING) {
             context = "Seedling stage: Ensure establishment but avoid waterlogging.";
         } else {
              context = "Soil moisture critically low.";
         }
 
+        double threshold = $seed.getAllowedWaterDeficit() * $seed.getParam("urgent_deficit_factor", 1.0);
+
         rec.setAdvice(urgency + ": Irrigate Wheat (" + $stage + ")");
         rec.setReasoning(context + " Deficit: " + String.format("%.1f", $calc.getDeficit()) +
-                         " mm on " + $soil + " soil.");
+                         " mm (Threshold: " + String.format("%.1f", threshold) + " mm).");
 
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         rec.getMetrics().put("crop_stage", $stage.toString());
@@ -135,9 +136,14 @@ rule "Irrigation Soon Warning - WHEAT"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.WHEAT);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
+
+        double minThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_min", 0.7);
+        double maxThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_max", 1.0);
+
         rec.setAdvice("Plan Irrigation for Wheat (" + $stage + ")");
-        rec.setReasoning("Moisture levels dropping. " + $stage + " stage approaching stress threshold. " +
-            "Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+        rec.setReasoning("Moisture levels dropping. Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm. Warning Range: " + String.format("%.1f", minThr) + " - " + String.format("%.1f", maxThr) + " mm.");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end
@@ -163,10 +169,13 @@ rule "No Action Needed - WHEAT"
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.WHEAT);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+
+        double limit = $seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.7);
+
         rec.setAdvice("Wheat Conditions Normal (" + $stage + ")");
-        rec.setReasoning("Wheat has adequate moisture (" +
-            String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
-            ") and manageable deficit.");
+        rec.setReasoning("Moisture adequate (" + String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
+                         "). Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm (Safe below: " + String.format("%.1f", limit) + " mm).");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end

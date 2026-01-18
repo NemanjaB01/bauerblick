@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
         // secure password hashing
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setPassword2(passwordEncoder.encode(dto.getPassword2()));
-        user.setDeleted_at(LocalDate.now());
+        user.setDeleted_at(null);
 
         return userRepository.save(user);
     }
@@ -119,6 +119,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found: " + email));
 
         user.setDeleted_at(LocalDate.now());
+        userRepository.save(user);
         return user;
     }
 

@@ -21,6 +21,6 @@ export class UserService {
   }
 
   deleteProfile(): Observable<any>{
-    return this.httpClient.put(this.globals.backendUri + "/users/delete", {})
+    return this.httpClient.put(this.profileDataUri + "/delete", {})
   }
 }

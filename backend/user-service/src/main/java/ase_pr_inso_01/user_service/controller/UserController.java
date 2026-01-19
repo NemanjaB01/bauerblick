@@ -84,4 +84,19 @@ public class UserController {
             return ResponseEntity.internalServerError().body("An error occurred while deleting profile");
         }
     }
+
+    @GetMapping("/password-reset")
+    public ResponseEntity<?> getResetPasswordEmail(@RequestParam String email) {
+        try {
+            UserDetailsDto applicationUser = userService.getUserByEmail(email);
+            if(applicationUser == null)
+                return ResponseEntity.status(401).build();
+            userService.resetPassword(email);
+            return ResponseEntity.ok(null);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An error occurred while resetting password");
+        }
+    }
 }

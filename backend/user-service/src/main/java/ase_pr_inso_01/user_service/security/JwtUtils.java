@@ -45,6 +45,17 @@ public class JwtUtils {
     }
   }
 
+  public String generatePasswordResetToken(String username) {
+    long resetExpirationMs = 900000;
+    return Jwts.builder()
+            .setSubject(username)
+            .claim("purpose", "password_reset")
+            .setIssuedAt(new Date())
+            .setExpiration(new Date((new Date()).getTime() + resetExpirationMs))
+            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+            .compact();
+  }
+
   private Key getSigningKey() {
     return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
   }

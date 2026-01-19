@@ -15,6 +15,7 @@ import ase_pr_inso_01.user_service.validation.UserValidator;
 import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,15 +30,19 @@ public class UserServiceImpl implements UserService {
     private final UserValidator userValidator;
     private final JwtUtils jwtUtils;
 
+    private final PasswordResetProducer resetProducer;
+
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            UserValidator userValidator,
-                           JwtUtils jwtUtils) {
+                           JwtUtils jwtUtils,
+                           PasswordResetProducer resetProducer) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userValidator = userValidator;
         this.jwtUtils = jwtUtils;
+        this.resetProducer = resetProducer;
     }
 
 
@@ -129,5 +134,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found: " + email));
 
         return new UserDetailsDto(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName());
+    }
+
+    @Override
+    public void resetPassword(String email) {
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found: " + email));
+
+        String resetToken = jwtUtils.generatePasswordResetToken(email);
+        resetProducer.sendResetEmail(email, resetToken);
     }
 }

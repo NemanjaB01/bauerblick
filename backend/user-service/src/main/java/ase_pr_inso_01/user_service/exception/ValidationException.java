@@ -10,4 +10,8 @@ public class ValidationException extends ErrorListException{
   public ValidationException(String summary, String field, String error) {
     super("Validation issues", summary, Map.of(field, error));
   }
+
+  public Map<String, String> getValidationIssues() {
+    return errors;
+  }
 }

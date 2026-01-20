@@ -1,5 +1,6 @@
 package ase_pr_inso_01.user_service.controller;
 
+import ase_pr_inso_01.user_service.controller.dto.user.ResetPasswordDto;
 import ase_pr_inso_01.user_service.controller.dto.user.UserCreateDto;
 import ase_pr_inso_01.user_service.controller.dto.user.UserDetailsDto;
 import ase_pr_inso_01.user_service.controller.dto.user.UserEditDto;
@@ -98,5 +99,11 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("An error occurred while resetting password");
         }
+    }
+
+    @PostMapping("/password-reset")
+    public ResponseEntity<?> resetUserPassword(@RequestParam("token") String token, @RequestBody ResetPasswordDto dto) throws ValidationException {
+        userService.completePasswordReset(token, dto);
+        return ResponseEntity.ok("Password updated successfully");
     }
 }

@@ -40,6 +40,7 @@ public class SecurityConfig {
             .requestMatchers("/api/authentication/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/users/password-reset").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/users/password-reset").permitAll()
             //.requestMatchers( "/api/users/**").permitAll()
             .anyRequest().authenticated()
     );

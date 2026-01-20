@@ -1,9 +1,6 @@
 package ase_pr_inso_01.user_service.service.impl;
 
-import ase_pr_inso_01.user_service.controller.dto.user.UserCreateDto;
-import ase_pr_inso_01.user_service.controller.dto.user.UserDetailsDto;
-import ase_pr_inso_01.user_service.controller.dto.user.UserEditDto;
-import ase_pr_inso_01.user_service.controller.dto.user.UserLoginDto;
+import ase_pr_inso_01.user_service.controller.dto.user.*;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.NotFoundException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
@@ -143,5 +140,27 @@ public class UserServiceImpl implements UserService {
 
         String resetToken = jwtUtils.generatePasswordResetToken(email);
         resetProducer.sendResetEmail(email, resetToken);
+    }
+
+    @Override
+    public void completePasswordReset(String token, ResetPasswordDto dto) throws ValidationException{
+
+        if (!jwtUtils.validateJwtToken(token)) {
+            throw new ValidationException(
+                    "The password reset link is invalid or has expired.",
+                    "token",
+                    "Expired"
+            );
+        }
+
+        String email = jwtUtils.getUsernameFromJwt(token);
+
+        userValidator.ValidateForPasswordReset(email, dto);
+
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userRepository.save(user);
     }
 }

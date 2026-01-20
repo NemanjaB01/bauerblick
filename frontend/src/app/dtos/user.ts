@@ -10,3 +10,8 @@ export interface EditUserDto {
   oldPassword?: string;
   newPassword?: string;
 }
+
+export interface ResetPasswordDto {
+  password: string;
+  confirmPassword: string;
+}

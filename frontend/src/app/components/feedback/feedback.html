@@ -1,6 +1,6 @@
 <div class="page-container">
 
-  <app-topbar [showFarmTitle]="false"></app-topbar>
+  <app-topbar [showFarmTitle]="true" [farmName]="currentFarmName"></app-topbar>
 
   <div class="body-container">
 
@@ -9,7 +9,7 @@
     <div class="content-area">
       <div class="feedback-container">
         <!-- Harvest Cards Grid -->
-        <div class="harvests-grid">
+        <div class="harvests-grid" *ngIf="harvests.length > 0">
           <div *ngFor="let harvest of harvests"
                [ngClass]="getCardClass(harvest.status)"
                (click)="harvest.status === 'ready' ? openFeedbackModal(harvest) : null">
@@ -63,8 +63,24 @@
             </div>
           </div>
         </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="harvests.length === 0">
+          <div class="empty-state-content">
+            <div class="empty-icon">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C10.9 2 10 2.9 10 4V5H7C5.9 5 5 5.9 5 7V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V7C19 5.9 18.1 5 17 5H14V4C14 2.9 13.1 2 12 2ZM12 4C12.6 4 13 4.4 13 5V7C13 7.6 12.6 8 12 8C11.4 8 11 7.6 11 7V5C11 4.4 11.4 4 12 4ZM7 7H10V8C10 9.1 10.9 10 12 10C13.1 10 14 9.1 14 8V7H17V19H7V7Z" fill="#8B6F47"/>
+                <path d="M9 12H15M9 15H15" stroke="#8B6F47" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2 class="empty-title">No Harvest Activity Yet</h2>
+            <p class="empty-message">
+              Your fields are currently empty.<br>
+              Start planting crops to track harvests and provide valuable feedback!
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
 
     <!-- =============== -->
     <!-- FEEDBACK MODAL  -->
@@ -186,4 +202,5 @@
     </div>
     </div>
   </div>
+</div>
 </div>

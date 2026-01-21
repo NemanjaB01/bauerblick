@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { TopbarComponent } from '../topbar/topbar';
 import { Sidebar } from '../sidebar/sidebar';
 import {FarmService} from '../../services/farm-service/farm-service';
-import {take} from 'rxjs/operators';
 
 interface HarvestFeedback {
   id: string;
@@ -66,17 +65,26 @@ export class Feedback implements OnInit {
   currentQuestionIndex = 0;
   userAnswers: FeedbackAnswer[] = [];
   selectedOption: FeedbackOption | null = null;
+  currentFarmName: string = '';
+
   constructor(private farmService: FarmService) {}
 
   ngOnInit(): void {
     this.loadFeedbackQuestions();
-    // this.loadMockData();
-    this.loadRealData();
+
+    this.farmService.selectedFarm$.subscribe(farm => {
+      if (farm && farm.id) {
+        this.currentFarmName = farm.name;
+        this.loadRealData(farm);
+      } else {
+        this.harvests = [];
+        this.currentFarmName = '';
+      }
+    });
   }
 
   /**
    * Load feedback questions from JSON
-   * TODO: Replace with actual API call to load questions
    */
   loadFeedbackQuestions(): void {
     this.farmService.getFeedbackQuestions().subscribe({
@@ -86,61 +94,6 @@ export class Feedback implements OnInit {
       },
       error: (err) => console.error('Could not load feedback questions', err)
     });
-  }
-
-  /**
-   * Load mock harvest data with question-based feedback
-   */
-  loadMockData(): void {
-    this.harvests = [
-      {
-        id: '1',
-        farmName: 'Farm 1',
-        cropType: 'Grape',
-        cropIcon: 'grape.svg',
-        harvestDate: 'dd/mm/yyyy',
-        status: 'ready'
-      },
-      {
-        id: '2',
-        farmName: 'Farm 1',
-        cropType: 'Barley',
-        cropIcon: 'barely.svg',
-        harvestDate: 'dd/mm/yyyy',
-        status: 'completed',
-        feedback: {
-          submittedAt: new Date('2024-10-15'),
-          answers: [
-            {
-              questionId: 'timing_urgency',
-              selectedOption: this.feedbackQuestions[0].options[2] // "Right on time"
-            },
-            {
-              questionId: 'moisture_perception',
-              selectedOption: this.feedbackQuestions[1].options[2] // "Expected / Normal"
-            },
-            {
-              questionId: 'plant_health_visual',
-              selectedOption: this.feedbackQuestions[2].options[2] // "Healthy and firm"
-            },
-            {
-              questionId: 'general_growth',
-              selectedOption: this.feedbackQuestions[3].options[1] // "Normal growth"
-            }
-          ]
-        }
-      },
-      {
-        id: '3',
-        farmName: 'Farm 2',
-        cropType: 'Wheat',
-        cropIcon: 'wheat.svg',
-        harvestDate: 'dd/mm/yyyy',
-        status: 'locked',
-        estimatedHarvest: 'dd/mm/yyyy',
-        lockedUntil: 'dd/mm/yyyy'
-      }
-    ];
   }
 
   /**
@@ -261,67 +214,60 @@ export class Feedback implements OnInit {
     }
   }
 
+  loadRealData(farm: any): void {
+    this.farmService.getHarvestHistory(farm.id).subscribe({
+      next: (historyData) => {
+        console.log('Harvest History loaded:', historyData);
 
-  loadRealData(): void {
-    this.farmService.selectedFarm$.pipe(take(1)).subscribe(farm => {
-      if (farm && farm.id) {
-
-        this.farmService.getHarvestHistory(farm.id).subscribe({
-          next: (historyData) => {
-            console.log('Harvest History loaded:', historyData);
-
-            const historyHarvests: HarvestFeedback[] = historyData.map(h => {
-              const hasFeedback = h.feedbackAnswers && h.feedbackAnswers.length > 0;
-              return {
-                id: h.id,
-                farmName: farm.name,
-                cropType: this.formatSeedName(h.seedType),
-                cropIcon: this.getIconForSeed(h.seedType),
-                harvestDate: new Date(h.harvestDate).toLocaleDateString('en-GB'),
-                status: hasFeedback ? 'completed' : 'ready',
-                feedback: hasFeedback ? {
-                  submittedAt: new Date(),
-                  answers: h.feedbackAnswers.map((ans: any) => ({
-                    questionId: ans.questionId,
-                    selectedOption: {
-                      label: ans.answerLabel,
-                      value: ans.answerValue,
-                      multiplier: ans.multiplier
-                    }
-                  }))
-                } : undefined
-              };
-            });
-
-            const activeFields: HarvestFeedback[] = (farm.fields || [])
-              .filter(f => f.status !== 'EMPTY')
-              .map(f => {
-                return {
-                  id: `field-${f.id}`,
-                  farmName: farm.name,
-                  cropType: this.formatSeedName(f.seedType || ''),
-                  cropIcon: this.getIconForSeed(this.formatSeedName(f.seedType as string)),
-                  harvestDate: '',
-                  status: 'locked',
-                  estimatedHarvest: f.plantedDate ?
-                    `Planted: ${new Date(f.plantedDate).toLocaleDateString('en-GB')}` :
-                    'Growing...',
-                  lockedUntil: 'TBD'
-                } as HarvestFeedback;
-              });
-
-            this.harvests = [...activeFields, ...historyHarvests];
-
-          },
-          error: (err) => console.error('Failed to load harvest history', err)
+        const historyHarvests: HarvestFeedback[] = historyData.map(h => {
+          const hasFeedback = h.feedbackAnswers && h.feedbackAnswers.length > 0;
+          return {
+            id: h.id,
+            farmName: farm.name,
+            cropType: this.formatSeedName(h.seedType),
+            cropIcon: this.getIconForSeed(h.seedType),
+            harvestDate: new Date(h.harvestDate).toLocaleDateString('en-GB'),
+            status: hasFeedback ? 'completed' : 'ready',
+            feedback: hasFeedback ? {
+              submittedAt: new Date(),
+              answers: h.feedbackAnswers.map((ans: any) => ({
+                questionId: ans.questionId,
+                selectedOption: {
+                  label: ans.answerLabel,
+                  value: ans.answerValue,
+                  multiplier: ans.multiplier
+                }
+              }))
+            } : undefined
+          };
         });
-      }
+
+        const activeFields: HarvestFeedback[] = (farm.fields || [])
+          .filter((f: any) => f.status !== 'EMPTY')
+          .map((f: any) => {
+            return {
+              id: `field-${f.id}`,
+              farmName: farm.name,
+              cropType: this.formatSeedName(f.seedType || ''),
+              cropIcon: this.getIconForSeed(this.formatSeedName(f.seedType as string)),
+              harvestDate: '',
+              status: 'locked',
+              estimatedHarvest: f.plantedDate ?
+                `Planted: ${new Date(f.plantedDate).toLocaleDateString('en-GB')}` :
+                'Growing...',
+              lockedUntil: 'TBD'
+            } as HarvestFeedback;
+          });
+
+        this.harvests = [...activeFields, ...historyHarvests];
+
+      },
+      error: (err) => console.error('Failed to load harvest history', err)
     });
   }
 
   private getIconForSeed(seedType: string): string {
     if (!seedType) return 'plant.svg';
-    console.log('Seed type:', seedType.toLowerCase());
     switch (seedType.toLowerCase()) {
       case 'wheat':
         return 'wheat.svg';
@@ -335,14 +281,11 @@ export class Feedback implements OnInit {
         return 'white_grape.svg';
       case 'black grapes':
         return 'grape.svg';
-
-
       default:
         return 'plant.svg';
     }
   }
 
-  // Helper za ime
   private formatSeedName(seedType: string): string {
     if (!seedType) return 'Crop';
     return seedType.replace(/_/g, ' ')
@@ -407,7 +350,6 @@ export class Feedback implements OnInit {
 
       this.farmService.submitFeedback(this.selectedHarvest.id, answersToSend).subscribe({
         next: () => {
-          // Ažuriraj UI nakon uspjeha
           this.selectedHarvest!.status = 'completed';
           this.selectedHarvest!.feedback = {
             submittedAt: new Date(),

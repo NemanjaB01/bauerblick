@@ -58,6 +58,7 @@ export class Sidebar {
   selectFarm(farm: Farm) {
     this.selectedFarm = farm;
     this.farmService.selectFarm(farm);
+    this.router.navigate(['home']);
   }
 
   onLogFarms(): void {

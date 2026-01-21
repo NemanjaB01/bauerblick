@@ -309,6 +309,10 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
   // ============================================
 
   openAddSeedModal(fieldId: number) {
+    // Close all other modals first
+    this.isDetailsModalOpen = false;
+    this.isHarvestModalOpen = false;
+
     this.selectedFieldId = fieldId;
     this.selectedSeedType = null;
     this.sowingDate = '';
@@ -324,12 +328,20 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     }
 
     if (field && field.status !== FieldStatus.empty) {
+      // Close all other modals first
+      this.isModalOpen = false;
+      this.isHarvestModalOpen = false;
+
       this.selectedFieldId = fieldId;
       this.isDetailsModalOpen = true;
     }
   }
 
   openHarvestModal(fieldId: number) {
+    // Close all other modals first
+    this.isModalOpen = false;
+    this.isDetailsModalOpen = false;
+
     this.selectedFieldId = fieldId;
     this.harvestDate = new Date().toISOString().split('T')[0];
     this.isHarvestModalOpen = true;

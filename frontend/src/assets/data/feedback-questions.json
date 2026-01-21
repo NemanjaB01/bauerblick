@@ -40,12 +40,12 @@
     "options": [
       {
         "label": "Completely dry / Dusty",
-        "value": 2,
+        "value": -2,
         "multiplier": 1.10
       },
       {
         "label": "Drier than expected",
-        "value": 1,
+        "value": -1,
         "multiplier": 1.05
       },
       {
@@ -55,7 +55,7 @@
       },
       {
         "label": "Wet / Muddy",
-        "value": -2,
+        "value": 2,
         "multiplier": 0.90
       }
     ]

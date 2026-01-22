@@ -1028,18 +1028,16 @@
 .field[data-field].growing .plants-container {
   grid-template-columns: repeat(4, 1fr) !important;
   grid-template-rows: repeat(4, 1fr) !important;
-  gap: 0px !important;
-  padding: 15px !important;
-  top: -50px !important;
-  left: -50px !important;
+  gap: -10px !important;
+  padding: 8px !important;
+  top: -65px !important;
+  left: -65px !important;
 }
 
 /* Show ALL 16 plants for growing */
 .field[data-field].growing .plant-item {
   display: flex !important;
-  margin: -45px !important;
-  justify-content: center;
-  align-items: center;
+  margin: -500px !important;
 }
 
 /* READY STAGE - 3x3 grid (9 plants) */

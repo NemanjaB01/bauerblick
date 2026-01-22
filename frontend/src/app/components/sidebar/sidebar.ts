@@ -68,4 +68,8 @@ export class Sidebar {
   onLoadFarms(): void {
     this.loadFarmsEvent.emit();
   }
+
+  gotoStatistic() {
+    this.router.navigate(["statistic"])
+  }
 }

@@ -300,7 +300,7 @@ export class StatisticComponent implements OnInit {
     this.analyticsService.getFeedbackStats(farmId).subscribe({
       next: (data) => {
         console.log('Feedback stats:', data);
-        const labels = ['-2 (Late/Too Dry)', '-1 (Somewhat Off)', '0 (Accurate)', '1 (Somewhat Good)', '2 (Excellent)'];
+          const labels = ['-2 (Late/Too Dry)', '-1 (Slightly late / Somewhat off)', '0 (Accurate)', '1 (Somewhat early)', '2 (Too early / False alarm)'];
         const values = [
           data['-2'] || 0,
           data['-1'] || 0,
@@ -312,10 +312,10 @@ export class StatisticComponent implements OnInit {
         this.feedbackChartData = {
           labels: [
             '-2 (Late / Too Dry)',
-            '-1 (Somewhat Off)',
+            '-1 (Slightly late / Somewhat off)',
             '0 (Accurate)',
-            '1 (Good)',
-            '2 (Excellent)'
+            '1 (Somewhat early)',
+            '2 (Too early / False alarm)'
           ],
           datasets: [
             {
@@ -323,17 +323,17 @@ export class StatisticComponent implements OnInit {
               label: 'Feedback Count',
               backgroundColor: [
                 'rgba(211, 47, 47, 0.7)',   // red
-                'rgba(245, 124, 0, 0.7)',  // orange
                 'rgba(255, 193, 7, 0.7)',  // yellow
-                'rgba(139, 195, 74, 0.7)', // light green
                 'rgba(76, 175, 80, 0.8)',  // green
+                'rgba(255, 193, 7, 0.7)',  // yellow
+                'rgba(211, 47, 47, 0.7)',   // red
               ],
               borderColor: [
                 '#c62828',
-                '#ef6c00',
                 '#f9a825',
-                '#7cb342',
-                '#388e3c'
+                '#388e3c',
+                '#f9a825',
+                '#c62828',
               ],
               borderWidth: 2,
               borderRadius: 8

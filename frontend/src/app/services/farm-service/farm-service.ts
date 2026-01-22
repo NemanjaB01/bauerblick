@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { Farm } from '../../models/Farm';
 import { HttpClient } from '@angular/common/http';
 import { FarmCheckResponse, FarmCreateDto } from '../../dtos/farm';
-import { tap } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 import { Globals } from '../../global/globals';
 import { FieldStatus } from '../../models/FieldStatus';
 import { FieldDetailsDto } from '../../dtos/field';
@@ -19,6 +19,7 @@ export interface HarvestRequest {
 })
 export class FarmService {
   private farmsBaseUri: string;
+  private readonly STORAGE_KEY = 'selectedFarmId';
 
   // Subject to store and share farm data across components
   private farmsSubject = new BehaviorSubject<Farm[]>([]);
@@ -29,20 +30,35 @@ export class FarmService {
 
   constructor(private httpClient: HttpClient, private globals: Globals) {
     this.farmsBaseUri = this.globals.backendUri + '/farms';
+
+    // Load all farms on initialization (this will handle restoration)
+    this.loadFarms().subscribe();
   }
 
   // Set the selected farm and notify all subscribers
   selectFarm(farm: Farm) {
     this.selectedFarmSubject.next(farm);  // Update selected farm in the service
-    console.log('Selected Farm:', farm);  // Log farm information each time it’s selected
+    console.log('Selected Farm:', farm);  // Log farm information each time it's selected
+
+    // Save to localStorage
+    if (farm && farm.id) {
+      localStorage.setItem(this.STORAGE_KEY, farm.id);
+    }
   }
 
   getSelectedFarm(): Farm | null {
     return this.selectedFarmSubject.value;
   }
 
-  clearSelectedFarm() { //TODO: Maybe delete this (it is not used)
+  clearSelectedFarm() {
     this.selectedFarmSubject.next(null);
+    // Remove from localStorage
+    localStorage.removeItem(this.STORAGE_KEY);
+  }
+
+  // Get a specific farm by ID (for specific use cases)
+  getFarmById(farmId: string): Observable<Farm> {
+    return this.httpClient.get<Farm>(`${this.farmsBaseUri}/${farmId}`);
   }
 
   // Method to get farms in memory (direct access to BehaviorSubject)
@@ -53,12 +69,12 @@ export class FarmService {
   // Add a new farm and update the list of farms
   addNewFarm(farm: FarmCreateDto): Observable<Farm> {
     farm.fields= [
-        { id: 1, status: FieldStatus.empty },
-        { id: 2, status: FieldStatus.empty },
-        { id: 3, status: FieldStatus.empty },
-        { id: 4, status: FieldStatus.empty },
-        { id: 5, status: FieldStatus.empty },
-        { id: 6, status: FieldStatus.empty }
+      { id: 1, status: FieldStatus.empty },
+      { id: 2, status: FieldStatus.empty },
+      { id: 3, status: FieldStatus.empty },
+      { id: 4, status: FieldStatus.empty },
+      { id: 5, status: FieldStatus.empty },
+      { id: 6, status: FieldStatus.empty }
     ];
 
     return this.httpClient.post<Farm>(this.farmsBaseUri, farm).pipe(
@@ -91,9 +107,32 @@ export class FarmService {
     return this.httpClient.get<Farm[]>(this.farmsBaseUri).pipe(
       tap((farms) => {
         this.farmsSubject.next(farms);  // Update farms list
-        if (farms.length && !this.selectedFarmSubject.value) {
-          this.selectFarm(farms[0]);  // Select the first farm by default when farms are loaded
+
+        // Check if we have a saved farm ID in localStorage
+        const savedFarmId = localStorage.getItem(this.STORAGE_KEY);
+
+        if (savedFarmId) {
+          // Try to find and select the saved farm
+          const savedFarm = farms.find(f => f.id === savedFarmId);
+          if (savedFarm) {
+            this.selectedFarmSubject.next(savedFarm);
+            console.log('Restored selected farm:', savedFarm);
+          } else {
+            // Saved farm not found in the list, clear storage and select first farm
+            console.warn('Saved farm not found, clearing localStorage');
+            localStorage.removeItem(this.STORAGE_KEY);
+            if (farms.length) {
+              this.selectFarm(farms[0]);
+            }
+          }
+        } else if (farms.length && !this.selectedFarmSubject.value) {
+          // No saved farm, select the first one
+          this.selectFarm(farms[0]);
         }
+      }),
+      catchError((error) => {
+        console.error('Error loading farms:', error);
+        return throwError(() => error);
       })
     );
   }

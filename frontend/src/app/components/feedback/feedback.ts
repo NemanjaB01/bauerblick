@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
 import { TopbarComponent } from '../topbar/topbar';
 import { Sidebar } from '../sidebar/sidebar';
@@ -67,7 +68,7 @@ export class Feedback implements OnInit {
   selectedOption: FeedbackOption | null = null;
   currentFarmName: string = '';
 
-  constructor(private farmService: FarmService) {}
+  constructor(private farmService: FarmService,  private toastr: ToastrService) {}
 
   ngOnInit(): void {
     this.loadFeedbackQuestions();
@@ -348,6 +349,8 @@ export class Feedback implements OnInit {
         };
       });
 
+      const cropName = this.selectedHarvest.cropType;
+
       this.farmService.submitFeedback(this.selectedHarvest.id, answersToSend).subscribe({
         next: () => {
           this.selectedHarvest!.status = 'completed';
@@ -356,12 +359,23 @@ export class Feedback implements OnInit {
             answers: this.userAnswers
           };
 
+          // Close modal first
           this.closeFeedbackModal();
-          alert('Feedback submitted successfully!');
+
+          // Show success toast
+          this.toastr.success(
+            `Your feedback for ${cropName} has been recorded`,
+            'Feedback Submitted!'
+          );
         },
         error: (err) => {
           console.error('Error submitting feedback', err);
-          alert('Failed to submit feedback. Try again.');
+
+          // Show error toast
+          this.toastr.error(
+            'Please try again or contact support',
+            'Failed to Submit Feedback'
+          );
         }
       });
     }

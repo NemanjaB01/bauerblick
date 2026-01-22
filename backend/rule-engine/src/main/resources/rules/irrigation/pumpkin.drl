@@ -23,7 +23,7 @@ rule "Pumpkin - Ready to Harvest "
         Recommendation rec = new Recommendation();
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.PUMPKIN);
-        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setRecommendationType(RecommendationType.READY_TO_HARVEST);
         rec.setAdvice(" STOP Irrigation - Prevent Fruit Rot");
         rec.setReasoning("Pumpkin is in 'Ready' stage. Wet soil at this stage causes 'belly rot' on fruits and reduces storage life significantly.");
         recommendations.add(rec);

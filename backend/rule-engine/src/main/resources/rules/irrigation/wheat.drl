@@ -23,7 +23,7 @@ rule "Wheat - Ready to Harvest - Force Dry"
         Recommendation rec = new Recommendation();
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.WHEAT);
-        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setRecommendationType(RecommendationType.READY_TO_HARVEST);
         rec.setAdvice("STOP Irrigation - Wheat Harvest Approaching");
         rec.setReasoning("Wheat is in 'Ready' stage. Irrigation now increases risk of sprouting in the ear and fungal diseases. Soil must be dry for harvest.");
         recommendations.add(rec);

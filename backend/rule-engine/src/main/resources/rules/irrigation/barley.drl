@@ -23,7 +23,7 @@ rule "Barley - Ready to Harvest - Force Dry"
         Recommendation rec = new Recommendation();
         rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
-        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setRecommendationType(RecommendationType.READY_TO_HARVEST);
         rec.setAdvice("STOP Irrigation - Barley Harvest Approaching");
         rec.setReasoning("Barley is in 'Ready' stage. Irrigation now creates high risk of sprouting in the ear (pre-harvest sprouting) and fungal infection.");
         recommendations.add(rec);
@@ -193,6 +193,11 @@ rule "Monitor Conditions - BARLEY (Fallback)"
         $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage, $fid : fieldId)
         $calc   : WaterDeficitResult(seed == $seed, fieldId == $fid)
         $analysis : DailyAnalysis()
+        eval(
+            $calc.getDeficit() > ($seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.7))
+            ||
+            $analysis.getCurrentSoilMoisture() < $seed.getMinSoilMoisture()
+        )
     then
         Recommendation rec = new Recommendation();
         rec.setFieldId( $fid);

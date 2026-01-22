@@ -116,14 +116,10 @@ public class RuleEvaluationService {
 
                 KieSession kieSession = kieContainer.newKieSession();
                 try {
-                    kieSession.setGlobal("recommendations", recommendations);
+                    List<Recommendation> fieldSpecificRecs = new ArrayList<>();
+                    kieSession.setGlobal("recommendations", fieldSpecificRecs);
                     kieSession.insert(farm);
                     kieSession.insert(analysis);
-
-                    int safetyCheckLimit = Math.min(hourlyData.size(), 3);
-                    for (int i = 0; i < safetyCheckLimit; i++) {
-                        kieSession.insert(hourlyData.get(i));
-                    }
 
                     try {
                         SeedType type = SeedType.valueOf(field.getSeed_type().toUpperCase());
@@ -139,6 +135,14 @@ public class RuleEvaluationService {
                         kieSession.insert(new FieldStatus(field.getField_id(), type, stage));
 
                         kieSession.fireAllRules();
+                        if (!fieldSpecificRecs.isEmpty()) {
+                            recommendations.add(fieldSpecificRecs.get(0));
+
+                            if (fieldSpecificRecs.size() > 1) {
+                                log.info("Filtered out {} lower priority rules for field {}",
+                                        fieldSpecificRecs.size() - 1, field.getField_id());
+                            }
+                        }
 
                     } catch (Exception e) {
                         log.warn("Error processing field {}: {}", field.getField_id(), e.getMessage());

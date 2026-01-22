@@ -23,7 +23,7 @@ rule "Black Grapes - Ready - Stop Irrigation"
         Recommendation rec = new Recommendation();
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.BLACK_GRAPES);
-        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setRecommendationType(RecommendationType.READY_TO_HARVEST);
         rec.setAdvice("STOP Irrigation - Harvest Approaching");
         rec.setReasoning("Grapes are in 'Ready' stage. Irrigation now will dilute sugars and flavors, and may cause berry splitting.");
         recommendations.add(rec);

@@ -23,7 +23,7 @@ rule "White Grapes - Ready - Stop Irrigation"
         Recommendation rec = new Recommendation();
         rec.setFieldId($fid);
         rec.setRecommendedSeed(SeedType.WHITE_GRAPES);
-        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setRecommendationType(RecommendationType.READY_TO_HARVEST);
         rec.setAdvice("STOP Irrigation - Harvest Approaching");
         rec.setReasoning("White grapes are in 'Ready' stage. Irrigation now can dilute acidity and aromatics, reducing wine quality.");
         recommendations.add(rec);

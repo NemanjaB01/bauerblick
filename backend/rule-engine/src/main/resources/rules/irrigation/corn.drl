@@ -23,7 +23,7 @@ rule "Corn - Ready to Harvest - Force Dry"
         Recommendation rec = new Recommendation();
         rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.CORN);
-        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setRecommendationType(RecommendationType.READY_TO_HARVEST);
         rec.setAdvice("STOP Irrigation - Corn Harvest Approaching");
         rec.setReasoning("Corn is in 'Ready' stage. Drying down is necessary for machinery access and grain quality. Ignore calculated moisture deficits.");
         recommendations.add(rec);

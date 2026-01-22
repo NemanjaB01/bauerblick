@@ -32,4 +32,6 @@ public interface FarmService {
     List<HarvestHistory> getHarvestHistory(String farmId);
 
     public Map<String, Double> calculateFeedbackFactors(String farmId);
+
+    void deleteHarvestHistory(String historyId, String email) throws Exception;
 }

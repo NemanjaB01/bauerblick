@@ -310,4 +310,20 @@ public class FarmServiceImpl implements FarmService {
 
         return factors;
     }
+
+    @Override
+    public void deleteHarvestHistory(String historyId, String email) throws Exception {
+        UserDetailsDto user = this.getUserDetails(email);
+
+        HarvestHistory history = harvestHistoryRepository.findById(historyId)
+                .orElseThrow(() -> new RuntimeException("Harvest history not found with ID: " + historyId));
+
+        Farm farm = farmRepository.findById(history.getFarmId())
+                .orElseThrow(() -> new RuntimeException("Associated farm not found"));
+
+        if (!farm.getUserId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: You cannot delete history for a farm you do not own");
+        }
+        harvestHistoryRepository.delete(history);
+    }
 }

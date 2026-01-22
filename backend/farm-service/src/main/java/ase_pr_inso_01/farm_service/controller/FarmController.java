@@ -135,4 +135,17 @@ public class FarmController {
     public Map<String, Double> calculateFeedbackFactors(@PathVariable String farmId) {
         return farmService.calculateFeedbackFactors(farmId);
     }
+
+    @DeleteMapping("/harvest-history/{historyId}")
+    public ResponseEntity<Void> deleteHarvestHistory(
+            @PathVariable String historyId,
+            Principal principal) throws Exception {
+
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        farmService.deleteHarvestHistory(historyId, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
 }

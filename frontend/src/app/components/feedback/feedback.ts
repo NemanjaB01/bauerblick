@@ -397,4 +397,64 @@ export class Feedback implements OnInit {
       };
     });
   }
+  restartFeedback(): void {
+    if (this.selectedHarvest && this.selectedHarvest.status === 'completed') {
+      const cropName = this.selectedHarvest.cropType;
+      const harvestId = this.selectedHarvest.id;
+
+      console.log('Attempting to restart feedback for harvest:', harvestId);
+
+      // Show confirmation
+      if (!confirm(`Are you sure you want to restart feedback for ${cropName}? Your previous feedback will be deleted.`)) {
+        console.log('User cancelled restart');
+        return;
+      }
+
+      this.farmService.deleteFeedback(harvestId).subscribe({
+        next: () => {
+          console.log('Feedback deleted successfully');
+
+          // Find and update the harvest in the list
+          const harvestIndex = this.harvests.findIndex(h => h.id === harvestId);
+          if (harvestIndex !== -1) {
+            this.harvests[harvestIndex].status = 'ready';
+            this.harvests[harvestIndex].feedback = undefined;
+          }
+
+          // Close the view modal
+          this.showViewFeedbackModal = false;
+
+          // Small delay to ensure UI updates before opening new modal
+          setTimeout(() => {
+            const updatedHarvest = this.harvests.find(h => h.id === harvestId);
+            if (updatedHarvest) {
+              this.openFeedbackModal(updatedHarvest);
+            }
+          }, 100);
+
+          // Show success toast
+          this.toastr.success(
+            `You can now submit new feedback for ${cropName}`,
+            'Feedback Restarted!'
+          );
+        },
+        error: (err) => {
+          console.error('Error deleting feedback:', err);
+          console.error('Error details:', {
+            status: err.status,
+            message: err.message,
+            error: err.error
+          });
+
+          this.toastr.error(
+            err.error?.message || 'Please try again or contact support',
+            'Failed to Delete Feedback'
+          );
+        }
+      });
+    } else {
+      console.error('Cannot restart feedback - invalid harvest state:', this.selectedHarvest);
+      this.toastr.warning('This harvest feedback cannot be restarted', 'Invalid State');
+    }
+  }
 }

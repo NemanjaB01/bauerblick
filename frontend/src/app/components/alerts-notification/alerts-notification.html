@@ -35,7 +35,7 @@
           </div>
           <h4 class="alert-title">{{ formatAdviceTitle(alert.advice) }}</h4>
 
-          <p class="alert-description">{{ alert.reasoning }}</p>
+          <p class="alert-description">{{ formatReasoning(alert.reasoning) }}</p>
 
           <div class="alert-metrics water-metric" *ngIf="isIrrigationAlert(alert.recommendationType)">
             <span class="metric-icon">💧</span>

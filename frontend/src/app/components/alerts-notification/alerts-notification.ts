@@ -240,9 +240,17 @@ export class AlertsNotification implements OnInit, OnDestroy {
 
   formatTemperature(temp?: number): string {
     if (temp === undefined) return 'N/A';
-    return `${temp.toFixed(1)}°C`;
+    return `${temp.toFixed(2)}°C`;
   }
 
+  formatReasoning(reasoning: string | undefined): string {
+    if (!reasoning) return '';
+
+    return reasoning.replace(/(-?\d+\.\d+)°?C/g, (match, temp) => {
+      const rounded = parseFloat(temp).toFixed(2);
+      return `${rounded}°C`;
+    });
+  }
   dismissAlert(alertId: string): void {
     this.notificationService.markAsRead(alertId).subscribe({
       next: () => {
@@ -284,4 +292,5 @@ export class AlertsNotification implements OnInit, OnDestroy {
     this.alerts = [];
     this.closeDropdown();
   }
+
 }

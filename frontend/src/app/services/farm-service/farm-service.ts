@@ -8,7 +8,6 @@ import { Globals } from '../../global/globals';
 import { FieldStatus } from '../../models/FieldStatus';
 import { FieldDetailsDto } from '../../dtos/field';
 
-
 export interface HarvestRequest {
   harvestDate: Date;
   answers: any[];
@@ -162,6 +161,17 @@ export class FarmService {
           f.id === updatedFarm.id ? updatedFarm : f
         );
         this.farmsSubject.next(farms);
+      })
+    );
+  }
+
+  deleteFeedback(historyId: string): Observable<void> {
+    console.log('Deleting feedback for history ID:', historyId);
+    return this.httpClient.delete<void>(`${this.farmsBaseUri}/harvest-history/${historyId}`).pipe(
+      tap(() => console.log('Delete request completed')),
+      catchError((error) => {
+        console.error('Delete request failed:', error);
+        return throwError(() => error);
       })
     );
   }

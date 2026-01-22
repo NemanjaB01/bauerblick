@@ -148,4 +148,17 @@ public class FarmController {
         farmService.deleteHarvestHistory(historyId, principal.getName());
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{farmId}/harvest-history")
+    public ResponseEntity<Void> deleteAllHarvestHistory(
+            @PathVariable String farmId,
+            Principal principal) throws Exception {
+
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        farmService.deleteAllHarvestHistory(farmId, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
 }

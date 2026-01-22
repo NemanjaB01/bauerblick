@@ -34,4 +34,6 @@ public interface FarmService {
     public Map<String, Double> calculateFeedbackFactors(String farmId);
 
     void deleteHarvestHistory(String historyId, String email) throws Exception;
+
+    void deleteAllHarvestHistory(String farmId, String email) throws Exception;
 }

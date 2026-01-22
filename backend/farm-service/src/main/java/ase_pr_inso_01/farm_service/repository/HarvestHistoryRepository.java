@@ -17,6 +17,8 @@ public interface HarvestHistoryRepository extends MongoRepository<HarvestHistory
     })
     List<StatResult> countRatingsByFarmId(String farmId);
 
+    void deleteByFarmId(String farmId);
+
     class StatResult {
         public Integer _id;
         public Long count;

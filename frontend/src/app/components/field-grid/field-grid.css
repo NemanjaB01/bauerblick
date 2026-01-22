@@ -1020,7 +1020,6 @@
   content: '🌾 ';
   margin-right: 5px;
 }
-
 /* ============================================
    GROWING STAGE
    ============================================ */
@@ -1057,13 +1056,13 @@
 }
 
 .plant-icon[src*="wheat_growing"] {
-  width: 180px !important;
-  height: 180px !important;
+  width: 140px !important;
+  height: 140px !important;
 }
 
 .plant-icon[src*="wheat_ready"] {
-  width: 200px !important;
-  height: 200px !important;
+  width: 190px !important;
+  height: 190px !important;
 }
 
 .plant-icon[src*="corn_growing"] {
@@ -1077,8 +1076,8 @@
 }
 
 .plant-icon[src*="barely_growing"] {
-  width: 180px !important;
-  height: 180px !important;
+  width: 145px !important;
+  height: 145px !important;
 }
 
 .plant-icon[src*="barely_ready"] {
@@ -1087,8 +1086,8 @@
 }
 
 .plant-icon[src*="black_grape_growing"] {
-  width: 160px !important;
-  height: 160px !important;
+  width: 140px !important;
+  height: 140px !important;
 }
 
 .plant-icon[src*="black_grape_ready"] {
@@ -1099,16 +1098,6 @@
 .plant-icon[src*="white_grape_ready"] {
   width: 160px !important;
   height: 240px !important;
-}
-
-.plant-icon[src*="pumpkin_growing"] {
-  width: 180px !important;
-  height: 180px !important;
-}
-
-.plant-icon[src*="pumpkin_ready"] {
-  width: 180px !important;
-  height: 180px !important;
 }
 
 .field.growing,
@@ -1154,11 +1143,11 @@
 }
 
 .plant-icon[src*="pumpkin_growing"] {
-  width: 260px !important;
-  height: 260px !important;
+  width: 140px !important;
+  height: 140px !important;
 }
 
 .plant-icon[src*="pumpkin_ready"] {
-  width: 240px !important;
-  height: 240px !important;
+  width: 190px !important;
+  height: 190px !important;
 }

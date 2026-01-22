@@ -324,7 +324,9 @@ public class FarmServiceImpl implements FarmService {
         if (!farm.getUserId().equals(user.getId())) {
             throw new RuntimeException("Unauthorized: You cannot delete history for a farm you do not own");
         }
-        harvestHistoryRepository.delete(history);
+
+        history.getFeedbackAnswers().clear();
+        harvestHistoryRepository.save(history);
     }
 
     @Override

@@ -8,6 +8,17 @@
 
     <div class="content-area">
       <div class="feedback-container">
+
+        <div class="reset-all-container" *ngIf="harvests.length > 0">
+          <button class="btn-reset-all" (click)="openResetConfirmModal()" title="Delete all feedback and reset rule engine">
+            <svg class="trash-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            <span>Reset All Feedback</span>
+          </button>
+        </div>
+
         <!-- Harvest Cards Grid -->
         <div class="harvests-grid" *ngIf="harvests.length > 0">
           <div *ngFor="let harvest of harvests"
@@ -208,6 +219,92 @@
       </div>
     </div>
     </div>
+
+
+      <!-- =================== -->
+      <!-- RESET CONFIRM MODAL -->
+      <!-- =================== -->
+      <div *ngIf="showResetConfirmModal" class="modal-overlay" (click)="closeResetConfirmModal()">
+        <div class="modal-content-confirm" (click)="$event.stopPropagation()">
+
+          <!-- Modal Header -->
+          <div class="modal-header-confirm">
+            <div class="warning-icon-large">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <h2 class="modal-title-confirm">Reset All Feedback?</h2>
+            <button class="close-button" (click)="closeResetConfirmModal()" aria-label="Close">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body-confirm">
+            <div class="warning-message">
+              <div class="warning-title">
+                <svg class="warning-icon-small" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>Permanent Action</span>
+              </div>
+              <p class="warning-text">
+                This will <strong>permanently delete ALL harvest history and feedback</strong> for farm "<strong>{{ currentFarmName }}</strong>".
+              </p>
+            </div>
+
+            <div class="consequences-list">
+              <h3 class="consequences-title">What will happen:</h3>
+              <ul>
+                <li>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                  All completed harvest records will be deleted
+                </li>
+                <li>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                  All feedback submissions will be removed
+                </li>
+                <li>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                  Rule-based engine will reset to default settings
+                </li>
+                <li>
+                  <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                  <strong>This action CANNOT be undone</strong>
+                </li>
+              </ul>
+            </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer-confirm">
+            <button class="btn btn-cancel-confirm" (click)="closeResetConfirmModal()">
+              Cancel
+            </button>
+            <button class="btn btn-confirm-danger" (click)="confirmResetAllFeedback()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+              Yes, Delete Everything
+            </button>
+          </div>
+        </div>
+      </div>
+
   </div>
+</div>
 </div>
 </div>

@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { TopbarComponent } from '../topbar/topbar';
 import { Sidebar } from '../sidebar/sidebar';
 import {FarmService} from '../../services/farm-service/farm-service';
+import {take} from 'rxjs/operators';
 
 interface HarvestFeedback {
   id: string;
@@ -456,5 +457,63 @@ export class Feedback implements OnInit {
       console.error('Cannot restart feedback - invalid harvest state:', this.selectedHarvest);
       this.toastr.warning('This harvest feedback cannot be restarted', 'Invalid State');
     }
+  }
+
+  showResetConfirmModal = false;
+
+  openResetConfirmModal(): void {
+    this.showResetConfirmModal = true;
+  }
+
+  closeResetConfirmModal(): void {
+    this.showResetConfirmModal = false;
+  }
+
+  confirmResetAllFeedback(): void {
+    this.farmService.selectedFarm$.pipe(take(1)).subscribe(farm => {
+      if (!farm || !farm.id) {
+        this.toastr.warning('No farm selected', 'Cannot Reset');
+        return;
+      }
+
+      const farmName = farm.name;
+      const farmId = farm.id;
+
+      console.log('Resetting all feedback for farm:', farmId);
+
+      this.farmService.deleteAllFeedbackForFarm(farmId).subscribe({
+        next: () => {
+          console.log('All feedback deleted successfully');
+
+          // Close the modal
+          this.closeResetConfirmModal();
+
+          // Remove all harvest history items (keep only locked fields)
+          this.harvests = this.harvests.filter(h => h.status === 'locked');
+
+          // Show success toast
+          this.toastr.success(
+            `All harvest history and feedback deleted. Rule-based engine reset to default.`,
+            'Reset Complete!'
+          );
+        },
+        error: (err) => {
+          console.error('Error deleting all feedback:', err);
+          console.error('Error details:', {
+            status: err.status,
+            message: err.message,
+            error: err.error
+          });
+
+          // Close modal
+          this.closeResetConfirmModal();
+
+          this.toastr.error(
+            err.error?.message || 'Please try again or contact support',
+            'Failed to Reset Feedback'
+          );
+        }
+      });
+    });
   }
 }

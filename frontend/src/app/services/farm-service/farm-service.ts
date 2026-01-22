@@ -176,5 +176,16 @@ export class FarmService {
     );
   }
 
+  deleteAllFeedbackForFarm(farmId: string): Observable<void> {
+    console.log('Deleting all feedback for farm:', farmId);
+    return this.httpClient.delete<void>(`${this.farmsBaseUri}/${farmId}/harvest-history`).pipe(
+      tap(() => console.log('All feedback deleted successfully')),
+      catchError((error) => {
+        console.error('Delete all feedback failed:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   //TODO: Add delete farm?
 }

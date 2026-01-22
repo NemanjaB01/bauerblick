@@ -15,6 +15,7 @@ export class Sidebar {
   displayName: string = 'Loading...';
   farms: Farm[] = [];
   selectedFarm: Farm | null = null;
+  profilePicture: string | null = null;
 
   constructor( private router: Router, private userService: UserService, private farmService: FarmService) { }
 
@@ -22,6 +23,11 @@ export class Sidebar {
     this.userService.getProfile().subscribe({
       next: (user) => {
         this.displayName = `${user.firstName} ${user.lastName}`;
+        if (user.profilePicture) {
+          this.profilePicture = `data:image/jpeg;base64,${user.profilePicture}`;
+        } else {
+          this.profilePicture = 'assets/icons/no_profile_photo.svg';
+        }
       },
       error: (err) => {
         console.error('Failed to fetch user name', err);

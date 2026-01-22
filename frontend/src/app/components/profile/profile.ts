@@ -41,14 +41,15 @@ export class Profile implements OnInit {
   showConfirmPassword = false;
 
   // Profile picture
-  profilePicture: string | null = null;
   originalProfilePicture: string | null = null;
+  profilePicture: string | null = null;
 
   // Menu toggle
   isMenuOpen = false;
 
   // Delete modal
   showDeleteModal = false;
+  selectedFile: File | null = null;
 
   constructor(private router: Router, private userService: UserService, private toastr: ToastrService) {}
 
@@ -59,13 +60,10 @@ export class Profile implements OnInit {
       console.error('JWT token not found in local storage');
       return;
     }
-
     this.loadUserData();
   }
 
   loadUserData() {
-
-
     this.userService.getProfile().subscribe({
       next: (data: UserProfileDetail) => {
         this.userData = {
@@ -74,10 +72,13 @@ export class Profile implements OnInit {
           email: data.email
         };
 
+        if (data.profilePicture) {
+          this.profilePicture = `data:image/jpeg;base64,${data.profilePicture}`;
+        } else {
+          this.profilePicture = 'assets/icons/no_profile_photo.svg';
+        }
+        this.originalProfilePicture = this.profilePicture;
         this.originalData = { ...this.userData };
-
-        // this.profilePicture = data.profilePictureUrl || null;
-        // this.originalProfilePicture = this.profilePicture;
       },
       error: (err) => {
         console.error('Error loading profile:', err);
@@ -102,28 +103,21 @@ export class Profile implements OnInit {
   }
 
   // File upload
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const maxSizeInBytes = 5 * 1024 * 1024;
 
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        this.toastr.error('Please select an image file');
+      if (file.size > maxSizeInBytes) {
+        this.toastr.error("File is too large. Maximum size is 5MB.", "Upload Error");
+
+        event.target.value = '';
         return;
       }
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        this.toastr.error('File size must be less than 5MB');
-        return;
-      }
-
-      // Read file as data URL
+      this.selectedFile = file;
       const reader = new FileReader();
-      reader.onload = (e) => {
-        this.profilePicture = e.target?.result as string;
-      };
+      reader.onload = (e: any) => this.profilePicture = e.target.result;
       reader.readAsDataURL(file);
     }
   }
@@ -180,6 +174,7 @@ export class Profile implements OnInit {
     if (!this.validatePasswordChange()) {
       return;
     }
+    const formData = new FormData();
 
     console.log('Saving profile data:', this.userData);
     const payload: EditUserDto = {
@@ -192,13 +187,13 @@ export class Profile implements OnInit {
       payload.newPassword = this.passwordData.newPassword;
     }
 
-    if (this.profilePicture !== this.originalProfilePicture) {
-      console.log('Updating profile picture');
-    }
-
-    // Update original data
     this.originalData = { ...this.userData };
-    this.originalProfilePicture = this.profilePicture;
+    formData.append('userData', new Blob([JSON.stringify(payload)], {
+      type: 'application/json'
+    }));
+    if (this.selectedFile) {
+      formData.append('file', this.selectedFile);
+    }
 
     // Clear password fields
     this.passwordData = {
@@ -207,7 +202,8 @@ export class Profile implements OnInit {
       confirmPassword: ''
     };
 
-    this.userService.editProfile(payload).subscribe({
+
+    this.userService.editProfile(formData).subscribe({
       next: (updatedUser) => {
         console.log('Update successful', updatedUser);
 
@@ -243,13 +239,12 @@ export class Profile implements OnInit {
   confirmDiscard() {
     // Reset all data to original values
     this.userData = { ...this.originalData };
-    this.profilePicture = this.originalProfilePicture;
     this.passwordData = {
       currentPassword: '',
       newPassword: '',
       confirmPassword: ''
     };
-
+    this.profilePicture = this.originalProfilePicture;
     this.showDiscardModal = false;
 
     this.toastr.info('All changes have been discarded', 'Changes Discarded');
@@ -284,7 +279,7 @@ export class Profile implements OnInit {
 
   logout() {
     this.isMenuOpen = false;
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('authToken');
     this.router.navigate(['/login']);
   }
 

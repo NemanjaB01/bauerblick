@@ -20,10 +20,7 @@ public class User {
   private String lastName;
   private String password;
   private String password2;
-  private String role = "USER";
-
   @Field(write = Field.Write.ALWAYS)
   private LocalDate deleted_at;
-
-  //TODO: enhance this to also include login attempts and security question!
+  private byte[] profileImageBlob;
 }

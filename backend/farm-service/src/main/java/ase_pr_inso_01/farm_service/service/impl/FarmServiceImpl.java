@@ -340,6 +340,7 @@ public class FarmServiceImpl implements FarmService {
             throw new RuntimeException("Unauthorized: You cannot delete history for a farm you do not own");
         }
 
+        
         harvestHistoryRepository.deleteByFarmId(farmId);
     }
 }

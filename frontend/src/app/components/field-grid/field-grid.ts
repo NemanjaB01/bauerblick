@@ -143,7 +143,11 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
       };
     }
 
-    const selectedDate = new Date(dateString);
+    const parts = dateString.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    const selectedDate = new Date(year, month, day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -392,17 +396,35 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
     if (this.selectedFieldId) {
       const fieldIndex = this.fields.findIndex(f => f.id === this.selectedFieldId);
       if (fieldIndex !== -1) {
+        // let finalPlantedDate = new Date(this.sowingDate);
+        const parts = this.sowingDate.split('-');
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+
+        let finalPlantedDate = new Date(year, month, day);
+        const today = new Date();
+
+        const isToday = finalPlantedDate.getDate() === today.getDate() &&
+          finalPlantedDate.getMonth() === today.getMonth() &&
+          finalPlantedDate.getFullYear() === today.getFullYear();
+
+        if (isToday) {
+          finalPlantedDate.setHours(today.getHours(), today.getMinutes(), today.getSeconds());
+        } else {
+          finalPlantedDate.setHours(0, 0, 0);
+        }
 
         const calculatedStage = this.calculateInitialGrowthStage(
           this.selectedSeedType!,
-          this.sowingDate
+          finalPlantedDate.toISOString()
         );
 
         const fieldUpdate = {
           id: this.selectedFieldId,
           status: calculatedStage === GrowthStage.ready ? FieldStatus.ready : FieldStatus.planted,
           seedType: this.selectedSeedType!,
-          plantedDate: new Date(this.sowingDate),
+          plantedDate: finalPlantedDate,
           growthStage: calculatedStage
         };
 

@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -30,13 +31,14 @@ public class GrowthStageScheduler {
     private final SeedRepository seedRepository;
 
 //    @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(fixedRate = 6000) // test
+    @Scheduled(fixedRate = 30000) // test
     public void updateGrowthStages() {
         log.info("Starting daily growth stage update...");
 
         Map<String, Seed> seedMap = seedRepository.findAll().stream()
                 .collect(Collectors.toMap(s -> s.getSeedType().name(), Function.identity()));
 
+        log.info("Loaded {} seeds from DB: {}", seedMap.size(), seedMap.keySet());
         List<Farm> farms = farmRepository.findAll();
         int updatedCount = 0;
 
@@ -46,21 +48,37 @@ public class GrowthStageScheduler {
             if (farm.getFields() == null) continue;
 
             for (Field field : farm.getFields()) {
+                if (field.getStatus() != FieldStatus.EMPTY) {
+                    log.info("Checking Field {} (Farm {}): Status={}, Seed={}, Planted={}",
+                            field.getId(), farm.getId(), field.getStatus(), field.getSeedType(), field.getPlantedDate());
+                }
                 if (field.getStatus() == FieldStatus.PLANTED && field.getPlantedDate() != null) {
 
                     Seed seedRule = seedMap.get(field.getSeedType().name());
-                    if (seedRule == null) continue;
+                    if (seedRule == null) {
+                        log.warn("CRITICAL: No seed rule found for type '{}'. Available: {}",
+                                field.getSeedType(), seedMap.keySet());
+                        continue;
+                    }
 
-                    long daysElapsed = calculateDaysElapsed(field.getPlantedDate());
-                    GrowthStage newStage = determineStage(daysElapsed, seedRule);
+                    long timeElapsed = calculateDaysElapsed(field.getPlantedDate());
+
+                    GrowthStage newStage = determineStage(timeElapsed, seedRule);
 
                     if (newStage != field.getGrowthStage()) {
-                        log.info("Updating Field {} ({}): {} -> {}",
+                        log.info("UPDATING Field {} ({}): {} -> {}",
                                 field.getId(), field.getSeedType(), field.getGrowthStage(), newStage);
 
                         field.setGrowthStage(newStage);
+
+                        if (newStage == GrowthStage.READY) {
+                            field.setStatus(FieldStatus.READY);
+                        }
+
                         farmChanged = true;
                         updatedCount++;
+                    } else {
+                        log.info("No stage change needed yet (Current: {}, Required for next: ?)", field.getGrowthStage());
                     }
                 }
             }
@@ -77,6 +95,16 @@ public class GrowthStageScheduler {
         LocalDate planted = plantedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate now = LocalDate.now();
         return ChronoUnit.DAYS.between(planted, now);
+    }
+
+    private long calculateMinutesElapsed(Date plantedDate) {
+        LocalDateTime planted = plantedDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        LocalDateTime now = LocalDateTime.now();
+
+        return Math.max(0, ChronoUnit.MINUTES.between(planted, now));
     }
 
     private GrowthStage determineStage(long days, Seed seed) {

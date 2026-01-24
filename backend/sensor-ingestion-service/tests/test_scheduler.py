@@ -11,7 +11,7 @@ def test_circuit_breaker_opens_on_failures():
     cb = CircuitBreaker(failure_threshold=2, recovery_timeout=1)
 
     def failing_job():
-        raise Exception("Boom!")
+        raise Exception("Failing job!")
 
     with pytest.raises(Exception):
         cb.call(failing_job)

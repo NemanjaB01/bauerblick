@@ -1,84 +1,188 @@
+image: maven:3.9-eclipse-temurin-21
+
+variables:
+  GIT_STRATEGY: "clone"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
 stages:
-  - build
   - test
-  - deploy
+  - build
 
 # Cache Maven dependencies for faster builds
 cache:
   paths:
     - .m2/repository
 
-# Build Docker images for each service
-build_api_gateway:
+# TEST STAGE
+
+test-api-gateway:
+  stage: test
+  script:
+    - cd backend/api-gateway
+    - mvn -B clean test
+
+test-user-service:
+  stage: test
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - cd backend/user-service
+    - mvn -B clean test
+
+test-farm-service:
+  stage: test
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - cd backend/farm-service
+    - mvn -B clean test
+
+test-service-registry:
+  stage: test
+  script:
+    - cd backend/service-registry
+    - mvn -B clean test
+
+test-notification-service:
+  stage: test
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - cd backend/notification-service
+    - mvn -B clean test
+
+test-rule-engine:
+  stage: test
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - cd backend/rule-engine
+    - mvn -B clean test
+
+# Test Python Service
+test-sensor-ingestion-service:
+  stage: test
+  image: python:3.11
+  script:
+    - cd backend/sensor-ingestion-service
+    - pip install -r requirements.txt
+    - echo "Python tests..."
+    # - pytest
+
+# Test Frontend
+test-frontend:
+  stage: test
+  image: node:20
+  script:
+    - cd frontend
+    - npm ci
+    - npm run test -- --watch=false --browsers=ChromeHeadless
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-frontend
+    paths:
+      - frontend/node_modules/
+
+# BUILD STAGE (with Jib)
+
+build-api-gateway:
   stage: build
   script:
     - cd backend/api-gateway
-    - mvn clean install
-#    - docker build -t /api-gateway:$CI_PIPELINE_ID .
-#    - docker push /api-gateway:$CI_PIPELINE_ID
+    - mvn clean package -DskipTests
+    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/api-gateway -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
+    - 21-kubernetes-integration-setup
 
-build_user_service:
+build-user-service:
   stage: build
   script:
     - cd backend/user-service
-    - mvn clean install
-  #    - docker build -t /api-gateway:$CI_PIPELINE_ID .
-  #    - docker push /api-gateway:$CI_PIPELINE_ID
+    - mvn clean package -DskipTests
+    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/user-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
+    - 21-kubernetes-integration-setup
 
-build_farm_service:
+build-farm-service:
   stage: build
   script:
     - cd backend/farm-service
-    - mvn clean install
-  #    - docker build -t /api-gateway:$CI_PIPELINE_ID .
-  #    - docker push /api-gateway:$CI_PIPELINE_ID
+    - mvn clean package -DskipTests
+    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/farm-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
+    - 21-kubernetes-integration-setup
 
-build_service_registry:
+build-service-registry:
   stage: build
   script:
     - cd backend/service-registry
-    - mvn clean install
-  #    - docker build -t /api-gateway:$CI_PIPELINE_ID .
-  #    - docker push /api-gateway:$CI_PIPELINE_ID
+    - mvn clean package -DskipTests
+    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/service-registry -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
+    - 21-kubernetes-integration-setup
 
-# Deploy to your environment (optional)
-# Replace these with the actual deployment steps for your environment (Kubernetes, etc.)
-deploy_api_gateway:
-  stage: deploy
+build-notification-service:
+  stage: build
   script:
-    - echo "Deploying to staging environment"
-    - kubectl apply -f deployment.yaml
+    - cd backend/notification-service
+    - mvn clean package -DskipTests
+    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/notification-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
+    - 21-kubernetes-integration-setup
 
-deploy_user_service:
-  stage: deploy
+build-rule-engine:
+  stage: build
   script:
-    - kubectl apply -f kubernetes/user-service-deployment.yaml
-    - kubectl apply -f kubernetes/user-service-service.yaml
-    - kubectl apply -f kubernetes/user-service-ingress.yaml
-
-
-deploy_farm_service:
-  stage: deploy
-  script:
-    - echo "Deploying to staging environment"
-    - kubectl apply -f deployment.yaml
+    - cd backend/rule-engine
+    - mvn clean package -DskipTests
+    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/rule-engine -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
+    - 21-kubernetes-integration-setup
 
-deploy_service_registry:
-  stage: deploy
+# Build Python Service with Docker
+build-sensor-ingestion-service:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - echo "Deploying to staging environment"
-    - kubectl apply -f deployment.yaml
+    - cd backend/sensor-ingestion-service
+    - docker build -t registry.reset.inso-w.at/$CI_PROJECT_PATH/sensor-ingestion-service:$CI_PIPELINE_ID .
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin registry.reset.inso-w.at
+    - docker push registry.reset.inso-w.at/$CI_PROJECT_PATH/sensor-ingestion-service:$CI_PIPELINE_ID
   only:
     - main
+    - 21-kubernetes-integration-setup
+
+# Build Frontend
+build-frontend:
+  stage: build
+  image: node:20
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-frontend
+    paths:
+      - frontend/node_modules/
+  only:
+    - main
+    - 21-kubernetes-integration-setup

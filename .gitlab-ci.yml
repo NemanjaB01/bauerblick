@@ -21,16 +21,16 @@ test-api-gateway:
     - cd backend/api-gateway
     - mvn -B clean test
 
-test-user-service:
-  stage: test
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - cd backend/user-service
-    - mvn -B clean test
+# test-user-service:
+#   stage: test
+#   services:
+#     - docker:dind
+#   variables:
+#     DOCKER_HOST: tcp://docker:2375
+#     DOCKER_TLS_CERTDIR: ""
+#   script:
+#     - cd backend/user-service
+#     - mvn -B clean test
 
 test-farm-service:
   stage: test

@@ -22,7 +22,7 @@ export const routes: Routes = [
   { path: 'seeds', component: SeedsComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: Profile, canActivate: [AuthGuard] },
   { path: 'feedback', component: Feedback, canActivate: [AuthGuard] },
-  { path: 'statistic', component: StatisticComponent, canActivate: [AuthGuard] }
+  { path: 'statistic', component: StatisticComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: Profile, canActivate: [AuthGuard] },
   { path: 'reset-password', component: ResetPassword, canActivate: [NoAuthGuard] },
   { path: 'forgot-password', component: ForgotPassword, canActivate: [NoAuthGuard] }

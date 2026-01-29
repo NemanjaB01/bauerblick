@@ -90,7 +90,7 @@ public class NotificationService {
         if (isAlertType(rec.getRecommendationType())) {
             webSocketService.sendAlertToFarm(rec.getFarmId(), rec);
             String emailBody = String.format("Alert Type: %s for %s\nDetails: %s",
-                    rec.getRecommendationType(), rec.getRecommendedSeed(), rec.getMetrics());
+                    rec.getRecommendationType(), rec.getRecommendedSeed(), rec.getReasoning());
             pendingAcks.put(rec.getId(), System.currentTimeMillis());
             emailService.sendAlertEmail(rec.getEmail(), "Farm Alert!", emailBody);
             log.info("Sent as ALERT (WebSocket + Email) for farm: {}", rec.getFarmId());

@@ -19,7 +19,7 @@ test-api-gateway:
   stage: test
   script:
     - cd backend/api-gateway
-    - mvn -B clean test -Dspring.profiles.active=test
+    - mvn -B clean test
 
 test-user-service:
   stage: test
@@ -29,9 +29,8 @@ test-user-service:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/user-service
-    - mvn -B clean test -Dspring.profiles.active=test
+    - mvn -B clean test
 
 test-farm-service:
   stage: test
@@ -41,15 +40,14 @@ test-farm-service:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/farm-service
-    - mvn -B clean test -Dspring.profiles.active=test
+    - mvn -B clean test
 
 test-service-registry:
   stage: test
   script:
     - cd backend/service-registry
-    - mvn -B clean test -Dspring.profiles.active=test
+    - mvn -B clean test
 
 test-notification-service:
   stage: test
@@ -59,9 +57,8 @@ test-notification-service:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/notification-service
-    - mvn -B clean test -Dspring.profiles.active=test
+    - mvn -B clean test
 
 test-rule-engine:
   stage: test
@@ -71,9 +68,8 @@ test-rule-engine:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/rule-engine
-    - mvn -B clean test -Dspring.profiles.active=test
+    - mvn -B clean test
 
 # Test Python Service
 test-sensor-ingestion-service:

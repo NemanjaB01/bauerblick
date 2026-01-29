@@ -162,6 +162,9 @@ build-sensor-ingestion-service:
   image: docker:latest
   services:
     - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
   script:
     - cd backend/sensor-ingestion-service
     - docker build -t registry.reset.inso-w.at/$CI_PROJECT_PATH/sensor-ingestion-service:$CI_PIPELINE_ID .
@@ -172,17 +175,17 @@ build-sensor-ingestion-service:
     - 21-kubernetes-integration-setup
 
 # Build Frontend
-build-frontend:
-  stage: build
-  image: node:20
-  script:
-    - cd frontend
-    - npm ci
-    - npm run build
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}-frontend
-    paths:
-      - frontend/node_modules/
-  only:
-    - main
-    - 21-kubernetes-integration-setup
+# build-frontend:
+#   stage: build
+#   image: node:20
+#   script:
+#     - cd frontend
+#     - npm ci
+#     - npm run build
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}-frontend
+#     paths:
+#       - frontend/node_modules/
+#   only:
+#     - main
+#     - 21-kubernetes-integration-setup

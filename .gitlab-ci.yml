@@ -156,20 +156,18 @@ build-rule-engine:
     - main
     - 21-kubernetes-integration-setup
 
-# Build Python Service with Docker
+# Build Python Service with Kaniko
 build-sensor-ingestion-service:
   stage: build
-  image: docker:latest
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
+  image:
+    name: gcr.io/kaniko-project/executor:latest
+    entrypoint: [""]
   script:
-    - cd backend/sensor-ingestion-service
-    - docker build -t registry.reset.inso-w.at/$CI_PROJECT_PATH/sensor-ingestion-service:$CI_PIPELINE_ID .
-    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin registry.reset.inso-w.at
-    - docker push registry.reset.inso-w.at/$CI_PROJECT_PATH/sensor-ingestion-service:$CI_PIPELINE_ID
+    - echo "{\"auths\":{\"registry.reset.inso-w.at\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/backend/sensor-ingestion-service"
+      --dockerfile "${CI_PROJECT_DIR}/backend/sensor-ingestion-service/Dockerfile"
+      --destination "registry.reset.inso-w.at/${CI_PROJECT_PATH}/sensor-ingestion-service:${CI_PIPELINE_ID}"
   only:
     - main
     - 21-kubernetes-integration-setup

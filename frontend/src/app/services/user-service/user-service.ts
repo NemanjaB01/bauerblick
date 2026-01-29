@@ -16,7 +16,12 @@ export class UserService {
   getProfile() :Observable<UserProfileDetail> {
     return this.httpClient.get<UserProfileDetail>(this.profileDataUri);
   }
-  editProfile(data: EditUserDto): Observable<UserProfileDetail> {
+
+    editProfile(data: FormData): Observable<UserProfileDetail> {
     return this.httpClient.put<UserProfileDetail>(this.profileDataUri, data);
+  }
+
+  deleteProfile(): Observable<any>{
+    return this.httpClient.put(this.profileDataUri + "/delete", {})
   }
 }

@@ -10,6 +10,8 @@ import { SeedsComponent } from './components/seeds/seeds';
 import { Profile } from './components/profile/profile';
 import {Feedback} from './components/feedback/feedback';
 import {StatisticComponent} from './components/statistic/statistic';
+import {ResetPassword} from './components/reset-password/reset-password';
+import {ForgotPassword} from './components/forgot-password/forgot-password';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -21,4 +23,7 @@ export const routes: Routes = [
   { path: 'profile', component: Profile, canActivate: [AuthGuard] },
   { path: 'feedback', component: Feedback, canActivate: [AuthGuard] },
   { path: 'statistic', component: StatisticComponent, canActivate: [AuthGuard] }
+  { path: 'profile', component: Profile, canActivate: [AuthGuard] },
+  { path: 'reset-password', component: ResetPassword, canActivate: [NoAuthGuard] },
+  { path: 'forgot-password', component: ForgotPassword, canActivate: [NoAuthGuard] }
 ];

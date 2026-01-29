@@ -1,7 +1,7 @@
 <div class="sidebar-container">
 
   <div class="sidebar-header">
-    <img src="assets/icons/no_profile_photo.svg" class="avatar" />
+    <img [src]="profilePicture || 'assets/icons/no_profile_photo.svg'" class="avatar" alt="Profile Picture"/>
     <div class="username">{{displayName}}</div>
   </div>
 

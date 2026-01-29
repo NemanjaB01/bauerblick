@@ -2,6 +2,7 @@ export interface UserProfileDetail {
   email: string;
   firstName: string;
   lastName: string;
+  profilePicture: string | null;
 }
 
 export interface EditUserDto {
@@ -9,4 +10,10 @@ export interface EditUserDto {
   lastName: string;
   oldPassword?: string;
   newPassword?: string;
+  profilePicture?: string;
+}
+
+export interface ResetPasswordDto {
+  password: string;
+  confirmPassword: string;
 }

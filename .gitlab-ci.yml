@@ -164,10 +164,7 @@ build-sensor-ingestion-service:
     entrypoint: [""]
   script:
     - echo "{\"auths\":{\"registry.reset.inso-w.at\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --context "${CI_PROJECT_DIR}/backend/sensor-ingestion-service"
-      --dockerfile "${CI_PROJECT_DIR}/backend/sensor-ingestion-service/Dockerfile"
-      --destination "registry.reset.inso-w.at/${CI_PROJECT_PATH}/sensor-ingestion-service:${CI_PIPELINE_ID}"
+    - /kaniko/executor --context "${CI_PROJECT_DIR}/backend/sensor-ingestion-service" --dockerfile "${CI_PROJECT_DIR}/backend/sensor-ingestion-service/Dockerfile" --destination "registry.reset.inso-w.at/${CI_PROJECT_PATH}/sensor-ingestion-service:${CI_PIPELINE_ID}"
   only:
     - main
     - 21-kubernetes-integration-setup

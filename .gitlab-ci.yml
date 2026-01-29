@@ -29,7 +29,7 @@ test-user-service:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 30 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
+    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/user-service
     - mvn -B clean test -Dspring.profiles.active=test
 
@@ -41,7 +41,7 @@ test-farm-service:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 30 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
+    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/farm-service
     - mvn -B clean test -Dspring.profiles.active=test
 
@@ -59,7 +59,7 @@ test-notification-service:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 30 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
+    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/notification-service
     - mvn -B clean test -Dspring.profiles.active=test
 
@@ -71,7 +71,7 @@ test-rule-engine:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   script:
-    - timeout 30 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
+    - timeout 120 sh -c 'until docker info >/dev/null 2>&1; do sleep 1; done'
     - cd backend/rule-engine
     - mvn -B clean test -Dspring.profiles.active=test
 

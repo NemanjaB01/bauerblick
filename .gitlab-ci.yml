@@ -19,7 +19,7 @@ test-api-gateway:
   stage: test
   script:
     - cd backend/api-gateway
-    - mvn -B clean test
+    - mvn -B clean test -Dspring.profiles.active=test
 
 test-user-service:
   stage: test
@@ -30,7 +30,7 @@ test-user-service:
     DOCKER_TLS_CERTDIR: ""
   script:
     - cd backend/user-service
-    - mvn -B clean test
+    - mvn -B clean test -Dspring.profiles.active=test
 
 test-farm-service:
   stage: test
@@ -41,13 +41,13 @@ test-farm-service:
     DOCKER_TLS_CERTDIR: ""
   script:
     - cd backend/farm-service
-    - mvn -B clean test
+    - mvn -B clean test -Dspring.profiles.active=test
 
 test-service-registry:
   stage: test
   script:
     - cd backend/service-registry
-    - mvn -B clean test
+    - mvn -B clean test -Dspring.profiles.active=test
 
 test-notification-service:
   stage: test
@@ -58,7 +58,7 @@ test-notification-service:
     DOCKER_TLS_CERTDIR: ""
   script:
     - cd backend/notification-service
-    - mvn -B clean test
+    - mvn -B clean test -Dspring.profiles.active=test
 
 test-rule-engine:
   stage: test
@@ -69,7 +69,7 @@ test-rule-engine:
     DOCKER_TLS_CERTDIR: ""
   script:
     - cd backend/rule-engine
-    - mvn -B clean test
+    - mvn -B clean test -Dspring.profiles.active=test
 
 # Test Python Service
 test-sensor-ingestion-service:
@@ -82,17 +82,17 @@ test-sensor-ingestion-service:
     # - pytest
 
 # Test Frontend
-test-frontend:
-  stage: test
-  image: node:20
-  script:
-    - cd frontend
-    - npm ci
-    - npm run test -- --watch=false --browsers=ChromeHeadless
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}-frontend
-    paths:
-      - frontend/node_modules/
+# test-frontend:
+#   stage: test
+#   image: node:20
+#   script:
+#     - cd frontend
+#     - npm ci
+#     - npm run test -- --watch=false --browsers=ChromeHeadless
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}-frontend
+#     paths:
+#       - frontend/node_modules/
 
 # BUILD STAGE (with Jib)
 

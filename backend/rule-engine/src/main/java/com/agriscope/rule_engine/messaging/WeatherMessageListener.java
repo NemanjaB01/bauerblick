@@ -45,6 +45,11 @@ public class WeatherMessageListener {
             queues = RabbitMQConfig.WEATHER_QUEUE,
             concurrency = "1-4")
     public void handleMessage(WeatherMessageDTO message) {
+        if (message == null) {
+            log.warn("Received null message, skipping processing.");
+            return;
+        }
+
         try {
             String userId = message.getUserId();
             String email = message.getEmail();

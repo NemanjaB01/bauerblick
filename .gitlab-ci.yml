@@ -85,10 +85,13 @@ test-sensor-ingestion-service:
 test-frontend:
   stage: test
   image: node:20
+  before_script:
+    - apt-get update
+    - apt-get install -y firefox
   script:
     - cd frontend
     - npm ci
-    - npm run test -- --watch=false --browsers=ChromeHeadless
+    - npm run test -- --watch=false --browsers=FirefoxHeadless
   cache:
     key: ${CI_COMMIT_REF_SLUG}-frontend
     paths:

@@ -82,17 +82,17 @@ test-sensor-ingestion-service:
     # - pytest
 
 # Test Frontend
-# test-frontend:
-#   stage: test
-#   image: node:20
-#   script:
-#     - cd frontend
-#     - npm ci
-#     - npm run test -- --watch=false --browsers=ChromeHeadless
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}-frontend
-#     paths:
-#       - frontend/node_modules/
+test-frontend:
+  stage: test
+  image: node:20
+  script:
+    - cd frontend
+    - npm ci
+    - npm run test -- --watch=false --browsers=ChromeHeadless
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-frontend
+    paths:
+      - frontend/node_modules/
 
 # BUILD STAGE (with Jib)
 
@@ -170,17 +170,17 @@ build-sensor-ingestion-service:
     - 21-kubernetes-integration-setup
 
 # Build Frontend
-# build-frontend:
-#   stage: build
-#   image: node:20
-#   script:
-#     - cd frontend
-#     - npm ci
-#     - npm run build
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}-frontend
-#     paths:
-#       - frontend/node_modules/
-#   only:
-#     - main
-#     - 21-kubernetes-integration-setup
+build-frontend:
+  stage: build
+  image: node:20
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-frontend
+    paths:
+      - frontend/node_modules/
+  only:
+    - main
+    - 21-kubernetes-integration-setup

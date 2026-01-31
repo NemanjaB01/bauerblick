@@ -13,6 +13,11 @@ A farm management platform for monitoring fields, tracking crops, and receiving 
 - **Analytics Dashboard:** Charts displaying feedback statistics, alert distribution, crop vulnerability, and water savings
 - **Seeds Catalog:** Comprehensive crop database that powers the rule-based recommendation engine
 
+## Application overview
+
+![Features Demo](frontend/src/assets/images/demo.gif)
+
+
 ## Tech Stack
 
 -  **Frontend:** Angular 21, TypeScript, Chart.js 4.5, ng2-charts 8.0  

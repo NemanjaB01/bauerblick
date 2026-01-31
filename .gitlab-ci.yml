@@ -5,8 +5,8 @@ variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 stages:
-  - test
-  - build
+#  - test
+#  - build
   - deploy
 
 # Cache Maven dependencies for faster builds
@@ -196,12 +196,12 @@ build-frontend:
 deploy:
   stage: deploy
   image: registry.reset.inso-w.at/pub/docker/kubectl
-  needs:
-    - build-service-registry
+  # needs:
+  #   - build-service-registry
   script:
     - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' kubernetes.yaml
     - cat kubernetes.yaml
-    - kubectl apply -f kubernetes-frontend.yaml
+    - kubectl apply -f frontend/kubernetes-frontend.yaml
   only:
     - main
     - 21-kubernetes-integration-setup

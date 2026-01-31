@@ -82,6 +82,8 @@ services:
         condition: service_started
       farms-db:
         condition: service_started
+      user-service:
+        condition: service_started
     environment:
       - spring.profiles.active=prod
       - spring.data.mongodb.uri=mongodb://farms-db:27017/farmsdb

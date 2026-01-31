@@ -4,15 +4,16 @@ import com.agriscope.rule_engine.domain.model.Seed;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.model.Recommendation;
 import com.agriscope.rule_engine.domain.enums.RecommendationType;
+import com.agriscope.rule_engine.domain.model.FieldStatus
+import com.agriscope.rule_engine.domain.enums.GrowthStage
 
 global java.util.List recommendations;
 
 rule "White Grapes - Downy Mildew Alert Dynamic"
     when
         $seed : Seed(seedType == SeedType.WHITE_GRAPES)
-
+        $field : FieldStatus(seedType == SeedType.WHITE_GRAPES, stage != GrowthStage.READY)
         $tempLimit : Number() from $seed.diseaseRiskMinTemp + $seed.getParam("disease_temp_offset", 0.0)
-
         $rainLimit : Number() from $seed.diseaseRainThreshold * $seed.getParam("disease_rain_factor", 1.0)
 
         $day : DailyWeatherData(
@@ -36,7 +37,7 @@ end
 rule "White Grapes - Pest Risk (Berry Moth) Dynamic"
     when
         $seed : Seed(seedType == SeedType.WHITE_GRAPES)
-
+        $field : FieldStatus(seedType == SeedType.WHITE_GRAPES, stage != GrowthStage.READY)
         $pestTempLimit : Number() from 14.0 + $seed.getParam("pest_temp_offset", 0.0)
 
         $day : DailyWeatherData(

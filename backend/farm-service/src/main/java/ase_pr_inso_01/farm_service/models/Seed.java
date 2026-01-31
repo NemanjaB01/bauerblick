@@ -6,8 +6,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
-@Document(collection = "seeds")
+@Document(collection = "seed")
 @Getter
 @Setter
 public class Seed {
@@ -27,4 +26,13 @@ public class Seed {
     private Double minSoilMoisture;
     private Double allowedWaterDeficit;
     private Double seedCoefficient;
+
+    private Integer daysToYoung;
+    private Integer daysToMature;
+    private Integer daysToReady;
+    private Double diseaseRiskMinTemp;
+    private Double diseaseRiskMaxTemp;
+    private Double diseaseRainThreshold;
+
+    private Double maxWindTolerance;
 }

@@ -39,4 +39,33 @@ public class Seed {
         }
         return defaultValue;
     }
+
+
+    public Seed copy() {
+        Seed newSeed = new Seed();
+        newSeed.setSeedType(this.seedType);
+        newSeed.setDisplayName(this.displayName);
+        newSeed.setScientificName(this.scientificName);
+
+        newSeed.setMinTemperature(this.minTemperature);
+        newSeed.setMaxTemperature(this.maxTemperature);
+        newSeed.setWaterRequirement(this.waterRequirement);
+        newSeed.setHeatStressTemperature(this.heatStressTemperature);
+        newSeed.setHeavyRainThreshold(this.heavyRainThreshold);
+        newSeed.setSeedCoefficient(this.seedCoefficient);
+        newSeed.setMinSoilMoisture(this.minSoilMoisture);
+        newSeed.setAllowedWaterDeficit(this.allowedWaterDeficit);
+        newSeed.setDiseaseRiskMinTemp(this.diseaseRiskMinTemp);
+        newSeed.setDiseaseRiskMaxTemp(this.diseaseRiskMaxTemp);
+        newSeed.setDiseaseRainThreshold(this.diseaseRainThreshold);
+        newSeed.setMaxWindTolerance(this.maxWindTolerance);
+
+        if (this.ruleParams != null) {
+            newSeed.setRuleParams(new java.util.HashMap<>(this.ruleParams));
+        } else {
+            newSeed.setRuleParams(new java.util.HashMap<>());
+        }
+
+        return newSeed;
+    }
 }

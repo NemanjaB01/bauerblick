@@ -13,7 +13,8 @@ services:
       - "27018:27017"
     volumes:
       - farms-db_data:/data/db
-
+      - ./backend/seeds.json:/data/seeds.json
+      - ./backend/init-farms.sh:/docker-entrypoint-initdb.d/init-farms.sh
   seeds-db:
     image: mongo
     container_name: seeds-db
@@ -50,12 +51,20 @@ services:
       - "8081:8081"
       - "5005:5005"   # expose debug port to host
     depends_on:
-      - service-registry
-      - users-db
+      service-registry:
+        condition: service_started
+      users-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     environment:
       - spring.profiles.active=prod
       - spring.data.mongodb.uri=mongodb://users-db:27017/usersdb
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - spring.rabbitmq.host=rabbitmq
+      - spring.rabbitmq.port=5672
 
   # Farm Service
   farm-service:
@@ -65,12 +74,22 @@ services:
       - "8082:8082"
       - "5006:5006"   # expose debug port to host
     depends_on:
-      - service-registry
-      - farms-db
+      service-registry:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      seeds-db:
+        condition: service_started
+      farms-db:
+        condition: service_started
     environment:
       - spring.profiles.active=prod
       - spring.data.mongodb.uri=mongodb://farms-db:27017/farmsdb
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - spring.rabbitmq.host=rabbitmq
+      - spring.rabbitmq.port=5672
 
   # API Gateway
   api-gateway:
@@ -100,6 +119,8 @@ services:
       seeds-db:
         condition: service_started
       notification-service:
+        condition: service_started
+      farm-service:
         condition: service_started
     environment:
       - spring.profiles.active=prod

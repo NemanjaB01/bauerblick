@@ -18,11 +18,12 @@ rule "Barley - Ready to Harvest - Force Dry"
     activation-group "barley-irrigation"
     when
         $seed   : Seed(seedType == SeedType.BARLEY)
-        $status : FieldStatus(seedType == SeedType.BARLEY, stage == GrowthStage.READY)
+        $status : FieldStatus(seedType == SeedType.BARLEY, stage == GrowthStage.READY, $fid : fieldId)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
-        rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+        rec.setRecommendationType(RecommendationType.READY_TO_HARVEST);
         rec.setAdvice("STOP Irrigation - Barley Harvest Approaching");
         rec.setReasoning("Barley is in 'Ready' stage. Irrigation now creates high risk of sprouting in the ear (pre-harvest sprouting) and fungal infection.");
         recommendations.add(rec);
@@ -33,12 +34,13 @@ rule "Delay Irrigation - BARLEY"
     salience 99
     activation-group "barley-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage, $fid : fieldId)
         $farm   : FarmDetails($soil : soilType)
         $seed   : Seed(seedType == SeedType.BARLEY)
 
         $calc   : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("delay_deficit_factor", 0.9)
         )
 
@@ -48,6 +50,7 @@ rule "Delay Irrigation - BARLEY"
         )
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
         rec.setRecommendationType(RecommendationType.DELAY_IRRIGATION);
         rec.setAdvice("Delay Irrigation (" + $stage + ") - Rain Forecast");
@@ -62,12 +65,13 @@ rule "Irrigation - BARLEY - Urgent"
     salience 50
     activation-group "barley-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage, $fid : fieldId)
         $farm   : FarmDetails($soil : soilType)
         $seed   : Seed(seedType == SeedType.BARLEY)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("urgent_deficit_factor", 1.0)
         )
 
@@ -78,15 +82,15 @@ rule "Irrigation - BARLEY - Urgent"
         not DailyAnalysis(totalRain > $seed.heavyRainThreshold)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
         rec.setRecommendationType(RecommendationType.IRRIGATE_NOW);
 
         String urgency = "URGENT";
         String context = "";
-
         if ($stage == GrowthStage.MATURE) {
             urgency = "CRITICAL";
-            context = "Grain filling stage (Nalijevanje zrna): Water stress now reduces yield and quality (protein content issues).";
+            context = "Grain filling stage: Water stress now reduces yield and quality.";
         } else if ($stage == GrowthStage.YOUNG) {
             context = "Stem elongation: Consistent moisture required for optimal head formation.";
         } else if ($stage == GrowthStage.SEEDLING) {
@@ -95,9 +99,12 @@ rule "Irrigation - BARLEY - Urgent"
              context = "Soil moisture critically low.";
         }
 
+        double threshold = $seed.getAllowedWaterDeficit() * $seed.getParam("urgent_deficit_factor", 1.0);
+
         rec.setAdvice(urgency + ": Irrigate Barley (" + $stage + ")");
+
         rec.setReasoning(context + " Deficit: " + String.format("%.1f", $calc.getDeficit()) +
-                         " mm on " + $soil + " soil.");
+                         " mm (Threshold: " + String.format("%.1f", threshold) + " mm).");
 
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         rec.getMetrics().put("crop_stage", $stage.toString());
@@ -109,11 +116,12 @@ rule "Irrigation Soon Warning - BARLEY"
     salience 40
     activation-group "barley-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage, $fid : fieldId)
         $seed   : Seed(seedType == SeedType.BARLEY)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit > $seed.allowedWaterDeficit * $seed.getParam("soon_deficit_min", 0.7),
             deficit <= $seed.allowedWaterDeficit * $seed.getParam("soon_deficit_max", 1.0)
         )
@@ -126,11 +134,18 @@ rule "Irrigation Soon Warning - BARLEY"
         not DailyAnalysis(totalRain > $seed.heavyRainThreshold)
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
         rec.setRecommendationType(RecommendationType.IRRIGATE_SOON);
+
+        double minThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_min", 0.7);
+        double maxThr = $seed.getAllowedWaterDeficit() * $seed.getParam("soon_deficit_max", 1.0);
+
         rec.setAdvice("Plan Irrigation for Barley (" + $stage + ")");
-        rec.setReasoning("Moisture levels declining. " + $stage + " stage needs monitoring. " +
-            "Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm.");
+
+        rec.setReasoning("Moisture levels declining. Deficit: " + String.format("%.1f", $calc.getDeficit()) +
+                         " mm. Warning Range: " + String.format("%.1f", minThr) + " - " + String.format("%.1f", maxThr) + " mm.");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end
@@ -140,11 +155,12 @@ rule "No Action Needed - BARLEY"
     salience 10
     activation-group "barley-irrigation"
     when
-        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage)
+        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage, $fid : fieldId)
         $seed   : Seed(seedType == SeedType.BARLEY)
 
         $calc : WaterDeficitResult(
             seed == $seed,
+            fieldId == $fid,
             deficit <= $seed.allowedWaterDeficit * $seed.getParam("normal_deficit_limit", 0.7)
         )
         $analysis : DailyAnalysis(
@@ -152,12 +168,18 @@ rule "No Action Needed - BARLEY"
         )
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
         rec.setRecommendationType(RecommendationType.CONTINUE_NORMAL);
+
+        double limit = $seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.7);
+
         rec.setAdvice("Barley Conditions Normal (" + $stage + ")");
+
         rec.setReasoning("Barley has adequate moisture (" +
             String.format("%.1f%%", $analysis.getCurrentSoilMoisture() * 100) +
-            "). Deficit manageable.");
+            "). Deficit: " + String.format("%.1f", $calc.getDeficit()) + " mm (Safe below: " + String.format("%.1f", limit) + " mm).");
+
         rec.getMetrics().put("deficit_amount", $calc.getDeficit());
         recommendations.add(rec);
 end
@@ -168,11 +190,17 @@ rule "Monitor Conditions - BARLEY (Fallback)"
     activation-group "barley-irrigation"
     when
         $seed   : Seed(seedType == SeedType.BARLEY)
-        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage)
-        $calc   : WaterDeficitResult(seed == $seed)
+        $status : FieldStatus(seedType == SeedType.BARLEY, $stage : stage, $fid : fieldId)
+        $calc   : WaterDeficitResult(seed == $seed, fieldId == $fid)
         $analysis : DailyAnalysis()
+        eval(
+            $calc.getDeficit() > ($seed.getAllowedWaterDeficit() * $seed.getParam("normal_deficit_limit", 0.7))
+            ||
+            $analysis.getCurrentSoilMoisture() < $seed.getMinSoilMoisture()
+        )
     then
         Recommendation rec = new Recommendation();
+        rec.setFieldId( $fid);
         rec.setRecommendedSeed(SeedType.BARLEY);
         rec.setRecommendationType(RecommendationType.MONITOR_CONDITIONS);
         rec.setAdvice("Monitor Barley Conditions (" + $stage + ")");

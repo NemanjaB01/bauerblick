@@ -4,13 +4,15 @@ import com.agriscope.rule_engine.domain.model.Seed;
 import com.agriscope.rule_engine.domain.enums.SeedType;
 import com.agriscope.rule_engine.domain.model.Recommendation
 import com.agriscope.rule_engine.domain.enums.RecommendationType;
+import com.agriscope.rule_engine.domain.model.FieldStatus
+import com.agriscope.rule_engine.domain.enums.GrowthStage
 
 global java.util.List recommendations;
 
 rule "Barley - Lodging Risk (Rain + Wind) Dynamic"
     when
         $seed : Seed(seedType == SeedType.BARLEY)
-
+        $field : FieldStatus(seedType == SeedType.BARLEY, stage != GrowthStage.READY)
         $rainLimit : Number() from $seed.getParam("lodging_rain_limit", 5.0)
         $windLimit : Number() from $seed.maxWindTolerance * $seed.getParam("lodging_wind_factor", 0.8)
 
@@ -37,7 +39,7 @@ end
 rule "Barley - Disease Risk (Net Blotch) Dynamic"
     when
         $seed : Seed(seedType == SeedType.BARLEY)
-
+        $field : FieldStatus(seedType == SeedType.BARLEY, stage != GrowthStage.READY)
         $rainThreshold : Number() from $seed.getParam("disease_rain_limit", 2.0)
         $tempMaxLimit  : Number() from $seed.diseaseRiskMaxTemp + $seed.getParam("disease_temp_offset", 0.0)
 

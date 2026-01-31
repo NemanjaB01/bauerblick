@@ -1,7 +1,7 @@
 <div class="sidebar-container">
 
   <div class="sidebar-header">
-    <img src="assets/icons/no_profile_photo.svg" class="avatar" />
+    <img [src]="profilePicture || 'assets/icons/no_profile_photo.svg'" class="avatar" alt="Profile Picture"/>
     <div class="username">{{displayName}}</div>
   </div>
 
@@ -33,19 +33,19 @@
       </div>
     </div>
 
-    <div class="menu-item">
+    <div class="menu-item" (click)="goToFeedback()">
       <img src="assets/icons/feedback.svg" />
       <span>Feedback</span>
+    </div>
+
+    <div class="menu-item" (click)="gotoStatistic()">
+      <img src="assets/icons/stats.svg" />
+      <span>Statistic</span>
     </div>
 
     <div class="menu-item" (click)="gotoSeeds()">
       <img src="assets/icons/seeds.svg" />
       <span>Seeds</span>
-    </div>
-
-    <div class="menu-item">
-      <img src="assets/icons/stats.svg" />
-      <span>Statistic</span>
     </div>
 
     <!-- ==================

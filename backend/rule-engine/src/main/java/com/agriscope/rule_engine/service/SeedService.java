@@ -29,6 +29,6 @@ public class SeedService {
             return null;
         }
 
-        return seedOpt.get();
+        return seedOpt.get().copy();
     }
 }

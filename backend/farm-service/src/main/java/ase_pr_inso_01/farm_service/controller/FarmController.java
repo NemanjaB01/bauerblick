@@ -4,6 +4,9 @@ import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCheckDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCreateDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmDetailsDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FieldDetailsDto;
+import ase_pr_inso_01.farm_service.models.HarvestHistory;
+import ase_pr_inso_01.farm_service.models.dto.FeedbackAnswerDTO;
+import ase_pr_inso_01.farm_service.models.dto.HarvestRequestDTO;
 import ase_pr_inso_01.farm_service.service.FarmService;
 
 
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -94,5 +98,67 @@ public class FarmController {
 
         FarmDetailsDto updatedFarm = farmService.updateField(farmId, field, email);
         return ResponseEntity.ok(updatedFarm);
+    }
+
+    @PostMapping("/{farmId}/fields/{fieldId}/harvest")
+    public ResponseEntity<Void> harvestField(
+            @PathVariable String farmId,
+            @PathVariable Integer fieldId,
+            @RequestBody HarvestRequestDTO harvestRequest) {
+
+        farmService.harvestField(farmId, fieldId, harvestRequest);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/harvest-history/{historyId}/feedback")
+    public ResponseEntity<Void> submitFeedback(
+            @PathVariable String historyId,
+            @RequestBody List<FeedbackAnswerDTO> answers) {
+
+        farmService.submitFeedback(historyId, answers);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{farmId}/harvest-history")
+    public ResponseEntity<List<HarvestHistory>> getHarvestHistory(@PathVariable String farmId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        List<HarvestHistory> history = farmService.getHarvestHistory(farmId);
+        return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/{farmId}/feedback-factors")
+    public Map<String, Double> calculateFeedbackFactors(@PathVariable String farmId) {
+        return farmService.calculateFeedbackFactors(farmId);
+    }
+
+    @DeleteMapping("/harvest-history/{historyId}")
+    public ResponseEntity<Void> deleteHarvestHistory(
+            @PathVariable String historyId,
+            Principal principal) throws Exception {
+
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        farmService.deleteHarvestHistory(historyId, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{farmId}/harvest-history")
+    public ResponseEntity<Void> deleteAllHarvestHistory(
+            @PathVariable String farmId,
+            Principal principal) throws Exception {
+
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        farmService.deleteAllHarvestHistory(farmId, principal.getName());
+        return ResponseEntity.noContent().build();
     }
 }

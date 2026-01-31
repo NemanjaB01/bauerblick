@@ -21,7 +21,7 @@ def fetch_hourly_weather_for_all():
             continue
 
         for farm in farms:
-            if farm.get("lat") is None or farm.get("lon") is None:
+            if farm.get("latitude") is None or farm.get("longitude") is None:
                 logger.warning(f"Skipping farm {farm.get('id')} - missing coordinates")
                 continue
 

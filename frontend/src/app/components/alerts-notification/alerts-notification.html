@@ -32,20 +32,23 @@
           <div class="alert-info">
             <img [src]="getSeedIcon(alert.recommendedSeed)" class="seed-icon-mini" />
             <span class="seed-name">{{ formatSeedName(alert.recommendedSeed) }}</span>
-            <span class="separator">•</span>
-            <span class="farm-id">{{ alert.farmId }}</span>
           </div>
           <h4 class="alert-title">{{ formatAdviceTitle(alert.advice) }}</h4>
 
-          <p class="alert-description">{{ alert.reasoning }}</p>
+          <p class="alert-description">{{ formatReasoning(alert.reasoning) }}</p>
 
-          <div class="alert-metrics" *ngIf="alert.metrics?.temperature !== undefined">
+          <div class="alert-metrics water-metric" *ngIf="isIrrigationAlert(alert.recommendationType)">
+            <span class="metric-icon">💧</span>
+            <span class="metric-value">{{ formatDeficit(alert) }}</span>
+          </div>
+
+          <div class="alert-metrics temp-metric" *ngIf="!isIrrigationAlert(alert.recommendationType) && alert.metrics?.temperature !== undefined">
             <span class="metric-icon">🌡️</span>
             <span class="metric-value">{{ formatTemperature(alert.metrics.temperature) }}</span>
           </div>
 
           <div class="alert-footer">
-            <span class="alert-time">{{ getTimeSince(alert) }}</span>
+            <span class="alert-time">{{ formatExactTime(alert.receivedAt) }}</span>
             <button class="dismiss-btn" (click)="dismissAlert(alert.id)">Dismiss</button>
           </div>
         </div>

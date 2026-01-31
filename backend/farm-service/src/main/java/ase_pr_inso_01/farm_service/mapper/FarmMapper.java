@@ -1,6 +1,7 @@
 package ase_pr_inso_01.farm_service.mapper;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmCreateDto;
 import ase_pr_inso_01.farm_service.controller.dto.farm.FarmDetailsDto;
@@ -29,7 +30,7 @@ public class FarmMapper {
         return farm;
     }
 
-    public FarmDetailsDto farmToFarmDetailsDto(Farm farm) {
+    public FarmDetailsDto farmToFarmDetailsDto(Farm farm, Map<String, Double> factors) {
         FieldDetailsDto[] fieldDetailsDtos = null;
 
         fieldDetailsDtos = Arrays.stream(farm.getFields())
@@ -44,7 +45,8 @@ public class FarmMapper {
                 farm.getSoilType(),
                 fieldDetailsDtos,
                 farm.getRecommendations(),
-                farm.getUserId()
+                farm.getUserId(),
+                factors
         );
     }
 

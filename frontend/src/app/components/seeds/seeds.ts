@@ -25,14 +25,28 @@ export class SeedsComponent implements OnInit {
 
   seeds : Seed[] = [];
   ngOnInit(): void {
-      this.seedService.getAll().subscribe(
-        data => {
-          if (data) {
-            this.seeds = data
-            console.log(data)
+    this.seedService.getAll().subscribe(
+      data => {
+        if (data) {
+          console.log('=== RAW DATA FROM BACKEND ===');
+          console.log('Full response:', data);
+          console.log('Number of seeds:', data.length);
+
+          if (data.length > 0) {
+            console.log('=== FIRST SEED DETAILS ===');
+            console.log('Full first seed object:', data[0]);
+            console.log('Keys in first seed:', Object.keys(data[0]));
+            console.log('daysToReady value:', data[0].daysToReady);
+            console.log('Type of daysToReady:', typeof data[0].daysToReady);
           }
+
+          this.seeds = data;
         }
-      )
+      },
+      error => {
+        console.error('Error fetching seeds:', error);
+      }
+    );
   }
 
   getSeedIcon(seedType: string): string {
@@ -47,25 +61,29 @@ export class SeedsComponent implements OnInit {
   }
   }
 
-  toggleMenu() {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
-
-  goToProfile() {
-    this.isMenuOpen = false;
-    // Navigate to profile
-  }
-
-  logout() {
-    this.isMenuOpen = false;
-    // Handle logout
-  }
-
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
     if (!target.closest('.menu-wrapper')) {
       this.isMenuOpen = false;
     }
+  }
+
+  selectedSeed: Seed | null = null;
+
+  formatSeedType(seedType: string): string {
+    // Convert "CORN" to "Corn", "BLACK_GRAPES" to "Black Grapes"
+    return seedType
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  openDetailsModal(seed: Seed): void {
+    this.selectedSeed = seed;
+  }
+
+  closeDetailsModal(): void {
+    this.selectedSeed = null;
   }
 }

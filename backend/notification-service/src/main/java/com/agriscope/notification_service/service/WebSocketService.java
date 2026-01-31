@@ -20,7 +20,7 @@ public class WebSocketService {
             messagingTemplate.convertAndSend(destination, recommendation);
             log.info("Sent WebSocket ALERT to farm: {}", farmId);
         } catch (Exception e) {
-            log.error("Failed to send WebSocket alert to farm: {}", farmId, e);
+            log.error("Failed to send WebSocket alert to farm: {}. Error:{}", farmId, e.getMessage());
         }
     }
 
@@ -30,7 +30,7 @@ public class WebSocketService {
             messagingTemplate.convertAndSend(destination, recommendation);
             log.info("Sent WebSocket RECOMMENDATION to farm: {}", farmId);
         } catch (Exception e) {
-            log.error("Failed to send WebSocket recommendation to farm: {}", farmId, e);
+            log.error("Failed to send WebSocket recommendation to farm: {}. Error:{}", farmId, e.getMessage());
         }
     }
 
@@ -40,7 +40,7 @@ public class WebSocketService {
             messagingTemplate.convertAndSend(destination, payload);
             log.info("Sent WebSocket WEATHER to farm: {}", farmId);
         } catch (Exception e) {
-            log.error("Failed to send WebSocket weather to farm: {}", farmId, e);
+            log.error("Failed to send WebSocket weather to farm: {}. Error:{}", farmId, e.getMessage());
         }
     }
 }

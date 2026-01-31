@@ -97,7 +97,7 @@
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>{{ getTimeSince(rec) }}</span>
+            <span>{{ formatExactTime(rec.receivedAt) }}</span>
           </div>
 
           <!-- Main Advice Title -->
@@ -124,8 +124,6 @@
           <div class="seed-farm-info">
             <img [src]="getSeedIcon(rec.recommendedSeed)" alt="{{ rec.recommendedSeed }}" class="seed-icon-small" />
             <span class="seed-name-inline">{{ rec.recommendedSeed }}</span>
-            <span class="separator">•</span>
-            <span class="farm-id-inline">{{ rec.farmId }}</span>
           </div>
 
           <!-- Action Buttons - Mark as Read + Clear All -->

@@ -7,13 +7,25 @@ logger = setup_logger(name="weather_processor")
 client = WeatherClient() #
 
 def fetch_and_publish_for_farm(user_id, email, farm_data, forecast_type: ForecastType):
-    farm_id = farm_data.get("id")
+    farm_id = farm_data.get("id") or farm_data.get("farm_id")
     farm_name = farm_data.get("name", farm_id)
 
-    lat = farm_data.get("lat")
-    lon = farm_data.get("lon")
+    lat = farm_data.get("latitude")
+    lon = farm_data.get("longitude")
     crops = farm_data.get("crops", [])
-    fields = farm_data.get("fields", [])
+    soil_type = farm_data.get("soilType")
+    raw_fields = farm_data.get("fields", [])
+    transformed_fields = []
+    for f in raw_fields:
+        f_id = f.get("id") or f.get("field_id")
+        s_type = f.get("seedType") or f.get("seed_type")
+        g_stage = f.get("growthStage") or f.get("growth_stage")
+
+        transformed_fields.append({
+            "field_id": str(f_id),
+            "seed_type": s_type,
+            "growth_stage": g_stage
+        })
 
     try:
         df = client.get_forecast(lat, lon, forecast_type)
@@ -42,7 +54,8 @@ def fetch_and_publish_for_farm(user_id, email, farm_data, forecast_type: Forecas
             "farm_id": farm_id,
             "farm_name": farm_name,
             "crops": crops,
-            "fields": fields,
+            "soil_type": soil_type,
+            "fields": transformed_fields,
             "lat": lat,
             "lon": lon,
             "forecast": df.to_dict(orient="records")

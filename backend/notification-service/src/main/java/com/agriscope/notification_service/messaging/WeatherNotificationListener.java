@@ -1,8 +1,9 @@
-package com.agriscope.notification_service.service;
+package com.agriscope.notification_service.messaging;
 
 import com.agriscope.notification_service.dto.WeatherUpdateDTO;
 import com.agriscope.notification_service.model.WeatherDocument;
 import com.agriscope.notification_service.repository.WeatherRepository;
+import com.agriscope.notification_service.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -63,7 +64,7 @@ public class WeatherNotificationListener {
                 weatherRepository.save(doc);
                 log.info("Weather cached in DB for farm: {}", weatherData.getFarmId());
             } catch (Exception e) {
-                log.error("Failed to cache weather for farm {}", weatherData.getFarmId(), e);
+                log.error("Failed to cache weather for farm {}: {}", weatherData.getFarmId(), e.getMessage());
             }
         } else {
             log.warn("Received weather payload without forecast: {}", weatherData);

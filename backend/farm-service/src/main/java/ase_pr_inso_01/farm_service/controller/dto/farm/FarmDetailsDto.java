@@ -11,6 +11,7 @@ public record FarmDetailsDto(
     SoilType soilType,
     FieldDetailsDto[] fields,
     Recommendation[] recommendations, //TODO: Change to dto
-    String userId
+    String userId,
+    java.util.Map<String, Double> feedbackFactors
 ) {
 }

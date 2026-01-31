@@ -1,5 +1,6 @@
 package ase_pr_inso_01.user_service.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,19 +38,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     jwt = authHeader.substring(7);
-    username = jwtUtils.getUsernameFromJwt(jwt);
+    try{
+      username = jwtUtils.getUsernameFromJwt(jwt);
 
-    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails userDetails = User.withUsername(username).password("").roles("USER").build();
+      if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        UserDetails userDetails = User.withUsername(username).password("").roles("USER").build();
 
-      if (jwtUtils.validateJwtToken(jwt)) {
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        if (jwtUtils.validateJwtToken(jwt)) {
+          UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                  userDetails, null, userDetails.getAuthorities());
+          authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+          SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
       }
+    }catch (ExpiredJwtException e) {
+      logger.debug("JWT Token is expired");
+    } catch (Exception e) {
+      logger.error("Cannot set user authentication");
     }
+
     chain.doFilter(request, response);
   }
 }

@@ -8,4 +8,7 @@ schedule
 pymongo
 tenacity
 urllib3
+pytest
+pytest-mock
+pytest-cov
 

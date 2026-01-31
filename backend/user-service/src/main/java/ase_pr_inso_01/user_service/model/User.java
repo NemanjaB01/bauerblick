@@ -4,8 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @Document(collection = "users")
 @Getter
@@ -18,7 +20,7 @@ public class User {
   private String lastName;
   private String password;
   private String password2;
-  private String role = "USER";
-
-  //TODO: enhance this to also include login attempts and security question!
+  @Field(write = Field.Write.ALWAYS)
+  private LocalDate deleted_at;
+  private byte[] profileImageBlob;
 }

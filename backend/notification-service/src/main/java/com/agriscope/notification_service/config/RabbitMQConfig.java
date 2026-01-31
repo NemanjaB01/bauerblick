@@ -20,6 +20,10 @@ public class RabbitMQConfig {
     public static final String EMAIL_EXCHANGE = "email_exchange";
     public static final String EMAIL_ROUTING_KEY = "email.generic";
 
+    public static final String FARM_EVENTS_EXCHANGE = "farm_events";
+    public static final String HARVEST_QUEUE = "notification_harvest_queue";
+    public static final String HARVEST_ROUTING_KEY = "field.harvested";
+
 
     @Bean
     public Queue alertQueue() {
@@ -69,5 +73,20 @@ public class RabbitMQConfig {
     @Bean
     public Binding emailBinding(Queue emailQueue, TopicExchange emailExchange) {
         return BindingBuilder.bind(emailQueue).to(emailExchange).with(EMAIL_ROUTING_KEY);
+    }
+
+    @Bean
+    public TopicExchange farmEventsExchange() {
+        return new TopicExchange(FARM_EVENTS_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue harvestQueue() {
+        return new Queue(HARVEST_QUEUE, true);
+    }
+
+    @Bean
+    public Binding harvestBinding(Queue harvestQueue, TopicExchange farmEventsExchange) {
+        return BindingBuilder.bind(harvestQueue).to(farmEventsExchange).with(HARVEST_ROUTING_KEY);
     }
 }

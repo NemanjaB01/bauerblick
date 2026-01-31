@@ -6,12 +6,14 @@ import {provideToastr} from 'ngx-toastr';
 import {provideAnimations} from '@angular/platform-browser/animations';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {AuthInterceptor} from './services/auth-service/auth.interceptor';
+import { provideCharts } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    provideCharts(),
     provideHttpClient(withInterceptorsFromDi()),
     provideToastr({
       timeOut: 3000,

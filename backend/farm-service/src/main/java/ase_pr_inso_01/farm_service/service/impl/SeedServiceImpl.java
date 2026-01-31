@@ -54,23 +54,32 @@ public class SeedServiceImpl implements SeedService {
 
         dto.setId(seed.getId());
         dto.setSeedType(seed.getSeedType());
-
-//        if (seed.getDisplayName() != null) {
-//            dto.setDisplayName(seed.getDisplayName());
-//        } else if (seed.getSeedType() != null) {
-//            dto.setDisplayName(seed.getSeedType()); //TODO
-//        }
-
+        dto.setDisplayName(seed.getDisplayName());
         dto.setScientificName(seed.getScientificName());
 
+        // Temperature
         dto.setMinTemperature(seed.getMinTemperature());
         dto.setMaxTemperature(seed.getMaxTemperature());
         dto.setHeatStressTemperature(seed.getHeatStressTemperature());
 
+        // Water & Soil
         dto.setWaterRequirement(seed.getWaterRequirement());
         dto.setHeavyRainThreshold(seed.getHeavyRainThreshold());
         dto.setMinSoilMoisture(seed.getMinSoilMoisture());
         dto.setAllowedWaterDeficit(seed.getAllowedWaterDeficit());
+
+        // Growth timeline
+        dto.setDaysToYoung(seed.getDaysToYoung());
+        dto.setDaysToMature(seed.getDaysToMature());
+        dto.setDaysToReady(seed.getDaysToReady());
+
+        // Disease risk
+        dto.setDiseaseRiskMinTemp(seed.getDiseaseRiskMinTemp());
+        dto.setDiseaseRiskMaxTemp(seed.getDiseaseRiskMaxTemp());
+        dto.setDiseaseRainThreshold(seed.getDiseaseRainThreshold());
+
+        // Wind tolerance
+        dto.setMaxWindTolerance(seed.getMaxWindTolerance());
 
         dto.setSeedCoefficient(seed.getSeedCoefficient());
 

@@ -35,7 +35,32 @@ public class EmailService {
     }
 
     @Async
-    public void sendGenericEmail(String to, String subject, String body) {
+    public void sendWelcomeEmail(String to, String firstName) {
+        try {
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom("noreply@agriscope.com");
+            helper.setTo(to);
+            helper.setSubject("Welcome to Agriscope, " + firstName + "!");
+
+            String htmlBody = "<h1>Welcome aboard!</h1>" +
+                    "<p>Hi " + firstName + ",</p>" +
+                    "<p>Thank you for joining Agriscope. Your account has been successfully created.</p>" +
+                    "<p>Start monitoring your farm today!</p>" +
+                    "<br><p>Best regards,<br>The Agriscope Team</p>";
+
+            helper.setText(htmlBody, true);
+
+            emailSender.send(message);
+            log.info("Welcome email sent to {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send welcome email to {}. Error: {}", to, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendResetEmail(String to, String subject, String body) {
         try {
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

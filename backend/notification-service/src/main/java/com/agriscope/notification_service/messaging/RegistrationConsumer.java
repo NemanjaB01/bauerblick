@@ -1,7 +1,7 @@
 package com.agriscope.notification_service.messaging;
 
 import com.agriscope.notification_service.config.RabbitMQConfig;
-import com.agriscope.notification_service.model.EmailRequest;
+import com.agriscope.notification_service.dto.UserRegisteredEvent;
 import com.agriscope.notification_service.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,18 +11,17 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmailConsumer {
+public class RegistrationConsumer {
 
     private final EmailService emailService;
 
-    @RabbitListener(queues = RabbitMQConfig.EMAIL_QUEUE)
-    public void handleEmailRequest(EmailRequest request) {
-        log.info("Received  email request for: {}", request.getTo());
+    @RabbitListener(queues = RabbitMQConfig.USER_REGISTERED_QUEUE)
+    public void handleUserRegistration(UserRegisteredEvent event) {
+        log.info("Processing welcome email for new user: {}", event.getEmail());
 
-        emailService.sendResetEmail(
-                request.getTo(),
-                request.getSubject(),
-                request.getBody()
+        emailService.sendWelcomeEmail(
+                event.getEmail(),
+                event.getFirstName()
         );
     }
 }

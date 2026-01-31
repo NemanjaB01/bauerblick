@@ -1,6 +1,8 @@
 package ase_pr_inso_01.user_service.service.impl;
 
+import ase_pr_inso_01.user_service.config.RabbitMQConfig;
 import ase_pr_inso_01.user_service.controller.dto.user.*;
+import ase_pr_inso_01.user_service.dto.UserRegisteredEvent;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.NotFoundException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
@@ -9,6 +11,7 @@ import ase_pr_inso_01.user_service.repository.UserRepository;
 import ase_pr_inso_01.user_service.security.JwtUtils;
 import ase_pr_inso_01.user_service.service.UserService;
 import ase_pr_inso_01.user_service.validation.UserValidator;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserValidator userValidator;
     private final JwtUtils jwtUtils;
+    private final RabbitTemplate rabbitTemplate;
 
     private final PasswordResetProducer resetProducer;
 
@@ -44,13 +48,15 @@ public class UserServiceImpl implements UserService {
                            PasswordEncoder passwordEncoder,
                            UserValidator userValidator,
                            JwtUtils jwtUtils,
-                           PasswordResetProducer resetProducer) {
+                           PasswordResetProducer resetProducer,
+                           RabbitTemplate rabbitTemplate) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userValidator = userValidator;
         this.jwtUtils = jwtUtils;
         this.resetProducer = resetProducer;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
 
@@ -64,12 +70,30 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
 
-        // secure password hashing
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setPassword2(passwordEncoder.encode(dto.getPassword2()));
         user.setDeleted_at(null);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        try {
+            UserRegisteredEvent event = new UserRegisteredEvent(
+                    savedUser.getId(),
+                    savedUser.getEmail(),
+                    savedUser.getFirstName(),
+                    savedUser.getLastName()
+            );
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EMAIL_EXCHANGE,
+                    RabbitMQConfig.USER_REGISTERED_ROUTING_KEY,
+                    event
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send RabbitMQ message: " + e.getMessage());
+        }
+
+        return savedUser;
     }
 
     @Override

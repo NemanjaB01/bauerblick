@@ -1,4 +1,5 @@
 package ase_pr_inso_01.user_service.config;
+
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -14,6 +15,9 @@ public class RabbitMQConfig {
   public static final String EMAIL_EXCHANGE = "email_exchange";
   public static final String EMAIL_ROUTING_KEY = "email.generic";
 
+  public static final String USER_REGISTERED_QUEUE = "user_registered_queue";
+  public static final String USER_REGISTERED_ROUTING_KEY = "user.registered";
+
   @Bean
   public TopicExchange emailExchange() {
     return new TopicExchange(EMAIL_EXCHANGE);
@@ -25,8 +29,20 @@ public class RabbitMQConfig {
   }
 
   @Bean
+  public Queue userRegisteredQueue() {
+    return new Queue(USER_REGISTERED_QUEUE, true);
+  }
+
+  @Bean
   public Binding binding(Queue emailQueue, TopicExchange emailExchange) {
     return BindingBuilder.bind(emailQueue).to(emailExchange).with(EMAIL_ROUTING_KEY);
+  }
+
+  @Bean
+  public Binding userRegisteredBinding(Queue userRegisteredQueue, TopicExchange emailExchange) {
+    return BindingBuilder.bind(userRegisteredQueue)
+            .to(emailExchange)
+            .with(USER_REGISTERED_ROUTING_KEY);
   }
 
   @Bean

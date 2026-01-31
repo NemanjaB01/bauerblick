@@ -42,7 +42,7 @@ class EmailServiceTest {
     @Test
     @DisplayName("Should send GENERIC email without subject prefix")
     void sendGenericEmail_Success() {
-        emailService.sendGenericEmail("user@test.com", "Welcome", "Hello User");
+        emailService.sendResetEmail("user@test.com", "Welcome", "Hello User");
 
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
         verify(emailSender).send(messageCaptor.capture());

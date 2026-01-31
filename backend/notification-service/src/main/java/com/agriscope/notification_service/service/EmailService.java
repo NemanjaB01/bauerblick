@@ -16,6 +16,8 @@ public class EmailService {
 
     private final JavaMailSender emailSender;
 
+    private final EmailTemplateService emailTemplateService;
+
     @Async
     public void sendAlertEmail(String toEmail, String subject, String htmlBody) {
         try {
@@ -37,19 +39,14 @@ public class EmailService {
     @Async
     public void sendWelcomeEmail(String to, String firstName) {
         try {
+            String htmlBody = emailTemplateService.buildWelcomeEmailHtml(firstName);
+
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom("noreply@agriscope.com");
             helper.setTo(to);
             helper.setSubject("Welcome to Agriscope, " + firstName + "!");
-
-            String htmlBody = "<h1>Welcome aboard!</h1>" +
-                    "<p>Hi " + firstName + ",</p>" +
-                    "<p>Thank you for joining Agriscope. Your account has been successfully created.</p>" +
-                    "<p>Start monitoring your farm today!</p>" +
-                    "<br><p>Best regards,<br>The Agriscope Team</p>";
-
             helper.setText(htmlBody, true);
 
             emailSender.send(message);

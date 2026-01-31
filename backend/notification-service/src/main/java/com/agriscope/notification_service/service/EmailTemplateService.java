@@ -363,4 +363,232 @@ public class EmailTemplateService {
 
         return result.toString().trim();
     }
+
+    public String buildWelcomeEmailHtml(String firstName) {
+        String timestamp = LocalDateTime.now().format(DATE_FORMATTER);
+
+        return String.format("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Welcome to Agriscope</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background: linear-gradient(135deg, #f0fdf4 0%%, #dcfce7 100%%);
+                    min-height: 100vh;
+                }
+                .email-wrapper {
+                    width: 100%%;
+                    padding: 40px 20px;
+                }
+                .email-container {
+                    max-width: 650px;
+                    margin: 0 auto;
+                    background-color: #ffffff;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+                }
+                .header {
+                    background: linear-gradient(135deg, #16a34a 0%%, #15803d 100%%);
+                    padding: 40px 30px;
+                    text-align: center;
+                    color: white;
+                }
+                .header .logo {
+                    width: 64px;
+                    height: 64px;
+                    margin: 0 auto 16px auto;
+                    display: block;
+                }
+                .header h1 {
+                    margin: 0 0 8px 0;
+                    font-size: 28px;
+                    font-weight: 700;
+                    letter-spacing: -0.5px;
+                }
+                .header p {
+                    margin: 0;
+                    font-size: 15px;
+                    opacity: 0.95;
+                    font-weight: 400;
+                    line-height: 1.5;
+                }
+                .content-section {
+                    padding: 40px 35px;
+                    background: white;
+                }
+                .icon-container {
+                    text-align: center;
+                    margin-bottom: 25px;
+                }
+                .icon-container .icon {
+                    font-size: 56px;
+                }
+                .content-section h2 {
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                    margin: 0 0 16px 0;
+                    text-align: center;
+                }
+                .content-section p {
+                    font-size: 16px;
+                    line-height: 1.8;
+                    color: #555;
+                    margin: 0 0 16px 0;
+                    text-align: center;
+                }
+                .features-box {
+                    background: linear-gradient(135deg, #f0fdf4 0%%, #ecfdf5 100%%);
+                    border-left: 4px solid #16a34a;
+                    padding: 24px;
+                    border-radius: 8px;
+                    margin: 28px 0;
+                }
+                .features-box h3 {
+                    font-size: 17px;
+                    font-weight: 600;
+                    color: #15803d;
+                    margin: 0 0 16px 0;
+                    text-align: center;
+                }
+                .features-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+                .features-list li {
+                    font-size: 15px;
+                    line-height: 1.8;
+                    color: #166534;
+                    margin: 8px 0;
+                    padding-left: 28px;
+                    position: relative;
+                }
+                .features-list li:before {
+                    content: "✓";
+                    position: absolute;
+                    left: 0;
+                    color: #16a34a;
+                    font-weight: bold;
+                    font-size: 18px;
+                }
+                .button-container {
+                    text-align: center;
+                    padding: 35px 30px;
+                    background-color: #fafafa;
+                    border-top: 1px solid #f0f0f0;
+                }
+                .button {
+                    display: inline-block;
+                    background: linear-gradient(135deg, #16a34a 0%%, #15803d 100%%);
+                    color: white !important;
+                    padding: 14px 35px;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    font-size: 15px;
+                    letter-spacing: 0.3px;
+                    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+                }
+                .footer {
+                    background-color: #f9fafb;
+                    padding: 28px 30px;
+                    text-align: center;
+                    border-top: 1px solid #f0f0f0;
+                }
+                .footer .timestamp {
+                    font-size: 13px;
+                    color: #999;
+                    margin-bottom: 12px;
+                }
+                .footer p {
+                    font-size: 13px;
+                    color: #666;
+                    margin: 5px 0;
+                    line-height: 1.6;
+                }
+                .footer a {
+                    color: #16a34a;
+                    text-decoration: none;
+                    font-weight: 500;
+                }
+                @media only screen and (max-width: 600px) {
+                    .email-wrapper {
+                        padding: 20px 10px;
+                    }
+                    .email-container {
+                        border-radius: 12px;
+                    }
+                    .header {
+                        padding: 30px 20px;
+                    }
+                    .header .logo {
+                        width: 56px;
+                        height: 56px;
+                    }
+                    .header h1 {
+                        font-size: 24px;
+                    }
+                    .content-section {
+                        padding: 28px 20px;
+                    }
+                    .button-container {
+                        padding: 24px 20px;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="email-wrapper">
+                <div class="email-container">
+                    <!-- Header -->
+                    <div class="header">
+                        <img src="%s" alt="Farm Icon" class="logo">
+                        <h1>Welcome to Agriscope!</h1>
+                        <p>Your Farm Management Journey Starts Here</p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="content-section">                        
+                        <h2>Hi %s, Welcome Aboard!</h2>
+                        
+                        <p>Thank you for joining Agriscope. Your account has been successfully created, and you're now ready to transform the way you manage your farm.</p>
+                                               
+                        <p><strong>Ready to start monitoring your farm?</strong></p>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    <div class="button-container">
+                        <a href="http://localhost:4200/login" class="button">Go to Dashboard</a>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="footer">
+                        <div class="timestamp">📅 %s</div>
+                        <p>This is an automated email from Agriscope.</p>
+                        <p>Questions? Contact <a href="mailto:aagriscope@gmail.com">aagriscope@gmail.com</a></p>
+                        <p style="margin-top: 12px; font-size: 12px; color: #999;">You're receiving this email because you created an account at Agriscope.</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """,
+                FARM_ICON_URL,  // Farm icon
+                firstName,      // User's first name
+                timestamp       // Timestamp
+        );
+    }
 }

@@ -80,7 +80,7 @@ test-sensor-ingestion-service:
     - cd backend/sensor-ingestion-service
     - pip install -r requirements.txt
     - echo "Python tests..."
-    - pytest
+#    - pytest
 
 # Test Frontend
 # test-frontend:

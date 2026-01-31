@@ -87,11 +87,12 @@ test-frontend:
   image: node:20
   before_script:
     - apt-get update
-    - apt-get install -y firefox-esr
+    - apt-get install -y chromium
+    - export CHROME_BIN=/usr/bin/chromium
   script:
     - cd frontend
     - npm ci
-    - npm run test -- --watch=false --browsers=FirefoxHeadless
+    - npm run test -- --watch=false --browsers=ChromeHeadless
   cache:
     key: ${CI_COMMIT_REF_SLUG}-frontend
     paths:

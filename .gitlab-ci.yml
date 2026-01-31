@@ -84,15 +84,19 @@ test-sensor-ingestion-service:
 # Test Frontend
 test-frontend:
   stage: test
-  image: node:20
+  image: node:20-bookworm
   before_script:
     - apt-get update
-    - apt-get install -y chromium
+    - apt-get install -y --no-install-recommends chromium
+    - rm -rf /var/lib/apt/lists/*
     - export CHROME_BIN=/usr/bin/chromium
+
+    # Make workspace writable for the non-root user
+    - chown -R node:node "$CI_PROJECT_DIR"
   script:
     - cd frontend
-    - npm ci
-    - npm run test -- --watch=false --browsers=ChromeHeadless
+    - runuser -u node -- npm ci
+    - runuser -u node -- npm run test -- --watch=false --browsers=ChromeHeadless
   cache:
     key: ${CI_COMMIT_REF_SLUG}-frontend
     paths:

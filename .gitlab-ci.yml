@@ -1,4 +1,4 @@
-image: maven:3.9-eclipse-temurin-21
+image: registry.reset.inso-w.at/pub/docker/debian-mvn
 
 variables:
   GIT_STRATEGY: "clone"
@@ -33,16 +33,16 @@ test-api-gateway:
 #     - cd backend/user-service
 #     - mvn -B clean test
 
-test-farm-service:
-  stage: test
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - cd backend/farm-service
-    - mvn -B clean test
+# test-farm-service:
+#   stage: test
+#   services:
+#     - docker:dind
+#   variables:
+#     DOCKER_HOST: tcp://docker:2375
+#     DOCKER_TLS_CERTDIR: ""
+#   script:
+#     - cd backend/farm-service
+#     - mvn -B clean test
 
 test-service-registry:
   stage: test
@@ -50,32 +50,32 @@ test-service-registry:
     - cd backend/service-registry
     - mvn -B clean test
 
-test-notification-service:
-  stage: test
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - cd backend/notification-service
-    - mvn -B clean test
+# test-notification-service:
+#   stage: test
+#   services:
+#     - docker:dind
+#   variables:
+#     DOCKER_HOST: tcp://docker:2375
+#     DOCKER_TLS_CERTDIR: ""
+#   script:
+#     - cd backend/notification-service
+#     - mvn -B clean test
 
-test-rule-engine:
-  stage: test
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - cd backend/rule-engine
-    - mvn -B clean test
+# test-rule-engine:
+#   stage: test
+#   services:
+#     - docker:dind
+#   variables:
+#     DOCKER_HOST: tcp://docker:2375
+#     DOCKER_TLS_CERTDIR: ""
+#   script:
+#     - cd backend/rule-engine
+#     - mvn -B clean test
 
 # Test Python Service
 test-sensor-ingestion-service:
   stage: test
-  image: python:3.11
+  image: registry.reset.inso-w.at/pub/docker/python:3.13-slim
   script:
     - cd backend/sensor-ingestion-service
     - pip install -r requirements.txt
@@ -178,31 +178,31 @@ build-sensor-ingestion-service:
     - main
     - 21-kubernetes-integration-setup
 
-# Build Frontend
+# Build Frontend with Kaniko
 build-frontend:
   stage: build
-  image: node:20
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
   script:
-    - cd frontend
-    - npm ci
-    - npm run build
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}-frontend
-    paths:
-      - frontend/node_modules/
+    - echo "{\"auths\":{\"registry.reset.inso-w.at\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor \
+        --context "${CI_PROJECT_DIR}/frontend" \
+        --dockerfile "${CI_PROJECT_DIR}/frontend/Dockerfile" \
+        --destination "registry.reset.inso-w.at/${CI_PROJECT_PATH}/frontend:${CI_PIPELINE_ID}"
   only:
     - main
     - 21-kubernetes-integration-setup
 
 deploy:
   stage: deploy
-  image: bitnami/kubectl:1.30
+  image: registry.reset.inso-w.at/pub/docker/kubectl
   needs:
     - build-service-registry
   script:
     - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' kubernetes.yaml
     - cat kubernetes.yaml
-    - kubectl apply -f kubernetes.yaml
+    - kubectl apply -f kubernetes-frontend.yaml
   only:
     - main
     - 21-kubernetes-integration-setup

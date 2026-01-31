@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM registry.reset.inso-w.at/pub/docker/python:3.13-slim
 
 WORKDIR /app
 

@@ -1,4 +1,4 @@
-image: registry.reset.inso-w.at/pub/docker/debian-mvn
+image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
 
 variables:
   GIT_STRATEGY: "clone"
@@ -20,7 +20,7 @@ test-api-gateway:
   stage: test
   script:
     - cd backend/api-gateway
-    - mvn -B clean test
+    - ./mvnw -B clean test
 
 # test-user-service:
 #   stage: test
@@ -31,7 +31,7 @@ test-api-gateway:
 #     DOCKER_TLS_CERTDIR: ""
 #   script:
 #     - cd backend/user-service
-#     - mvn -B clean test
+#     - ./mvnw -B clean test
 
 # test-farm-service:
 #   stage: test
@@ -42,13 +42,13 @@ test-api-gateway:
 #     DOCKER_TLS_CERTDIR: ""
 #   script:
 #     - cd backend/farm-service
-#     - mvn -B clean test
+#     - ./mvnw -B clean test
 
 test-service-registry:
   stage: test
   script:
     - cd backend/service-registry
-    - mvn -B clean test
+    - ./mvnw -B clean test
 
 # test-notification-service:
 #   stage: test
@@ -59,7 +59,7 @@ test-service-registry:
 #     DOCKER_TLS_CERTDIR: ""
 #   script:
 #     - cd backend/notification-service
-#     - mvn -B clean test
+#     - ./mvnw -B clean test
 
 # test-rule-engine:
 #   stage: test
@@ -70,7 +70,7 @@ test-service-registry:
 #     DOCKER_TLS_CERTDIR: ""
 #   script:
 #     - cd backend/rule-engine
-#     - mvn -B clean test
+#     - ./mvnw -B clean test
 
 # Test Python Service
 test-sensor-ingestion-service:
@@ -109,8 +109,8 @@ build-api-gateway:
   stage: build
   script:
     - cd backend/api-gateway
-    - mvn clean package -DskipTests
-    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/api-gateway -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+    - ./mvnw clean package -DskipTests
+    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/api-gateway -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
     - 21-kubernetes-integration-setup
@@ -119,8 +119,8 @@ build-user-service:
   stage: build
   script:
     - cd backend/user-service
-    - mvn clean package -DskipTests
-    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/user-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+    - ./mvnw clean package -DskipTests
+    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/user-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
     - 21-kubernetes-integration-setup
@@ -129,8 +129,8 @@ build-farm-service:
   stage: build
   script:
     - cd backend/farm-service
-    - mvn clean package -DskipTests
-    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/farm-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+    - ./mvnw clean package -DskipTests
+    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/farm-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
     - 21-kubernetes-integration-setup
@@ -139,8 +139,8 @@ build-service-registry:
   stage: build
   script:
     - cd backend/service-registry
-    - mvn clean package -DskipTests
-    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/service-registry -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+    - ./mvnw clean package -DskipTests
+    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/service-registry -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
     - 21-kubernetes-integration-setup
@@ -150,8 +150,8 @@ build-notification-service:
   image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
   script:
     - cd backend/notification-service
-    - mvn clean package -DskipTests
-    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/notification-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+    - ./mvnw clean package -DskipTests
+    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/notification-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
     - 21-kubernetes-integration-setup
@@ -161,8 +161,8 @@ build-rule-engine:
   image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
   script:
     - cd backend/rule-engine
-    - mvn clean package -DskipTests
-    - mvn -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/rule-engine -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+    - ./mvnw clean package -DskipTests
+    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/rule-engine -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
   only:
     - main
     - 21-kubernetes-integration-setup

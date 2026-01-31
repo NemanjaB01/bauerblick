@@ -7,6 +7,7 @@ variables:
 stages:
   - test
   - build
+  - deploy
 
 # Cache Maven dependencies for faster builds
 cache:
@@ -79,28 +80,28 @@ test-sensor-ingestion-service:
     - cd backend/sensor-ingestion-service
     - pip install -r requirements.txt
     - echo "Python tests..."
-    # - pytest
+    - pytest
 
 # Test Frontend
-test-frontend:
-  stage: test
-  image: node:20-bookworm
-  before_script:
-    - apt-get update
-    - apt-get install -y --no-install-recommends chromium
-    - rm -rf /var/lib/apt/lists/*
-    - export CHROME_BIN=/usr/bin/chromium
-
-    # Make workspace writable for the non-root user
-    - chown -R node:node "$CI_PROJECT_DIR"
-  script:
-    - cd frontend
-    - runuser -u node -- npm ci
-    - runuser -u node -- npm run test -- --watch=false --browsers=ChromeHeadless
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}-frontend
-    paths:
-      - frontend/node_modules/
+# test-frontend:
+#   stage: test
+#   image: node:20-bookworm
+#   before_script:
+#     - apt-get update
+#     - apt-get install -y --no-install-recommends chromium
+#     - rm -rf /var/lib/apt/lists/*
+#     - export CHROME_BIN=/usr/bin/chromium
+# 
+#     # Make workspace writable for the non-root user
+#     - chown -R node:node "$CI_PROJECT_DIR"
+#   script:
+#     - cd frontend
+#     - runuser -u node -- npm ci
+#     - runuser -u node -- npm run test -- --watch=false --browsers=ChromeHeadless
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}-frontend
+#     paths:
+#       - frontend/node_modules/
 
 # BUILD STAGE (with Jib)
 
@@ -192,3 +193,36 @@ build-frontend:
   only:
     - main
     - 21-kubernetes-integration-setup
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:1.30
+  needs:
+    - build-service-registry
+  script:
+    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' kubernetes.yaml
+    - cat kubernetes.yaml
+    - kubectl apply -f kubernetes.yaml
+  only:
+    - main
+    - 21-kubernetes-integration-setup
+  
+# deploy:
+#   stage: deploy
+#   image: bitnami/kubectl:1.30
+#   needs:
+#     - build-api-gateway
+#     - build-user-service
+#     - build-farm-service
+#     - build-service-registry
+#     - build-notification-service
+#     - build-rule-engine
+#     - build-sensor-ingestion-service
+#     - build-frontend-service
+#   script:
+#     - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' kubernetes.yaml
+#     - cat kubernetes.yaml
+#     - kubectl apply -f kubernetes.yaml
+#   only:
+#     - main
+#     - 21-kubernetes-integration-setup

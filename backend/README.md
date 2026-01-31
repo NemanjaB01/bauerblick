@@ -15,7 +15,7 @@ This directory contains the core intelligence and data management layers of the 
 
 - User Service: Manages identity and access. It handles user registration, JWT issuance, and profile management (including profile picture processing). It publishes events to trigger welcome workflows or to reset password.
 
-Farm Service: The source of truth for agricultural data. It manages the hierarchy of Farms and Fields, tracks crop types (Seeds), and growth stages. It also stores historical harvest data and user feedback which is used to fine-tune the recommendation engine.
+- Farm Service: The source of truth for agricultural data. It manages the hierarchy of Farms and Fields, tracks crop types (Seeds), and growth stages. It also stores historical harvest data and user feedback which is used to fine-tune the recommendation engine.
 
 ### Intelligent Processing
 

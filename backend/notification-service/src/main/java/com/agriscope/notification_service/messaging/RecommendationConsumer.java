@@ -26,8 +26,8 @@ public class RecommendationConsumer {
         try {
             notificationService.processIncomingRecommendation(recommendation);
         } catch (Exception e) {
-            log.error("Failed to process recommendation type {}. Data: {}",
-                    recommendation.getRecommendationType(), recommendation, e);
+            log.error("Failed to process recommendation type {}. Data: {}. Error: {}",
+                    recommendation.getRecommendationType(), recommendation, e.getMessage());
         }
     }
 }

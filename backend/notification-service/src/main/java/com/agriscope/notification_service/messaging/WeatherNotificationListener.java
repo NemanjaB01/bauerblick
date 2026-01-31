@@ -64,7 +64,7 @@ public class WeatherNotificationListener {
                 weatherRepository.save(doc);
                 log.info("Weather cached in DB for farm: {}", weatherData.getFarmId());
             } catch (Exception e) {
-                log.error("Failed to cache weather for farm {}", weatherData.getFarmId(), e);
+                log.error("Failed to cache weather for farm {}: {}", weatherData.getFarmId(), e.getMessage());
             }
         } else {
             log.warn("Received weather payload without forecast: {}", weatherData);

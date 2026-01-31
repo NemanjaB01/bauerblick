@@ -25,7 +25,7 @@ public class EmailService {
             emailSender.send(message);
             log.info("Alert email sent to {}", toEmail);
         } catch (Exception e) {
-            log.error("Failed to send alert email", e);
+            log.error("Failed to send alert email. Error:{}", e.getMessage());
         }
     }
 
@@ -40,7 +40,7 @@ public class EmailService {
             emailSender.send(message);
             log.info("Generic email sent to {}", to);
         } catch (Exception e) {
-            log.error("Failed to send generic email", e);
+            log.error("Failed to send generic email. Error:{}", e.getMessage());
         }
     }
 }

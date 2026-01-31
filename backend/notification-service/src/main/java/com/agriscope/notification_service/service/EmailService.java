@@ -31,7 +31,7 @@ public class EmailService {
 
             emailSender.send(message);
             log.info("HTML alert email sent to {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send alert email. Error: {}", e.getMessage());
         }
     }
@@ -51,7 +51,7 @@ public class EmailService {
 
             emailSender.send(message);
             log.info("Welcome email sent to {}", to);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send welcome email to {}. Error: {}", to, e.getMessage());
         }
     }
@@ -69,7 +69,7 @@ public class EmailService {
 
             emailSender.send(message);
             log.info("Generic email sent to {}", to);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send generic email. Error: {}", e.getMessage());
         }
     }

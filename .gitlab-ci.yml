@@ -7,7 +7,7 @@ variables:
 stages:
 #  - test
   - build
-  - deploy
+  # - deploy
 
 # Cache Maven dependencies for faster builds
 cache:
@@ -108,80 +108,80 @@ cache:
 
 # BUILD STAGE (with Jib)
 
-build-api-gateway:
- stage: build
- script:
-   - cd backend/api-gateway
-   - ./mvnw clean package -DskipTests
-   - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/api-gateway -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# build-api-gateway:
+#  stage: build
+#  script:
+#    - cd backend/api-gateway
+#    - ./mvnw clean package -DskipTests
+#    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/api-gateway -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup
 
-build-user-service:
- stage: build
- script:
-   - cd backend/user-service
-   - ./mvnw clean package -DskipTests
-   - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/user-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# build-user-service:
+#  stage: build
+#  script:
+#    - cd backend/user-service
+#    - ./mvnw clean package -DskipTests
+#    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/user-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup
 
-build-farm-service:
- stage: build
- script:
-   - cd backend/farm-service
-   - ./mvnw clean package -DskipTests
-   - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/farm-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# build-farm-service:
+#  stage: build
+#  script:
+#    - cd backend/farm-service
+#    - ./mvnw clean package -DskipTests
+#    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/farm-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup
 
-build-service-registry:
- stage: build
- script:
-   - cd backend/service-registry
-   - ./mvnw clean package -DskipTests
-   - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/service-registry -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# build-service-registry:
+#  stage: build
+#  script:
+#    - cd backend/service-registry
+#    - ./mvnw clean package -DskipTests
+#    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/service-registry -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup
 
-build-notification-service:
- stage: build
- image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
- script:
-   - cd backend/notification-service
-   - ./mvnw clean package -DskipTests
-   - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/notification-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# build-notification-service:
+#  stage: build
+#  image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
+#  script:
+#    - cd backend/notification-service
+#    - ./mvnw clean package -DskipTests
+#    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/notification-service -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup
 
-build-rule-engine:
- stage: build
- image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
- script:
-   - cd backend/rule-engine
-   - ./mvnw clean package -DskipTests
-   - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/rule-engine -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# build-rule-engine:
+#  stage: build
+#  image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
+#  script:
+#    - cd backend/rule-engine
+#    - ./mvnw clean package -DskipTests
+#    - ./mvnw -B jib:build -Djib.to.image=registry.reset.inso-w.at/$CI_PROJECT_PATH/rule-engine -Djib.to.tags=$CI_PIPELINE_ID -Djib.to.auth.username=$CI_REGISTRY_USER -Djib.to.auth.password=$CI_REGISTRY_PASSWORD
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup
 
-# Build Python Service with Kaniko
-build-sensor-ingestion-service:
- stage: build
- image:
-   name: gcr.io/kaniko-project/executor:debug
-   entrypoint: [""]
- script:
-   - echo "{\"auths\":{\"registry.reset.inso-w.at\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-   - /kaniko/executor --context "${CI_PROJECT_DIR}/backend/sensor-ingestion-service" --dockerfile "${CI_PROJECT_DIR}/backend/sensor-ingestion-service/Dockerfile" --destination "registry.reset.inso-w.at/${CI_PROJECT_PATH}/sensor-ingestion-service:${CI_PIPELINE_ID}"
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# # Build Python Service with Kaniko
+# build-sensor-ingestion-service:
+#  stage: build
+#  image:
+#    name: gcr.io/kaniko-project/executor:debug
+#    entrypoint: [""]
+#  script:
+#    - echo "{\"auths\":{\"registry.reset.inso-w.at\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+#    - /kaniko/executor --context "${CI_PROJECT_DIR}/backend/sensor-ingestion-service" --dockerfile "${CI_PROJECT_DIR}/backend/sensor-ingestion-service/Dockerfile" --destination "registry.reset.inso-w.at/${CI_PROJECT_PATH}/sensor-ingestion-service:${CI_PIPELINE_ID}"
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup
 
 # Build Frontend with Kaniko
 build-frontend:
@@ -196,25 +196,25 @@ build-frontend:
    - main
    - 21-kubernetes-integration-setup
 
-deploy:
- stage: deploy
- image: registry.reset.inso-w.at/pub/docker/kubectl
- needs:
-   - build-api-gateway
-   - build-user-service
-   - build-farm-service
-   - build-service-registry
-   - build-notification-service
-   - build-rule-engine
-   - build-sensor-ingestion-service
-   - build-frontend
- script:
-   - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-service-registry.yaml
-   - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-api-gateway.yaml
-   - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-frontend.yaml
-   - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-backend-services.yaml
-   # Deploy all services
-   - kubectl apply -f k8s/
- only:
-   - main
-   - 21-kubernetes-integration-setup
+# deploy:
+#  stage: deploy
+#  image: registry.reset.inso-w.at/pub/docker/kubectl
+#  needs:
+#    - build-api-gateway
+#    - build-user-service
+#    - build-farm-service
+#    - build-service-registry
+#    - build-notification-service
+#    - build-rule-engine
+#    - build-sensor-ingestion-service
+#    - build-frontend
+#  script:
+#    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-service-registry.yaml
+#    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-api-gateway.yaml
+#    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-frontend.yaml
+#    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-backend-services.yaml
+#    # Deploy all services
+#    - kubectl apply -f k8s/
+#  only:
+#    - main
+#    - 21-kubernetes-integration-setup

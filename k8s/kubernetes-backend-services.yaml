@@ -214,20 +214,15 @@ data:
         }
       }
     ]
-  init-farms.js: |
-    // Init script for farms-db - runs automatically when MongoDB starts
-    db = db.getSiblingDB('farmsdb');
-    db.seed.drop();
-    var seeds = JSON.parse(cat('/docker-entrypoint-initdb.d/seeds.json'));
-    db.seed.insertMany(seeds);
-    print('Inserted ' + seeds.length + ' seeds into farmsdb.seed');
-  init-seeds.js: |
-    // Init script for seeds-db - runs automatically when MongoDB starts
-    db = db.getSiblingDB('seedsdb');
-    db.seed.drop();
-    var seeds = JSON.parse(cat('/docker-entrypoint-initdb.d/seeds.json'));
-    db.seed.insertMany(seeds);
-    print('Inserted ' + seeds.length + ' seeds into seedsdb.seed');
+  init-farms.sh: |
+    #!/bin/bash
+    # Init script for farms-db - runs automatically when MongoDB starts
+    mongoimport --db farmsdb --collection seed --type json --file /docker-entrypoint-initdb.d/seeds.json --jsonArray --drop
+    echo "Inserted seeds into farmsdb.seed"
+  init-seeds.sh: |
+    #!/bin/bash
+    # Init script for seeds-db - runs automatically when MongoDB starts
+    mongoimport --db seedsdb --collection seed --type json --file /docker-entrypoint-initdb.d/seeds.json --jsonArray --drop
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -291,8 +286,8 @@ spec:
             - name: farms-db-data
               mountPath: /data/db
             - name: seeds-config
-              mountPath: /docker-entrypoint-initdb.d/init-farms.js
-              subPath: init-farms.js
+              mountPath: /docker-entrypoint-initdb.d/init-farms.sh
+              subPath: init-farms.sh
             - name: seeds-config
               mountPath: /docker-entrypoint-initdb.d/seeds.json
               subPath: seeds.json
@@ -314,8 +309,8 @@ spec:
             - name: seeds-db-data
               mountPath: /data/db
             - name: seeds-config
-              mountPath: /docker-entrypoint-initdb.d/init-seeds.js
-              subPath: init-seeds.js
+              mountPath: /docker-entrypoint-initdb.d/init-seeds.sh
+              subPath: init-seeds.sh
             - name: seeds-config
               mountPath: /docker-entrypoint-initdb.d/seeds.json
               subPath: seeds.json

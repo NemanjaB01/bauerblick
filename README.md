@@ -20,9 +20,12 @@ A farm management platform for monitoring fields, tracking crops, and receiving 
   <p><em>Application workflow</em></p>
 </div>
 
-[<img src="https://drive.google.com/file/d/1pB9BM-YlY5DuUN--xQLdId1XQeomqXHU/view?usp=sharing" width="700">](https://drive.google.com/file/d/1pB9BM-YlY5DuUN--xQLdId1XQeomqXHU/view?usp=sharing)
-
-*Click to watch the full demo*
+<div align="center">
+  <a href="https://drive.google.com/file/d/1pB9BM-YlY5DuUN--xQLdId1XQeomqXHU/view?usp=drive_link">
+    <img src="https://drive.google.com/thumbnail?id=1pB9BM-YlY5DuUN--xQLdId1XQeomqXHU&sz=w800" width="700" alt="Agriscope Demo"/>
+  </a>
+  <p><em>Click to watch the full demo</em></p>
+</div>
 
 ## Tech Stack
 

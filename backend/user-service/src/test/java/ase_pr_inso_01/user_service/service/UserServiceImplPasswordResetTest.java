@@ -6,15 +6,20 @@ import ase_pr_inso_01.user_service.controller.dto.user.UserLoginDto;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.NotFoundException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
+import ase_pr_inso_01.user_service.model.EmailRequest;
 import ase_pr_inso_01.user_service.repository.UserRepository;
 import ase_pr_inso_01.user_service.security.JwtUtils;
 import ase_pr_inso_01.user_service.service.impl.PasswordResetProducer;
+import ase_pr_inso_01.user_service.validation.UserValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,7 +53,38 @@ public class UserServiceImplPasswordResetTest {
     void tearDown() {
         userRepository.deleteAll();
     }
+    @Mock
+    private UserValidator userValidator;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    private final String TEST_EMAIL = "test@example.com";
 
+    @Test
+    void ShouldSendResetEmailSuccessfully() {
+
+        final EmailRequest[] capturedRequest = new EmailRequest[1];
+
+        RabbitTemplate fakeTemplate = new RabbitTemplate() {
+            @Override
+            public void convertAndSend(String exchange, String routingKey, Object message) {
+                capturedRequest[0] = (EmailRequest) message;
+            }
+        };
+
+        PasswordResetProducer producer = new PasswordResetProducer(fakeTemplate);
+
+        String testEmail = "farmer@test.com";
+        String testToken = "abc-123";
+        producer.sendResetEmail(testEmail, testToken);
+
+        EmailRequest result = capturedRequest[0];
+        assertNotNull(result);
+        assertEquals(testEmail, result.getTo());
+        assertEquals("Password Reset Request - Agriscope", result.getSubject());
+
+        assertTrue(result.getBody().contains("token=abc-123"));
+        assertTrue(result.getBody().contains(testEmail));
+    }
     @Test
     void shouldInitiatePasswordResetSuccessfully() throws ValidationException, ConflictException {
         String email = "reset_init@test.com";

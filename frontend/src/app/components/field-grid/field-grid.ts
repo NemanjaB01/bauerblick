@@ -428,11 +428,13 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
           growthStage: calculatedStage
         };
 
+        // Capture seedType before async call (closeModal() will set it to null)
+        const seedType = this.selectedSeedType!;
+
         this.farmService.updateField(fieldUpdate).subscribe({
           next: () => {
             // Success notification
-            // @ts-ignore
-            const seedName = this.selectedSeedType.replace('_', ' ');
+            const seedName = seedType.replace('_', ' ');
             this.toastr.success(
               `${seedName.charAt(0).toUpperCase() + seedName.slice(1)} planted successfully`,
               `Field ${this.selectedFieldId} Planted`

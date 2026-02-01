@@ -275,10 +275,11 @@ spec:
             - |
               mongod --port 27018 &
               MONGO_PID=$!
-              # Wait for MongoDB to be ready (max 180 seconds)
-              for i in $(seq 1 90); do
-                if mongosh --port 27018 --eval "db.adminCommand('ping')" &>/dev/null; then
-                  echo "MongoDB is ready"
+              # Wait for MongoDB to be ready using lightweight TCP check (max 60 seconds)
+              for i in $(seq 1 30); do
+                if (echo > /dev/tcp/127.0.0.1/27018) 2>/dev/null; then
+                  echo "MongoDB port is open"
+                  sleep 2
                   break
                 fi
                 echo "Waiting for MongoDB... ($i)"
@@ -311,10 +312,11 @@ spec:
             - |
               mongod --port 27019 &
               MONGO_PID=$!
-              # Wait for MongoDB to be ready (max 180 seconds)
-              for i in $(seq 1 90); do
-                if mongosh --port 27019 --eval "db.adminCommand('ping')" &>/dev/null; then
-                  echo "MongoDB is ready"
+              # Wait for MongoDB to be ready using lightweight TCP check (max 60 seconds)
+              for i in $(seq 1 30); do
+                if (echo > /dev/tcp/127.0.0.1/27019) 2>/dev/null; then
+                  echo "MongoDB port is open"
+                  sleep 2
                   break
                 fi
                 echo "Waiting for MongoDB... ($i)"

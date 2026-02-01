@@ -19,7 +19,7 @@ public class EmailConsumer {
     public void handleEmailRequest(EmailRequest request) {
         log.info("Received  email request for: {}", request.getTo());
 
-        emailService.sendGenericEmail(
+        emailService.sendResetEmail(
                 request.getTo(),
                 request.getSubject(),
                 request.getBody()

@@ -1,16 +1,15 @@
 package ase_pr_inso_01.user_service.service;
 
-import ase_pr_inso_01.user_service.TestContainersConfiguration;
 import ase_pr_inso_01.user_service.controller.dto.user.*;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.NotFoundException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
+import ase_pr_inso_01.user_service.repository.UserRepository;
 import ase_pr_inso_01.user_service.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,10 +18,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestContainersConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class UserServiceImplLoginTest {
     // TESTING LOGIN
+
+    @Autowired
+    private UserRepository userRepository;
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+    }
 
     @Autowired
     private UserService userService;
@@ -74,11 +78,11 @@ public class UserServiceImplLoginTest {
         loginDto.setEmail("");
         loginDto.setPassword("Test123!");
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> {
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> {
             userService.login(loginDto);
         });
 
-        assertEquals("No email given", ex.getErrors().get("email"));
+        assertEquals("User with given e-mail was not found!", ex.getMessage());
     }
 
     @Test
@@ -91,7 +95,7 @@ public class UserServiceImplLoginTest {
             userService.login(loginDto);
         });
 
-        assertEquals("User not found", ex.getMessage());
+        assertEquals("User with given e-mail was not found!", ex.getMessage());
     }
 
 }

@@ -1,13 +1,13 @@
 package ase_pr_inso_01.user_service.service;
 
-import ase_pr_inso_01.user_service.TestContainersConfiguration;
 import ase_pr_inso_01.user_service.controller.dto.user.UserCreateDto;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
+import ase_pr_inso_01.user_service.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,12 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestContainersConfiguration.class)
 public class UserServiceImplCreateUserTest {
 
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+    }
     @Test
     void shouldCreateUserAndStoreInDatabase() throws ValidationException, ConflictException {
         UserCreateDto dto = new UserCreateDto();

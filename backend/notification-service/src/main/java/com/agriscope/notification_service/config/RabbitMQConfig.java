@@ -24,6 +24,21 @@ public class RabbitMQConfig {
     public static final String HARVEST_QUEUE = "notification_harvest_queue";
     public static final String HARVEST_ROUTING_KEY = "field.harvested";
 
+    public static final String USER_REGISTERED_QUEUE = "user_registered_queue";
+    public static final String USER_REGISTERED_ROUTING_KEY = "user.registered";
+
+    @Bean
+    public Queue userRegisteredQueue() {
+        return new Queue(USER_REGISTERED_QUEUE, true);
+    }
+
+    @Bean
+    public Binding userRegisteredBinding(Queue userRegisteredQueue, TopicExchange emailExchange) {
+        return BindingBuilder.bind(userRegisteredQueue)
+                .to(emailExchange)
+                .with(USER_REGISTERED_ROUTING_KEY);
+    }
+
 
     @Bean
     public Queue alertQueue() {

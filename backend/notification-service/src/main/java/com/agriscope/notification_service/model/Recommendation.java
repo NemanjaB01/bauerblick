@@ -13,6 +13,7 @@ public class Recommendation {
     private String userId;
     private String farmId;
     private String fieldId;
+    private String fieldName;
 
     private String recommendedSeed;
     private String recommendationType;

@@ -25,6 +25,8 @@ public class NotificationService {
 
     private final ConcurrentHashMap<String, Long> pendingAcks = new ConcurrentHashMap<>();
 
+    private final EmailTemplateService emailTemplateService;
+
     private final Cache<String, Recommendation> lastSentCache = Caffeine.newBuilder()
             .expireAfterWrite(24, TimeUnit.HOURS)
             .maximumSize(10000)
@@ -89,11 +91,14 @@ public class NotificationService {
     private void sendAndCache(String key, Recommendation rec) {
         if (isAlertType(rec.getRecommendationType())) {
             webSocketService.sendAlertToFarm(rec.getFarmId(), rec);
-            String emailBody = String.format("Alert Type: %s for %s\nDetails: %s",
-                    rec.getRecommendationType(), rec.getRecommendedSeed(), rec.getReasoning());
+
+            String fieldName = rec.getFieldName(); // Get from recommendation
+            String htmlEmailBody = emailTemplateService.buildAlertEmailHtml(rec, fieldName);
+            String emailSubject = rec.getRecommendationType();
+
             pendingAcks.put(rec.getId(), System.currentTimeMillis());
-            emailService.sendAlertEmail(rec.getEmail(), "Farm Alert!", emailBody);
-            log.info("Sent as ALERT (WebSocket + Email) for farm: {}", rec.getFarmId());
+            emailService.sendAlertEmail(rec.getEmail(), emailSubject, htmlEmailBody);
+            log.info("Sent HTML alert email for farm: {}", rec.getFarmId());
         } else if (isRecommendationType(rec.getRecommendationType())) {
             webSocketService.sendRecommendationToFarm(rec.getFarmId(), rec);
             log.info("Sent as RECOMMENDATION for farm: {}", rec.getFarmId());

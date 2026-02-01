@@ -27,6 +27,6 @@ class EmailConsumerTest {
 
         consumer.handleEmailRequest(request);
 
-        verify(emailService).sendGenericEmail("test@test.com", "Subject", "Body");
+        verify(emailService).sendResetEmail("test@test.com", "Subject", "Body");
     }
 }

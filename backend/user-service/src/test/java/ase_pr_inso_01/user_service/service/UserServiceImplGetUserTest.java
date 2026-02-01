@@ -1,16 +1,15 @@
 package ase_pr_inso_01.user_service.service;
 
-import ase_pr_inso_01.user_service.TestContainersConfiguration;
 import ase_pr_inso_01.user_service.controller.dto.user.*;
 import ase_pr_inso_01.user_service.exception.ConflictException;
 import ase_pr_inso_01.user_service.exception.NotFoundException;
 import ase_pr_inso_01.user_service.exception.ValidationException;
+import ase_pr_inso_01.user_service.repository.UserRepository;
 import ase_pr_inso_01.user_service.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,13 +17,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestContainersConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class UserServiceImplGetUserTest {
 
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+    }
 
     @Test
     void shouldReturnUserById() throws ValidationException, ConflictException {

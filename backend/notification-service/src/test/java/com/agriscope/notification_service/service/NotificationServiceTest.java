@@ -3,6 +3,7 @@ package com.agriscope.notification_service.service;
 import com.agriscope.notification_service.model.NotificationDocument;
 import com.agriscope.notification_service.model.Recommendation;
 import com.agriscope.notification_service.repository.NotificationRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +29,19 @@ class NotificationServiceTest {
     private EmailService emailService;
 
     @Mock
+    private EmailTemplateService emailTemplateService;
+
+    @Mock
     private NotificationRepository notificationRepository;
 
     @InjectMocks
     private NotificationService notificationService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(emailTemplateService.buildAlertEmailHtml(any(), any()))
+                .thenReturn("<html><body>Mock Email</body></html>");
+    }
 
 
     @Test

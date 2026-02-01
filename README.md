@@ -16,7 +16,7 @@ A farm management platform for monitoring fields, tracking crops, and receiving 
 ## Application overview
 
 <div align="center">
-  <img src="frontend/src/assets/images/workflow.gif" alt="Agriscope Workflow" width="700"/>
+  <img src="frontend/src/assets/images/workflow.png" alt="Agriscope Workflow" width="700"/>
   <p><em>Application workflow</em></p>
 </div>
 

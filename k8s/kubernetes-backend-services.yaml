@@ -236,6 +236,8 @@ metadata:
   namespace: 25ws-ase-pr-inso-01
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: backend-services

@@ -4,7 +4,7 @@ import {Injectable} from '@angular/core';
 })
 export class Globals {
   readonly backendUri: string = Globals.findBackendUrl();
-  //readonly backendImageUri: string = Globals.findImageBackendUrl();
+  readonly wsUri: string = Globals.findWebSocketUrl();
 
   private static findBackendUrl(): string {
     if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8080
@@ -15,14 +15,14 @@ export class Globals {
     }
   }
 
-  //private static findImageBackendUrl(): string {
-  //  if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8080
-  //    return 'http://localhost:8080/assets';
-  //  } else {
-  //    // assume deployed somewhere and backend is available at same host/port as frontend
-  //    return window.location.protocol + '//' + window.location.host + window.location.pathname + 'assets';
-  //  }
-  //}
+  private static findWebSocketUrl(): string {
+    if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8085
+      return 'http://localhost:8085';
+    } else {
+      // assume deployed somewhere and backend is available at same host/port as frontend
+      return window.location.protocol + '//' + window.location.host + window.location.pathname.replace(/\/$/, '');
+    }
+  }
 }
 
 

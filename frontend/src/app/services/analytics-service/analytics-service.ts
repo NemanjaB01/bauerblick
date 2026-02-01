@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Globals } from '../../global/globals';
 
 export interface FeedbackStats {
   [key: string]: number;
@@ -23,10 +24,13 @@ export interface DashboardAnalytics {
   providedIn: 'root',
 })
 export class AnalyticsService {
-  private farmAnalyticsBaseUrl = 'http://localhost:8082/api/farm-analytics';
-  private notificationAnalyticsBaseUrl = 'http://localhost:8085/api/analytics';
+  private farmAnalyticsBaseUrl: string;
+  private notificationAnalyticsBaseUrl: string;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private globals: Globals) {
+    this.farmAnalyticsBaseUrl = this.globals.backendUri + '/farm-analytics';
+    this.notificationAnalyticsBaseUrl = this.globals.backendUri + '/analytics';
+  }
 
   getFeedbackStats(farmId: string): Observable<FeedbackStats> {
     return this.httpClient.get<FeedbackStats>(

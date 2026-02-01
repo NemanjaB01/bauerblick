@@ -11,7 +11,7 @@ export class SeedService {
   private signUpBaseUri: string;
 
   constructor(private httpClient: HttpClient, private globals: Globals) {
-    this.signUpBaseUri = 'http://localhost:8082/api/seeds';
+    this.signUpBaseUri = this.globals.backendUri + '/seeds';
   }
 
   getAll(): Observable<Seed[]> {

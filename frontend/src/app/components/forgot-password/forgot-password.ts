@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
+import {Globals} from '../../global/globals';
 
 @Component({
   selector: 'app-forgot-password',
@@ -17,10 +18,10 @@ import {ToastrService} from 'ngx-toastr';
 export class ForgotPassword {
   resetEmail: string = '';
 
-  constructor(private http: HttpClient, private toastr: ToastrService) {}
+  constructor(private http: HttpClient, private toastr: ToastrService, private globals: Globals) {}
 
   onResetRequest() {
-    const url = `http://localhost:8080/api/users/password-reset?email=${this.resetEmail}`;
+    const url = `${this.globals.backendUri}/users/password-reset?email=${this.resetEmail}`;
 
     this.http.get(url).subscribe({
       next: (response) => {

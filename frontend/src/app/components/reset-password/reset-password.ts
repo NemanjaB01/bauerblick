@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import {ResetPasswordDto} from '../../dtos/user';
+import {Globals} from '../../global/globals';
 
 @Component({
   selector: 'app-reset-password',
@@ -29,7 +30,8 @@ export class ResetPassword implements OnInit {
     private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private globals: Globals
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +54,7 @@ export class ResetPassword implements OnInit {
   onResetPassword() {
     this.errorMap = {};
 
-    const url = `http://localhost:8080/api/users/password-reset?token=${this.token}`;
+    const url = `${this.globals.backendUri}/users/password-reset?token=${this.token}`;
 
     this.http.post(url, this.resetData, { responseType: 'text' }).subscribe({
       next: (response) => {

@@ -11,7 +11,7 @@ export class NotificationService {
   private notificationUri: string;
 
   constructor(private httpClient: HttpClient, private globals: Globals) {
-    this.notificationUri = 'http://localhost:8085/api/notifications';
+    this.notificationUri = this.globals.backendUri + '/notifications';
   }
 
   getLatestWeather(farmId: string): Observable<any> {

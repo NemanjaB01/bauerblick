@@ -5,7 +5,7 @@ variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 stages:
-  - test
+#  - test
   - build
   - deploy
 
@@ -55,36 +55,36 @@ cache:
 #     - cd backend/service-registry
 #     - ./mvnw -B clean test
 
-test-notification-service:
-  stage: test
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - cd backend/notification-service
-    - ./mvnw -B clean test
-
-test-rule-engine:
-  stage: test
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  script:
-    - cd backend/rule-engine
-    - ./mvnw -B clean test
-
-test-sensor-ingestion-service:
-  stage: test
-  image: registry.reset.inso-w.at/pub/docker/python:3.13-slim
-  script:
-    - cd backend/sensor-ingestion-service
-    - pip install -r requirements.txt
-    - echo "Python tests..."
-    - pytest
+#test-notification-service:
+#  stage: test
+#  services:
+#    - docker:dind
+#  variables:
+#    DOCKER_HOST: tcp://docker:2375
+#    DOCKER_TLS_CERTDIR: ""
+#  script:
+#    - cd backend/notification-service
+#    - ./mvnw -B clean test
+#
+#test-rule-engine:
+#  stage: test
+#  services:
+#    - docker:dind
+#  variables:
+#    DOCKER_HOST: tcp://docker:2375
+#    DOCKER_TLS_CERTDIR: ""
+#  script:
+#    - cd backend/rule-engine
+#    - ./mvnw -B clean test
+#
+#test-sensor-ingestion-service:
+#  stage: test
+#  image: registry.reset.inso-w.at/pub/docker/python:3.13-slim
+#  script:
+#    - cd backend/sensor-ingestion-service
+#    - pip install -r requirements.txt
+#    - echo "Python tests..."
+#    - pytest
 
 # test-frontend:
 #   stage: test

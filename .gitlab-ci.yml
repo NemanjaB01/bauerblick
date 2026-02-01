@@ -199,9 +199,12 @@ deploy:
   # needs:
   #   - build-service-registry
   script:
-    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' kubernetes.yaml
-    - cat kubernetes.yaml
-    - kubectl apply -f frontend/kubernetes-frontend.yaml
+    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-service-registry.yaml
+    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-api-gateway.yaml
+    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-frontend.yaml
+    - sed -i 's/:latest/:'$CI_PIPELINE_ID'/g' k8s/kubernetes-backend-services.yaml
+    # Deploy all services
+    - kubectl apply -f k8s/
   only:
     - main
     - 21-kubernetes-integration-setup

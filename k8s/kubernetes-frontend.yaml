@@ -15,17 +15,17 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: registry.reset.inso-w.at/2025ws-ase-pr-group/frontend:latest
+          image: registry.reset.inso-w.at/2025ws-ase-pr-group/25ws-ase-pr-inso-01/frontend:latest
           ports:
             - containerPort: 80
           resources:
             requests:
               cpu: "10m"
-              memory: "128Mi"
+              memory: "96Mi"
               ephemeral-storage: "50Mi"
             limits:
-              cpu: "150m"
-              memory: "256Mi"
+              cpu: "75m"
+              memory: "192Mi"
               ephemeral-storage: "150Mi"
       imagePullSecrets:
         - name: secret-dockercfg

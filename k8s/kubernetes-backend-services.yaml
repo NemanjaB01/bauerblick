@@ -431,6 +431,8 @@ spec:
               value: "localhost"
             - name: SPRING_RABBITMQ_PORT
               value: "5672"
+            - name: API_GATEWAY_URL
+              value: "http://s-api-gateway:8080"
           resources:
             requests:
               cpu: "30m"

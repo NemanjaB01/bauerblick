@@ -158,7 +158,11 @@ public class FarmServiceImpl implements FarmService {
     }
 
     private UserDetailsDto getUserDetails(String email) throws Exception {
-        String url = "http://api-gateway:8080/api/users/by-email/" + email;
+        String baseUrl = System.getenv("API_GATEWAY_URL");
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        String url = baseUrl + "/api/users/by-email/" + email;
 
         try {
             UserDetailsDto userDto = restTemplate.getForObject(url, UserDetailsDto.class);

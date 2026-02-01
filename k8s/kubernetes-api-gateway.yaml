@@ -21,6 +21,8 @@ spec:
           env:
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: "http://s-service-registry:8761/eureka/"
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
             - name: SPRING_PROFILES_ACTIVE
               value: "kubernetes"
           resources:

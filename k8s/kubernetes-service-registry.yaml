@@ -21,6 +21,8 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "kubernetes"
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
           resources:
             requests:
               cpu: "40m"

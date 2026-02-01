@@ -395,6 +395,8 @@ spec:
               value: "mongodb://localhost:27017/usersdb"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: "http://s-service-registry:8761/eureka/"
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
             - name: SPRING_RABBITMQ_HOST
               value: "localhost"
             - name: SPRING_RABBITMQ_PORT
@@ -421,6 +423,8 @@ spec:
               value: "mongodb://localhost:27018/farmsdb"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: "http://s-service-registry:8761/eureka/"
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
             - name: SPRING_RABBITMQ_HOST
               value: "localhost"
             - name: SPRING_RABBITMQ_PORT
@@ -447,6 +451,8 @@ spec:
               value: "mongodb://localhost:27019/seedsdb"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: "http://s-service-registry:8761/eureka/"
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
             - name: SPRING_RABBITMQ_HOST
               value: "localhost"
             - name: SPRING_RABBITMQ_PORT
@@ -475,6 +481,8 @@ spec:
               value: "true"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: "http://s-service-registry:8761/eureka/"
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
             - name: SPRING_RABBITMQ_HOST
               value: "localhost"
             - name: SPRING_RABBITMQ_PORT

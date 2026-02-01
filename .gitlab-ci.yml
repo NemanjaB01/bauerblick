@@ -33,7 +33,7 @@ cache:
 #     - cd backend/user-service
 #     - ./mvnw -B clean test
 
-# test-farm-service:
+test-farm-service:
   stage: test
   script:
     - cd backend/farm-service

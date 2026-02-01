@@ -403,6 +403,8 @@ spec:
               value: "localhost"
             - name: SPRING_RABBITMQ_PORT
               value: "5672"
+            - name: FRONTEND_URL
+              value: "https://25ws-ase-pr-inso-01.apps.student.inso-w.at"
           resources:
             requests:
               cpu: "30m"
@@ -433,6 +435,8 @@ spec:
               value: "5672"
             - name: API_GATEWAY_URL
               value: "http://s-api-gateway:8080"
+            - name: CORS_ALLOWED_ORIGINS
+              value: "http://localhost:4200,https://25ws-ase-pr-inso-01.apps.student.inso-w.at"
           resources:
             requests:
               cpu: "30m"
@@ -513,6 +517,8 @@ spec:
               value: "true"
             - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
               value: "true"
+            - name: CORS_ALLOWED_ORIGINS
+              value: "http://localhost:4200,https://25ws-ase-pr-inso-01.apps.student.inso-w.at"
           resources:
             requests:
               cpu: "30m"

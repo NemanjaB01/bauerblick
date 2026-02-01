@@ -13,7 +13,11 @@ public class PasswordResetProducer {
   private final RabbitTemplate rabbitTemplate;
 
   public void sendResetEmail(String userEmail, String token) {
-    String resetLink = "http://localhost:4200/reset-password?token=" + token;
+    String frontendUrl = System.getenv("FRONTEND_URL");
+    if (frontendUrl == null) {
+      frontendUrl = "http://localhost:4200";
+    }
+    String resetLink = frontendUrl + "/reset-password?token=" + token;
 
     EmailRequest request = new EmailRequest(
             userEmail,

@@ -62,12 +62,22 @@ metadata:
   namespace: 25ws-ase-pr-inso-01
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: "s-api-gateway"
 spec:
   rules:
     - host: "25ws-ase-pr-inso-01.apps.student.inso-w.at"
       http:
         paths:
           - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: s-api-gateway
+                port:
+                  number: 8080
+          - path: /ws-alerts
             pathType: Prefix
             backend:
               service:

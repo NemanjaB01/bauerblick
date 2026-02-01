@@ -10,17 +10,17 @@ export class Globals {
     if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8080
       return 'http://localhost:8080/api';
     } else {
-      // assume deployed somewhere and backend is available at same host/port as frontend
-      return window.location.protocol + '//' + window.location.host + window.location.pathname + 'api';
+      // deployed: backend is available at same host via /api path
+      return window.location.origin + '/api';
     }
   }
 
   private static findWebSocketUrl(): string {
-    if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8085
+    if (window.location.port === '4200') { // local `ng serve`, notification service at localhost:8085
       return 'http://localhost:8085';
     } else {
-      // assume deployed somewhere and backend is available at same host/port as frontend
-      return window.location.protocol + '//' + window.location.host + window.location.pathname.replace(/\/$/, '');
+      // deployed: WebSocket goes through same host (api-gateway)
+      return window.location.origin;
     }
   }
 }

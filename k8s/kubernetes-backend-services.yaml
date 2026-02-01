@@ -214,15 +214,6 @@ data:
         }
       }
     ]
-  init-farms.sh: |
-    #!/bin/bash
-    # Init script for farms-db - runs automatically when MongoDB starts
-    mongoimport --db farmsdb --collection seed --type json --file /docker-entrypoint-initdb.d/seeds.json --jsonArray --drop
-    echo "Inserted seeds into farmsdb.seed"
-  init-seeds.sh: |
-    #!/bin/bash
-    # Init script for seeds-db - runs automatically when MongoDB starts
-    mongoimport --db seedsdb --collection seed --type json --file /docker-entrypoint-initdb.d/seeds.json --jsonArray --drop
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -279,17 +270,30 @@ spec:
         # Farms MongoDB - port 27018 (with init script for seeding)
         - name: farms-db
           image: mongo:6
-          args: ["--port", "27018"]
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              mongod --port 27018 &
+              MONGO_PID=$!
+              # Wait for MongoDB to be ready (max 180 seconds)
+              for i in $(seq 1 90); do
+                if mongosh --port 27018 --eval "db.adminCommand('ping')" &>/dev/null; then
+                  echo "MongoDB is ready"
+                  break
+                fi
+                echo "Waiting for MongoDB... ($i)"
+                sleep 2
+              done
+              mongoimport --port 27018 --db farmsdb --collection seed --type json --file /seeds/seeds.json --jsonArray --drop
+              echo "Seeds imported to farmsdb"
+              wait $MONGO_PID
           ports:
             - containerPort: 27018
           volumeMounts:
             - name: farms-db-data
               mountPath: /data/db
             - name: seeds-config
-              mountPath: /docker-entrypoint-initdb.d/init-farms.sh
-              subPath: init-farms.sh
-            - name: seeds-config
-              mountPath: /docker-entrypoint-initdb.d/seeds.json
+              mountPath: /seeds/seeds.json
               subPath: seeds.json
           resources:
             requests:
@@ -302,17 +306,30 @@ spec:
         # Seeds MongoDB - port 27019 (with init script for seeding)
         - name: seeds-db
           image: mongo:6
-          args: ["--port", "27019"]
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              mongod --port 27019 &
+              MONGO_PID=$!
+              # Wait for MongoDB to be ready (max 180 seconds)
+              for i in $(seq 1 90); do
+                if mongosh --port 27019 --eval "db.adminCommand('ping')" &>/dev/null; then
+                  echo "MongoDB is ready"
+                  break
+                fi
+                echo "Waiting for MongoDB... ($i)"
+                sleep 2
+              done
+              mongoimport --port 27019 --db seedsdb --collection seed --type json --file /seeds/seeds.json --jsonArray --drop
+              echo "Seeds imported to seedsdb"
+              wait $MONGO_PID
           ports:
             - containerPort: 27019
           volumeMounts:
             - name: seeds-db-data
               mountPath: /data/db
             - name: seeds-config
-              mountPath: /docker-entrypoint-initdb.d/init-seeds.sh
-              subPath: init-seeds.sh
-            - name: seeds-config
-              mountPath: /docker-entrypoint-initdb.d/seeds.json
+              mountPath: /seeds/seeds.json
               subPath: seeds.json
           resources:
             requests:
@@ -460,6 +477,8 @@ spec:
               value: "localhost"
             - name: SPRING_RABBITMQ_PORT
               value: "5672"
+            - name: FARM_SERVICE_URL
+              value: "http://s-api-gateway:8080/api/farms"
           resources:
             requests:
               cpu: "30m"

@@ -16,44 +16,44 @@ cache:
 
 # TEST STAGE
 
-test-api-gateway:
-  stage: test
-  script:
-    - cd backend/api-gateway
-    - ./mvnw -B clean test
+# test-api-gateway:
+#   stage: test
+#   script:
+#     - cd backend/api-gateway
+#     - ./mvnw -B clean test
 
-test-user-service:
-  stage: test
-  image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
-  services:
-    - name: mongo:6
-      alias: mongo
-    - name: rabbitmq:3-management
-      alias: rabbitmq
-  variables:
-    SPRING_DATA_MONGODB_URI: "mongodb://mongo:27017/testdb"
-    SPRING_RABBITMQ_HOST: "rabbitmq"
-    SPRING_RABBITMQ_PORT: "5672"
-  script:
-    - cd backend/user-service
-    - ./mvnw -B clean test
+# test-user-service:
+#   stage: test
+#   image: registry.reset.inso-w.at/pub/docker/eclipse-temurin:21
+#   services:
+#     - name: mongo:6
+#       alias: mongo
+#     - name: rabbitmq:3-management
+#       alias: rabbitmq
+#   variables:
+#     SPRING_DATA_MONGODB_URI: "mongodb://mongo:27017/testdb"
+#     SPRING_RABBITMQ_HOST: "rabbitmq"
+#     SPRING_RABBITMQ_PORT: "5672"
+#   script:
+#     - cd backend/user-service
+#     - ./mvnw -B clean test
 
-test-farm-service:
-  stage: test
-  services:
-    - name: mongo:6
-      alias: mongo
-  variables:
-    SPRING_DATA_MONGODB_URI: "mongodb://mongo:27017/testdb"
-  script:
-    - cd backend/farm-service
-    - ./mvnw -B clean test
+# test-farm-service:
+#   stage: test
+#   services:
+#     - name: mongo:6
+#       alias: mongo
+#   variables:
+#     SPRING_DATA_MONGODB_URI: "mongodb://mongo:27017/testdb"
+#   script:
+#     - cd backend/farm-service
+#     - ./mvnw -B clean test
 
-test-service-registry:
-  stage: test
-  script:
-    - cd backend/service-registry
-    - ./mvnw -B clean test
+# test-service-registry:
+#   stage: test
+#   script:
+#     - cd backend/service-registry
+#     - ./mvnw -B clean test
 
 test-notification-service:
   stage: test

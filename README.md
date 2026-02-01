@@ -20,9 +20,9 @@ A farm management platform for monitoring fields, tracking crops, and receiving 
   <p><em>Application workflow</em></p>
 </div>
 
-[<img src="https://drive.google.com/file/d/1cfG_x4XYp9j8F1dizdWV9Mr_yhIkngml/view?usp=sharing" width="600">](https://drive.google.com/file/d/1cfG_x4XYp9j8F1dizdWV9Mr_yhIkngml/view?usp=sharing)
+📹 [Watch Demo Video](https://drive.google.com/file/d/1cfG_x4XYp9j8F1dizdWV9Mr_yhIkngml/view?usp=sharing)
 
-*Click to watch the demo video*
+*Full walkthrough of Agriscope features*
 
 ## Tech Stack
 

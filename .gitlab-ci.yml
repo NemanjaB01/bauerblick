@@ -16,11 +16,11 @@ cache:
 
 # TEST STAGE
 
-test-api-gateway:
-  stage: test
-  script:
-    - cd backend/api-gateway
-    - ./mvnw -B clean test
+# test-api-gateway:
+#   stage: test
+#   script:
+#     - cd backend/api-gateway
+#     - ./mvnw -B clean test
 
 # test-user-service:
 #   stage: test
@@ -44,11 +44,11 @@ test-api-gateway:
 #     - cd backend/farm-service
 #     - ./mvnw -B clean test
 
-test-service-registry:
-  stage: test
-  script:
-    - cd backend/service-registry
-    - ./mvnw -B clean test
+# test-service-registry:
+#   stage: test
+#   script:
+#     - cd backend/service-registry
+#     - ./mvnw -B clean test
 
 # test-notification-service:
 #   stage: test

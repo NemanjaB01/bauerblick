@@ -195,10 +195,15 @@ services:
     build: ./backend/sensor-ingestion-service
     container_name: sensor-ingestion
     depends_on:
-      - rabbitmq
-      - users-db
-      - farms-db
-      - rule-engine
+      rabbitmq:
+          condition: service_healthy
+      users-db:
+        condition: service_started
+      farms-db:
+        condition: service_started
+      rule-engine:
+        condition: service_started
+
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672

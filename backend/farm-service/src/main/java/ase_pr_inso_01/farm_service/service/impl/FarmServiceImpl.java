@@ -162,7 +162,8 @@ public class FarmServiceImpl implements FarmService {
         if (baseUrl == null) {
             baseUrl = "http://localhost:8080";
         }
-        String url = baseUrl + "/api/users/by-email/" + email;
+        //String url = baseUrl + "/api/users/by-email/" + email;
+        String url = "http://api-gateway:8080/api/users/by-email/" + email;
 
         try {
             UserDetailsDto userDto = restTemplate.getForObject(url, UserDetailsDto.class);

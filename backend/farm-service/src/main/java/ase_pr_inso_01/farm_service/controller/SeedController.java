@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/seeds")
+@CrossOrigin(origins = "http://localhost:4200")
 public class SeedController {
 
     private final SeedService seedService;

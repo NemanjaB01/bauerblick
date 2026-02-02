@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             allowedOrigins = "http://localhost:4200";
         }
         registry.addEndpoint("/ws-alerts")
-                .setAllowedOriginPatterns(allowedOrigins.split(","))
+                .setAllowedOriginPatterns("http://localhost:4200")
                 .withSockJS();
     }
 }

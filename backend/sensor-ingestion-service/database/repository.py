@@ -1,19 +1,30 @@
 import os
+import sys
+import urllib.parse
 from pymongo import MongoClient
 from bson import ObjectId
 
-USERS_MONGO_URI = os.getenv("USERS_MONGO_URI", "mongodb://users-db:27017/usersdb")
-FARMS_MONGO_URI = os.getenv("FARMS_MONGO_URI", "mongodb://farms-db:27017/farmsdb")
 
-users_client = MongoClient(USERS_MONGO_URI)
-farms_client = MongoClient(FARMS_MONGO_URI)
-def get_mongo_client(uri):
-    return MongoClient(uri)
+
+MONGO_USER = os.getenv("MONGO_USER", "admin")
+MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "password")
+encoded_user = urllib.parse.quote_plus(MONGO_USER)
+encoded_password = urllib.parse.quote_plus(MONGO_PASSWORD)
+
+USERS_URI = f"mongodb://{encoded_user}:{encoded_password}@users-db:27017/usersdb?authSource=admin"
+FARMS_URI = f"mongodb://{encoded_user}:{encoded_password}@farms-db:27017/farmsdb?authSource=admin"
+
+try:
+    users_client = MongoClient(USERS_URI)
+    farms_client = MongoClient(FARMS_URI)
+
+    users_client.admin.command('ping')
+except Exception as e:
+    print(f"Error connecting to MongoDB: {e}")
+    sys.exit(1)
+
 
 def get_all_users_with_farms():
-    users_client = get_mongo_client(USERS_MONGO_URI)
-    farms_client = get_mongo_client(FARMS_MONGO_URI)
-
     try:
         users_db = users_client.get_default_database()
         farms_db = farms_client.get_default_database()
@@ -22,7 +33,6 @@ def get_all_users_with_farms():
         farms_collection = farms_db["farms"]
 
         all_users = []
-
         mongo_users = list(users_collection.find())
 
         for user in mongo_users:

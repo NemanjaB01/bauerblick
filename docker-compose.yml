@@ -2,15 +2,17 @@ services:
   users-db:
     image: mongo
     container_name: users-db
-    ports:
-      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - users-db_data:/data/db
   farms-db:
     image: mongo
     container_name: farms-db
-    ports:
-      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - farms-db_data:/data/db
       - ./backend/seeds.json:/data/seeds.json
@@ -18,17 +20,19 @@ services:
   seeds-db:
     image: mongo
     container_name: seeds-db
-    ports:
-      - "27019:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - ./backend/seeds.json:/data/seeds.json
-      - ./backend/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - ./backend/init-seeds.sh:/docker-entrypoint-initdb.d/init-seeds.sh
 
   notifications-db:
     image: mongo
     container_name: notifications-db
-    ports:
-      - "27020:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - notifications-db_data:/data/db
 
@@ -49,7 +53,6 @@ services:
     container_name: user-service
     ports:
       - "8081:8081"
-      - "5005:5005"   # expose debug port to host
     depends_on:
       service-registry:
         condition: service_started
@@ -58,13 +61,13 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      - spring.profiles.active=prod
-      - spring.data.mongodb.uri=mongodb://users-db:27017/usersdb
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@users-db:27017/usersdb?authSource=admin
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - spring.rabbitmq.host=rabbitmq
-      - spring.rabbitmq.port=5672
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
   # Farm Service
   farm-service:
@@ -72,7 +75,6 @@ services:
     container_name: farm-service
     ports:
       - "8082:8082"
-      - "5006:5006"   # expose debug port to host
     depends_on:
       service-registry:
         condition: service_started
@@ -85,13 +87,18 @@ services:
       user-service:
         condition: service_started
     environment:
-      - spring.profiles.active=prod
-      - spring.data.mongodb.uri=mongodb://farms-db:27017/farmsdb
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_MONGODB_HOST=farms-db
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=farmsdb
+      - SPRING_DATA_MONGODB_USERNAME=${MONGO_USER}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGO_PASSWORD}
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - spring.rabbitmq.host=rabbitmq
-      - spring.rabbitmq.port=5672
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
   # API Gateway
   api-gateway:
@@ -125,13 +132,18 @@ services:
       farm-service:
         condition: service_started
     environment:
-      - spring.profiles.active=prod
-      - spring.data.mongodb.uri=mongodb://seeds-db:27017/seedsdb
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_MONGODB_HOST=seeds-db
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=seedsdb
+      - SPRING_DATA_MONGODB_USERNAME=${MONGO_USER}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGO_PASSWORD}
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - spring.rabbitmq.host=rabbitmq
-      - spring.rabbitmq.port=5672
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
   # Notification Service
   notification-service:
@@ -144,28 +156,26 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
-      redis:
-        condition: service_started
       notifications-db:
         condition: service_started
     environment:
-      - spring.profiles.active=prod
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_MONGODB_HOST=notifications-db
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=notificationsdb
+      - SPRING_DATA_MONGODB_USERNAME=${MONGO_USER}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGO_PASSWORD}
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
+      - SPRING_DATA_MONGODB_AUTO_INDEX_CREATION=true
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
-      - spring.data.mongodb.uri=mongodb://notifications-db:27017/notificationsdb
-      - spring.data.mongodb.auto-index-creation=true
-
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - spring.rabbitmq.host=rabbitmq
-      - spring.rabbitmq.port=5672
-
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - SPRING_MAIL_HOST=smtp.gmail.com
       - SPRING_MAIL_PORT=587
-      - SPRING_MAIL_USERNAME=aagriscope@gmail.com
-      - SPRING_MAIL_PASSWORD=ftnxrgeryqkzgjzq
+      - SPRING_MAIL_USERNAME=${MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
       - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
       - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
 
@@ -176,8 +186,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 10s
@@ -185,26 +195,25 @@ services:
       retries: 5
       start_period: 10s
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-
   sensor-ingestion-service:
     build: ./backend/sensor-ingestion-service
     container_name: sensor-ingestion
     depends_on:
-      - rabbitmq
-      - users-db
-      - farms-db
-      - rule-engine
+      rabbitmq:
+        condition: service_healthy
+      users-db:
+        condition: service_started
+      farms-db:
+        condition: service_started
+      rule-engine:
+        condition: service_started
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
-      - USERS_MONGO_URI=mongodb://users-db:27017/usersdb
-      - FARMS_MONGO_URI=mongodb://farms-db:27017/farmsdb
-
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
 
 volumes:
   users-db_data:

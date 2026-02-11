@@ -2,6 +2,9 @@
 set -e
 
 mongoimport --host localhost \
+            --username "$MONGO_INITDB_ROOT_USERNAME" \
+            --password "$MONGO_INITDB_ROOT_PASSWORD" \
+            --authenticationDatabase admin \
             --db farmsdb \
             --collection seed \
             --type json \

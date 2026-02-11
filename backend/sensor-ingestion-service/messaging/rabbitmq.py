@@ -5,9 +5,31 @@ import os
 
 logger = logging.getLogger("rabbitmq")
 
-rabbitmq_host = os.getenv('RABBITMQ_HOST', 'localhost')
+RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'localhost')
+RABBITMQ_PORT = int(os.getenv('RABBITMQ_PORT', 5672))
+RABBITMQ_USER = os.getenv('RABBITMQ_USER', 'guest')
+RABBITMQ_PASS = os.getenv('RABBITMQ_PASSWORD', 'guest')
 _channel = None
 _connection = None
+
+def get_connection():
+    if not RABBITMQ_USER or not RABBITMQ_PASS:
+        logger.warning("RabbitMQ credentials are empty! Check your .env file.")
+    credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASS)
+
+    parameters = pika.ConnectionParameters(
+        host=RABBITMQ_HOST,
+        port=RABBITMQ_PORT,
+        credentials=credentials,
+        virtual_host='/'
+    )
+
+    try:
+        connection = pika.BlockingConnection(parameters)
+        return connection
+    except Exception as e:
+        logger.error(f"Failed to connect to RabbitMQ at {RABBITMQ_HOST}: {e}")
+        raise e
 
 def get_global_channel():
     global _channel, _connection
@@ -45,12 +67,6 @@ def start_event_loop():
         channel.start_consuming()
     except Exception as e:
         logger.error(f"Event loop crashed: {e}")
-
-def get_connection():
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=rabbitmq_host)
-    )
-    return connection
 
 def publish_message(data, routing_key, exchange="weather_exchange"):
 

@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -18,13 +19,19 @@ public class EmailService {
 
     private final EmailTemplateService emailTemplateService;
 
+    @Value("${app.mail.noreply}")
+    private String noreplyEmail;
+
+    @Value("${app.mail.support}")
+    private String supportEmail;
+
     @Async
     public void sendAlertEmail(String toEmail, String subject, String htmlBody) {
         try {
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("noreply@agriscope.com");
+            helper.setFrom(noreplyEmail);
             helper.setTo(toEmail);
             helper.setSubject("FARM ALERT: " + formatSubject(subject));
             helper.setText(htmlBody, true);
@@ -44,7 +51,7 @@ public class EmailService {
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("noreply@agriscope.com");
+            helper.setFrom(noreplyEmail);
             helper.setTo(to);
             helper.setSubject("Welcome to Agriscope, " + firstName + "!");
             helper.setText(htmlBody, true);
@@ -62,7 +69,7 @@ public class EmailService {
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("noreply@agriscope.com");
+            helper.setFrom(supportEmail);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(body, true);

@@ -102,7 +102,7 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - API_GATEWAY_URL=http://api-gateway:8080
-      - ALLOWED_ORIGIN=http://bauerblick.com
+      - ALLOWED_ORIGIN=http://bauerblick.com:8080
 
   # API Gateway
   api-gateway:

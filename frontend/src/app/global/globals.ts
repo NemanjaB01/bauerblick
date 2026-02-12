@@ -4,6 +4,7 @@ import {Injectable} from '@angular/core';
 })
 export class Globals {
   readonly backendUri: string = Globals.findBackendUrl();
+  readonly wsUri: string = Globals.findWebSocketUrl();
   //readonly backendImageUri: string = Globals.findImageBackendUrl();
 
   private static findBackendUrl(): string {
@@ -11,7 +12,19 @@ export class Globals {
       return 'http://localhost:8080/api';
     } else {
       // assume deployed somewhere and backend is available at same host/port as frontend
-      return window.location.protocol + '//' + window.location.host + window.location.pathname + 'api';
+      return window.location.protocol + '//' + window.location.host  + 'api';
+    }
+  }
+
+  private static findWebSocketUrl(): string {
+    if (window.location.port === '4200') {
+      return 'http://localhost:8080/ws-alerts';
+    } else {
+
+      const protocol = window.location.protocol; // http: or https:
+      const hostname = window.location.hostname; // bauerblick.com
+
+      return `${protocol}//${hostname}:8080/ws-alerts`;
     }
   }
 

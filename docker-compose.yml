@@ -174,7 +174,10 @@ services:
       - SPRING_DATA_MONGODB_PASSWORD=${MONGO_PASSWORD}
       - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
       - SPRING_DATA_MONGODB_AUTO_INDEX_CREATION=true
+      - SPRING_APPLICATION_NAME=notification-service
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
       - eureka.client.serviceUrl.defaultZone=http://service-registry:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
@@ -190,6 +193,7 @@ services:
       - APP_MAIL_SUPPORT=${MAIL_FROM_SUPPORT}
       - APP_FRONTEND_URL=http://bauerblick.com
       - ALLOWED_ORIGIN=http://bauerblick.com
+      - SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED=false
 
   rabbitmq:
     image: rabbitmq:3-management

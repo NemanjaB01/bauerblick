@@ -432,11 +432,15 @@ constructor(private farmService: FarmService, private toastr: ToastrService) {
           next: () => {
             // Success notification
             // @ts-ignore
-            const seedName = this.selectedSeedType.replace('_', ' ');
-            this.toastr.success(
-              `${seedName.charAt(0).toUpperCase() + seedName.slice(1)} planted successfully`,
-              `Field ${this.selectedFieldId} Planted`
-            );
+            if (this.selectedSeedType) {
+              let formatted = this.selectedSeedType.replace('_', ' ');
+              const seedName = formatted;
+              this.toastr.success(
+                `${seedName.charAt(0).toUpperCase() + seedName.slice(1)} planted successfully`,
+                `Field ${this.selectedFieldId} Planted`
+              );
+            }
+
           },
           error: () => this.toastr.error('Update failed')
         });

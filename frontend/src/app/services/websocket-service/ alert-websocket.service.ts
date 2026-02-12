@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { Client } from '@stomp/stompjs';
+import { Globals } from '../../global/globals';
 
 declare var SockJS: any;
 
@@ -32,7 +33,7 @@ export enum ConnectionStatus {
   providedIn: 'root'
 })
 export class AlertsWebSocketService implements OnDestroy {
-  private serverUrl = 'http://localhost:8085/ws-alerts';
+  private serverUrl: string;
   private isConnecting = false;
   private stompClient: Client | null = null;
   private alertsSubject = new Subject<AlertData>();
@@ -44,7 +45,9 @@ export class AlertsWebSocketService implements OnDestroy {
   private currentUserId: string | null = null;
   private currentFarmId: string | null = null;
 
-  constructor() {}
+  constructor(private globals: Globals) {
+    this.serverUrl = globals.wsUri;
+  }
 
   setFarmForUser(userId: string, farmId: string): void {
     console.log(`Alerts: Setting user ${userId}, farm ${farmId} - Connecting to WebSocket`);

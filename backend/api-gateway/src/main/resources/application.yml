@@ -6,41 +6,49 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "${ALLOWED_ORIGIN:http://localhost:4200}"
-            allowedMethods: [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
-            allowedHeaders: "*"
-            allowCredentials: true
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:4200"
+                  - "http://bauerblick.com"
+                  - "https://bauerblick.com"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/users/**, /api/authentication/**, /api/me/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
 
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/users/**, /api/authentication/**, /api/me/**
-          filters:
-            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+            - id: farm-service
+              uri: lb://farm-service
+              predicates:
+                - Path=/api/farms/**, /api/seeds/**, /api/farm-analytics/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
 
-        - id: farm-service
-          uri: lb://farm-service
-          predicates:
-            - Path=/api/farms/**, /api/seeds/**, /api/farm-analytics/**
-          filters:
-            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+            - id: notification-service
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/notifications/**, /api/analytics/**
+              filters:
+                - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
 
-
-        - id: notification-service
-          uri: lb://notification-service
-          predicates:
-            - Path=/api/notifications/**, /api/analytics/**
-          filters:
-            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
-
-        - id: notification-service-websocket
-          uri: lb:ws://notification-service
-          predicates:
-            - Path=/ws-alerts/**
+            - id: notification-service-websocket
+              uri: lb:ws://notification-service
+              predicates:
+                - Path=/ws-alerts/**
 
 eureka:
   client:

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { Client } from '@stomp/stompjs';
+import { Globals } from '../../global/globals';
+
 
 declare var SockJS: any;
 
@@ -25,7 +27,7 @@ export enum ConnectionStatus {
   providedIn: 'root'
 })
 export class WeatherWebSocketService {
-  private serverUrl = 'http://localhost:8085/ws-alerts';
+  private serverUrl: string;
   private isConnecting = false;
   private stompClient: Client | null = null;
   private weatherSubject = new Subject<WeatherData>();
@@ -36,7 +38,9 @@ export class WeatherWebSocketService {
 
   private weatherSubscription: any = null;
 
-  constructor() {}
+  constructor(globals: Globals) {
+    this.serverUrl = globals.wsUri;
+  }
 
   setFarmForUser(userId: string, farmId: string): void {
     console.log(`Setting user ${userId}, farm ${farmId} - Connecting to WebSocket`);

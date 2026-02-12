@@ -11,8 +11,10 @@ export class Globals {
     if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8080
       return 'http://localhost:8080/api';
     } else {
-      // assume deployed somewhere and backend is available at same host/port as frontend
-      return window.location.protocol + '//' + window.location.host  + 'api';
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname; // bauerblick.com
+
+      return `${protocol}//${hostname}:8080/api`;
     }
   }
 

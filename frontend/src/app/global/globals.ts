@@ -11,10 +11,7 @@ export class Globals {
     if (window.location.port === '4200') { // local `ng serve`, backend at localhost:8080
       return 'http://localhost:8080/api';
     } else {
-      const protocol = window.location.protocol;
-      const hostname = window.location.hostname; // bauerblick.com
-
-      return `${protocol}//${hostname}:8080/api`;
+      return 'https://bauerblick.com/api';
     }
   }
 
@@ -22,11 +19,7 @@ export class Globals {
     if (window.location.port === '4200') {
       return 'http://localhost:8080/ws-alerts';
     } else {
-
-      const protocol = window.location.protocol; // http: or https:
-      const hostname = window.location.hostname; // bauerblick.com
-
-      return `${protocol}//${hostname}:8080/ws-alerts`;
+      return 'wss://bauerblick.com/ws-alerts';
     }
   }
 

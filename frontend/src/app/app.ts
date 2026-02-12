@@ -9,7 +9,7 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = 'Agriscope';
+  protected readonly title = 'Bauerblick';
 }
 
 

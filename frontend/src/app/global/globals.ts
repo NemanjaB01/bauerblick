@@ -19,7 +19,7 @@ export class Globals {
     if (window.location.port === '4200') {
       return 'http://localhost:8080/ws-alerts';
     } else {
-      return 'wss://bauerblick.com/ws-alerts';
+      return 'https://bauerblick.com/ws-alerts';
     }
   }
 

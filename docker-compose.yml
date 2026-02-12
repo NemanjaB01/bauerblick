@@ -150,7 +150,6 @@ services:
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - FARM_SERVICE_URL=http://api-gateway:8080/api/farms
-      - ALLOWED_ORIGIN=http://bauerblick.com
       - ALLOWED_ORIGIN=https://bauerblick.com
 
   # Notification Service
@@ -193,7 +192,6 @@ services:
       - APP_MAIL_NOREPLY=${MAIL_FROM_NOREPLY}
       - APP_MAIL_SUPPORT=${MAIL_FROM_SUPPORT}
       - APP_FRONTEND_URL=http://bauerblick.com
-      - ALLOWED_ORIGIN=http://bauerblick.com
       - SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED=false
       - ALLOWED_ORIGIN=https://bauerblick.com
 

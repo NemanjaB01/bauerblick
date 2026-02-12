@@ -4,9 +4,9 @@
 
 .sidebar-container {
   width: 320px;
-  height: 100vh;
   position: fixed;
   top: 70px;
+  bottom: 0;          /* ← stretches to actual screen bottom, zoom-proof */
   left: 0;
   z-index: 10;
 
@@ -20,6 +20,8 @@
 
   border-radius: 0 35px 35px 0;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.12);
+  overflow-y: auto;          /* FIX: allow scroll if content overflows */
+  overflow-x: hidden;
 }
 
 /* ============================================
@@ -71,7 +73,6 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 0;
-
 }
 
 .menu-item.has-dropdown .menu-item-content {
@@ -81,7 +82,6 @@
   width: 90%;
   padding: 20px 0px 13px 28px;
   border-radius: 18px;
-  /* transition: all 0.75s ease; */
 }
 
 .menu-item img {
@@ -139,7 +139,6 @@
   width: 100%;
   border-radius: 18px;
   padding: 0;
-  /* box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); */
   backdrop-filter: blur(22px);
   max-height: 0;
   opacity: 0;
@@ -151,8 +150,6 @@
 .menu-item.has-dropdown:hover .farms-dropdown {
   max-height: 500px;
   opacity: 1;
-  /* padding: 20px; */
-  /* margin-top: 10px; */
 }
 
 /* Dropdown Header */
@@ -187,8 +184,6 @@
 }
 
 .farm-item {
-  /* padding: 12px 15px;
-  background: rgba(0, 0, 0, 0.04); */
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -198,7 +193,6 @@
 .farm-item:hover {
   background: rgba(0, 0, 0, 0.08);
   border-color: rgba(84, 84, 84, 0.15);
-  /* transform: translateX(3px); */
 }
 
 .farm-item span {
@@ -211,7 +205,6 @@
 /* Add Farm Button */
 .add-farm-btn {
   width: 100%;
-  /* padding: 12px; */
   background: rgba(174, 173, 173, 0.08);
   color: #333;
   border: none;
@@ -267,7 +260,7 @@
 .farm-item.selected {
   background-color: #f0f0f0;
   font-weight: bold;
-  border-left: 4px solid #007bff;  /* Highlight with a left border */
+  border-left: 4px solid #007bff;
 }
 
 /* ===================

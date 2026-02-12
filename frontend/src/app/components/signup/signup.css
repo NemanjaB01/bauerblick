@@ -263,3 +263,42 @@ input.error-input:focus {
     );
   }
 }
+
+@media (max-height: 600px) {
+
+  .signup-card {
+    width: clamp(300px, 80vw, 420px);
+    padding: clamp(16px, 3vh, 30px);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .signup-title {
+    font-size: clamp(18px, 3vh, 28px);
+  }
+
+  .signup-icon {
+    width: clamp(35px, 5vh, 60px);
+  }
+
+  label {
+    font-size: clamp(13px, 2vh, 16px);
+  }
+
+  input {
+    padding: clamp(8px, 1.8vh, 12px);
+    font-size: clamp(13px, 2vh, 15px);
+    margin-bottom: clamp(8px, 1.5vh, 15px);
+  }
+
+  .signup-btn {
+    padding: clamp(10px, 2vh, 14px);
+    font-size: clamp(14px, 2.5vh, 18px);
+  }
+
+  .signin-row {
+    font-size: clamp(12px, 1.8vh, 15px);
+  }
+}
+
+

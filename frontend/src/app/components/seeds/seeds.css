@@ -1,20 +1,17 @@
 .page-container {
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
   background-image: url('/assets/images/background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
 }
 
 .body-container {
   display: flex;
   margin-top: 70px;
-  height: calc(100vh - 70px);
   width: 100%;
-  overflow: hidden;
+  flex: 1;
 }
 
 .sidebar {
@@ -25,8 +22,6 @@
 .content-area {
   flex: 1;
   padding: 40px 60px 40px 120px;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 /* Seeds Grid */

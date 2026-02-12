@@ -4,6 +4,7 @@ import ase_pr_inso_01.user_service.config.RabbitMQConfig;
 import ase_pr_inso_01.user_service.model.EmailRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,9 +13,11 @@ public class PasswordResetProducer {
 
   private final RabbitTemplate rabbitTemplate;
 
-  public void sendResetEmail(String userEmail, String token) {
-    String resetLink = "http://localhost:4200/reset-password?token=" + token;
+  @Value("${APP_FRONTEND_URL:http://localhost:4200}")
+  private String frontendUrl;
 
+  public void sendResetEmail(String userEmail, String token) {
+    String resetLink = frontendUrl + "/reset-password?token=" + token;
     // Build HTML email body
     String htmlBody = buildPasswordResetEmailHtml(resetLink, userEmail);
 

@@ -1,6 +1,7 @@
 package com.agriscope.notification_service.service;
 
 import com.agriscope.notification_service.model.Recommendation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,9 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 public class EmailTemplateService {
+
+    @Value("${APP_FRONTEND_URL:http://localhost:4200}")
+    private String frontendUrl;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
@@ -20,6 +24,7 @@ public class EmailTemplateService {
         String reasoning = rec.getReasoning() != null ? rec.getReasoning() : "No details provided.";
         String advice = rec.getAdvice() != null ? formatAdvice(rec.getAdvice()) : "";
         String timestamp = LocalDateTime.now().format(DATE_FORMATTER);
+        String dashboardLink = frontendUrl + "/home";
 
         return String.format("""
             <!DOCTYPE html>
@@ -261,6 +266,7 @@ public class EmailTemplateService {
                 cropName,             // Crop name
                 reasoning,            // Details
                 buildAdviceSection(advice), // Advice section
+                dashboardLink,
                 timestamp             // Timestamp
         );
     }
@@ -366,7 +372,7 @@ public class EmailTemplateService {
 
     public String buildWelcomeEmailHtml(String firstName) {
         String timestamp = LocalDateTime.now().format(DATE_FORMATTER);
-
+        String loginLink = frontendUrl + "/login";
         return String.format("""
         <!DOCTYPE html>
         <html>
@@ -588,6 +594,7 @@ public class EmailTemplateService {
         """,
                 FARM_ICON_URL,  // Farm icon
                 firstName,      // User's first name
+                loginLink,
                 timestamp       // Timestamp
         );
     }

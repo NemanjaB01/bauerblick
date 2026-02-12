@@ -13,6 +13,7 @@ import ase_pr_inso_01.farm_service.repository.FarmRepository;
 import ase_pr_inso_01.farm_service.repository.HarvestHistoryRepository;
 import ase_pr_inso_01.farm_service.service.FarmService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -32,6 +33,9 @@ public class FarmServiceImpl implements FarmService {
     private final RestTemplate restTemplate;
     private final RabbitTemplate rabbitTemplate;
     private final HarvestHistoryRepository harvestHistoryRepository;
+
+    @Value("${API_GATEWAY_URL:http://localhost:8080}")
+    private String gatewayUrl;
 
     public FarmServiceImpl(FarmRepository farmRepository, FarmMapper farmMapper, RestTemplate restTemplate, RabbitTemplate rabbitTemplate, HarvestHistoryRepository harvestHistoryRepository) {
         this.farmRepository = farmRepository;
@@ -158,7 +162,7 @@ public class FarmServiceImpl implements FarmService {
     }
 
     private UserDetailsDto getUserDetails(String email) throws Exception {
-        String url = "http://api-gateway:8080/api/users/by-email/" + email;
+        String url = gatewayUrl + "/api/users/by-email/" + email;
 
         try {
             UserDetailsDto userDto = restTemplate.getForObject(url, UserDetailsDto.class);

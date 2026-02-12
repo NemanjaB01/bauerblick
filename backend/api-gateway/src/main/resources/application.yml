@@ -9,13 +9,8 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "http://localhost:4200"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
+            allowedOrigins: "${ALLOWED_ORIGIN:http://localhost:4200}"
+            allowedMethods: [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
             allowedHeaders: "*"
             allowCredentials: true
 
@@ -30,11 +25,24 @@ spring:
         - id: farm-service
           uri: lb://farm-service
           predicates:
-            - Path=/api/farms/**
+            - Path=/api/farms/**, /api/seeds/**, /api/farm-analytics/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**, /api/analytics/**
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+        - id: notification-service-websocket
+          uri: lb:ws://notification-service
+          predicates:
+            - Path=/ws-alerts/**
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}

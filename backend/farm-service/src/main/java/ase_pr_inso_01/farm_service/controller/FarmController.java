@@ -25,7 +25,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api/farms")
-@CrossOrigin(origins = "http://localhost:4200")
 public class FarmController {
     private final FarmService farmService;
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

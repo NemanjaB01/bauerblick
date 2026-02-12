@@ -39,7 +39,8 @@ public class WeatherMessageListener {
     @Autowired
     private RestTemplate restTemplate;
 
-    private final String FARM_SERVICE_URL = "http://farm-service:8082/api/farms";
+    @Value("${FARM_SERVICE_URL:http://localhost:8080/api/farms}")
+    private String farmServiceUrl;
 
     @RabbitListener(
             queues = RabbitMQConfig.WEATHER_QUEUE,
@@ -174,7 +175,7 @@ public class WeatherMessageListener {
 
     private Map<String, Double> fetchFeedbackFactors(String farmId) {
         try {
-            String url = FARM_SERVICE_URL + "/" + farmId + "/feedback-factors";
+            String url = farmServiceUrl + "/" + farmId + "/feedback-factors";
 
             ResponseEntity<Map<String, Double>> response = restTemplate.exchange(
                     url,

@@ -1,0 +1,302 @@
+<!-- ═══════════════════════════════════════════ -->
+<!--  BAUERBLICK — Gamified Farm Homepage      -->
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- FLOATING PARTICLES -->
+<div class="particles-layer">
+  <span class="particle leaf" style="--x: 8%; --delay: 0s; --duration: 12s;">🍃</span>
+  <span class="particle leaf" style="--x: 22%; --delay: 3s; --duration: 15s;">🌿</span>
+  <span class="particle leaf" style="--x: 45%; --delay: 1s; --duration: 11s;">🍂</span>
+  <span class="particle leaf" style="--x: 68%; --delay: 5s; --duration: 14s;">🍃</span>
+  <span class="particle leaf" style="--x: 85%; --delay: 2s; --duration: 13s;">🌿</span>
+  <span class="particle leaf" style="--x: 92%; --delay: 4s; --duration: 12s;">🍂</span>
+</div>
+
+<!-- ═══ NAVIGATION BAR ═══ -->
+<nav class="farm-nav" [class.scrolled]="isNavScrolled">
+  <div class="nav-inner">
+    <a class="nav-brand" (click)="scrollTo('hero')">
+      <img src="assets/icons/logo.svg" alt="Bauerblick" class="brand-logo" />
+      <span class="brand-text">Bauer<span class="brand-accent">blick</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a (click)="scrollTo('story')">Our Story</a></li>
+      <li><a (click)="scrollTo('features')">Features</a></li>
+      <li><a (click)="scrollTo('workflow')">Workflow</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="nav-btn nav-btn-outline" (click)="openDemo()">
+        ▶ Watch Demo
+      </button>
+      <button class="nav-btn nav-btn-primary" (click)="navigateTo('/login')">
+        Start Farming
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO SECTION ═══ -->
+<section class="page-section hero" id="hero">
+  <div class="sky-layer"></div>
+  <div class="clouds-layer">
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+  </div>
+  <div class="sun"><div class="sun-rays"></div></div>
+
+  <div class="hero-content">
+    <div class="hero-left">
+      <h1 class="hero-title reveal-on-scroll">
+        Your Farm,<br>
+        <span class="title-accent">at a Glance</span>
+      </h1>
+      <p class="hero-desc reveal-on-scroll">
+        Bauerblick is a gamified farm management platform. Monitor fields,
+        track crops, receive real-time alerts, and grow your farm —
+        all from one beautiful dashboard.
+      </p>
+      <div class="hero-buttons reveal-on-scroll">
+        <button class="hero-btn hero-btn-primary" (click)="navigateTo('/login')">
+          <span class="hero-btn-icon">🚜</span>
+          <span class="hero-btn-label">
+            <strong>Start Farming</strong>
+            <small>Create your first farm</small>
+          </span>
+        </button>
+        <button class="hero-btn hero-btn-secondary" (click)="openDemo()">
+          <span class="hero-btn-icon">🎬</span>
+          <span class="hero-btn-label">
+            <strong>Watch Demo</strong>
+            <small>See it in action</small>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-right reveal-on-scroll">
+      <div class="farm-scene">
+        <div class="scene-row scene-row-1">
+          <div class="scene-tile barn"><span class="tile-emoji">🏠</span><span class="tile-label">Farm HQ</span></div>
+          <div class="scene-tile field-green"><span class="tile-emoji">🌾</span><span class="tile-label">Wheat Field</span></div>
+          <div class="scene-tile field-gold"><span class="tile-emoji">🌽</span><span class="tile-label">Corn Field</span></div>
+        </div>
+        <div class="scene-row scene-row-2">
+          <div class="scene-tile weather"><span class="tile-emoji">🌤️</span><span class="tile-label">Weather</span></div>
+          <div class="scene-tile alerts"><span class="tile-emoji">🔔</span><span class="tile-label">Alerts</span><span class="alert-dot"></span></div>
+          <div class="scene-tile stats"><span class="tile-emoji">📊</span><span class="tile-label">Analytics</span></div>
+        </div>
+        <div class="scene-row scene-row-3">
+          <div class="scene-tile seeds"><span class="tile-emoji">🌱</span><span class="tile-label">Seeds</span></div>
+          <div class="scene-tile feedback"><span class="tile-emoji">💬</span><span class="tile-label">Feedback</span></div>
+          <div class="scene-tile profile"><span class="tile-emoji">👨‍🌾</span><span class="tile-label">Profile</span></div>
+        </div>
+        <div class="scene-popup popup-frost">❄️ Frost Alert!</div>
+        <div class="scene-popup popup-harvest">✅ Harvest Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hills-layer">
+    <svg viewBox="0 0 1440 180" preserveAspectRatio="none">
+      <path d="M0,120 C240,40 480,140 720,80 C960,20 1200,100 1440,60 L1440,180 L0,180Z" fill="#5a8f29" opacity="0.4"/>
+      <path d="M0,140 C300,80 600,160 900,100 C1100,60 1300,120 1440,90 L1440,180 L0,180Z" fill="#4a7c20" opacity="0.6"/>
+      <path d="M0,155 C200,120 500,170 800,130 C1000,100 1200,150 1440,120 L1440,180 L0,180Z" fill="#3d6a18"/>
+    </svg>
+  </div>
+
+  <div class="fence-row">
+    <div class="fence-segment" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"></div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint" (click)="scrollTo('story')">
+    <span class="scroll-hint-text">Scroll to explore</span>
+    <div class="scroll-hint-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STORY SECTION ═══ -->
+<section class="page-section story-section" id="story">
+  <div class="section-inner story-inner">
+
+    <div class="story-grid">
+      <!-- Left: Austria map -->
+      <div class="story-map reveal-on-scroll">
+        <div class="austria-container">
+          <img src="assets/images/austria.png" alt="Austria Map — Bauerblick Coverage" class="austria-map-img" />
+        </div>
+      </div>
+
+      <!-- Right: Story content -->
+      <div class="story-content">
+        <h2 class="section-title reveal-on-scroll">
+          <span class="title-icon">🇦🇹</span>
+          Our <span class="title-highlight">Story</span>
+        </h2>
+
+        <div class="story-text reveal-on-scroll">
+          <p>
+            Bauerblick was born at <strong>TU Wien</strong> as a university project with a simple idea —
+            what if managing a farm could feel as intuitive and engaging as playing a game?
+          </p>
+          <p>
+            Currently available across <strong>Austria</strong>, you can position your farm anywhere
+            in the country using real coordinates. Based on your location, field type, live weather
+            data and strong database about the different seed types, Bauerblick provides personalized alerts and recommendations to support your
+            farming journey.
+          </p>
+          <p>
+            This is an <strong>ongoing project</strong> that we're constantly improving.
+            We built it for the academic community and beyond, and we hope it might be
+            useful to anyone curious about smart, data-driven farming.
+          </p>
+        </div>
+
+        <div class="story-highlights reveal-on-scroll">
+          <div class="highlight-card">
+            <span class="highlight-icon">📍</span>
+            <div>
+              <strong>GPS-based</strong>
+              <span>Place your farm anywhere in Austria</span>
+            </div>
+          </div>
+          <div class="highlight-card">
+            <span class="highlight-icon">🌦️</span>
+            <div>
+              <strong>Live Weather</strong>
+              <span>Real data for your exact location</span>
+            </div>
+          </div>
+          <div class="highlight-card">
+            <span class="highlight-icon">⚙️</span>
+            <div>
+              <strong>Rule based engine</strong>
+              <span>Individual data correction based on your feedback.</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="story-footnote reveal-on-scroll">
+          * Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> — free &amp; open weather API.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ FEATURES SECTION ═══ -->
+<section class="page-section features-section" id="features">
+  <div class="section-inner">
+    <div class="section-header reveal-on-scroll">
+      <h2 class="section-title">
+        Farm <span class="title-highlight">Features</span>
+      </h2>
+      <p class="section-desc">Everything your farm needs to thrive</p>
+    </div>
+
+    <div class="features-grid">
+      <div
+        class="feature-card reveal-on-scroll"
+        *ngFor="let feature of features; let i = index"
+        [style.animation-delay]="(i * 80) + 'ms'"
+      >
+        <div class="card-ribbon">{{ feature.badge }}</div>
+        <div class="card-icon-wrapper">
+          <span class="card-icon">{{ feature.icon }}</span>
+        </div>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WORKFLOW SECTION ═══ -->
+<section class="page-section workflow-section" id="workflow">
+  <div class="section-inner">
+    <div class="section-header reveal-on-scroll">
+      <h2 class="section-title">
+        How It <span class="title-highlight">Works</span>
+      </h2>
+      <p class="section-desc">Your journey through Bauerblick</p>
+    </div>
+
+    <div class="workflow-showcase reveal-on-scroll">
+      <img src="assets/images/workflow-transparent.png" alt="Bauerblick Application Workflow" class="workflow-img" />
+    </div>
+
+    <div class="workflow-steps reveal-on-scroll">
+      <div class="wf-step">
+        <div class="wf-step-num">1</div>
+        <h4>Register & Login</h4>
+        <p>Create your farmer account and sign in to get started</p>
+      </div>
+      <div class="wf-step-arrow">→</div>
+      <div class="wf-step">
+        <div class="wf-step-num">2</div>
+        <h4>Create Your Farm</h4>
+        <p>Set up your first farm with fields, crops, and location</p>
+      </div>
+      <div class="wf-step-arrow">→</div>
+      <div class="wf-step">
+        <div class="wf-step-num">3</div>
+        <h4>Grow & Monitor</h4>
+        <p>Track fields, receive alerts, harvest, and give feedback</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA SECTION ═══ -->
+<section class="page-section cta-section" id="cta">
+  <div class="cta-inner reveal-on-scroll">
+    <div class="cta-barn">🏠</div>
+    <h2>Ready to manage your farm?</h2>
+    <p>Watch the full demo or jump right in and start planting!</p>
+    <div class="cta-buttons">
+      <button class="hero-btn hero-btn-primary" (click)="navigateTo('/login')">
+        <span class="hero-btn-icon">🌾</span>
+        <span class="hero-btn-label">
+          <strong>Start Farming</strong>
+          <small>Create your first farm</small>
+        </span>
+      </button>
+      <button class="hero-btn hero-btn-secondary" (click)="openDemo()">
+        <span class="hero-btn-icon">📹</span>
+        <span class="hero-btn-label">
+          <strong>Watch Demo</strong>
+          <small>Full walkthrough</small>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer inside CTA -->
+  <footer class="farm-footer">
+    <div class="footer-fence">
+      <div class="fence-segment" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]"></div>
+    </div>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="assets/icons/logo.svg" alt="" class="footer-logo-img" />
+        Bauer<span class="brand-accent">blick</span>
+      </div>
+      <p class="footer-tagline">Intelligent Farm Management System</p>
+      <div class="footer-links">
+        <a (click)="scrollTo('story')">Our Story</a>
+        <a (click)="scrollTo('features')">Features</a>
+        <a (click)="scrollTo('workflow')">Workflow</a>
+      </div>
+      <p class="footer-copy">
+        📩 Contact us: <a href="mailto:support@bauerblick.com">support@bauerblick.com</a>
+      </p>
+    </div>
+
+  </footer>
+</section>

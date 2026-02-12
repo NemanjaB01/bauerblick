@@ -12,9 +12,9 @@ import {Feedback} from './components/feedback/feedback';
 import {StatisticComponent} from './components/statistic/statistic';
 import {ResetPassword} from './components/reset-password/reset-password';
 import {ForgotPassword} from './components/forgot-password/forgot-password';
-
+import {HomepageComponent} from './components/first-page/first-page';
 export const routes: Routes = [
-  { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
+  { path: '', component: HomepageComponent, canActivate: [NoAuthGuard] },
   { path: 'login', component: Login, canActivate: [NoAuthGuard] },
   { path: 'signup', component: Signup, canActivate: [NoAuthGuard] },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },

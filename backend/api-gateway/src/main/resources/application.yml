@@ -13,7 +13,7 @@ spring:
               '[/**]':
                 allowedOrigins:
                   - "http://localhost:4200"
-                  - "http://bauerblick.com"
+                  - "https://bauerblick.com"
                 allowedMethods:
                   - GET
                   - POST

@@ -1,20 +1,21 @@
 .page-container {
-  height: 100vh;
-  width: 100vw;
+  height: 100%;            /* important: full viewport */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   background-image: url('/assets/images/background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
 }
 
+/* the region below the topbar */
 .body-container {
   display: flex;
+  height: 100%;     /* IMPORTANT: height, not min-height */
   margin-top: 70px;
-  height: calc(100vh - 70px);
   width: 100%;
-  overflow: hidden;
+  overflow: hidden;               /* keep: prevents double scrollbars */
 }
 
 .sidebar {
@@ -24,9 +25,11 @@
 
 .content-area {
   flex: 1;
-  padding: 40px 60px 40px 120px;
-  overflow-y: auto;
+  height: 100%;                   /* IMPORTANT */
+  overflow-y: auto;               /* scroll lives here */
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* smoother on iOS */
+  padding: 40px 60px 40px 120px;
 }
 
 .statistics-container {
@@ -166,50 +169,54 @@
 
 
 /* Responsive Design */
-@media (max-width: 1400px) {
-  .charts-grid {
-    gap: 25px;
-    row-gap: 40px;
-  }
-
-  .chart-wrapper {
-    height: 350px;
-  }
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  width: 100%;
 }
 
+/* Tablet */
 @media (max-width: 1200px) {
-  .content-area {
-    padding: 30px 40px 30px 80px;
-  }
-
   .charts-grid {
-    grid-template-columns: 1fr;
-    gap: 30px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 
   .chart-wrapper {
-    height: 400px;
+    height: 320px;
   }
 }
 
+/* Phone */
 @media (max-width: 768px) {
-  .content-area {
-    padding: 20px;
-  }
-
-  .page-title {
-    font-size: 28px;
-  }
-
-  .page-subtitle {
-    font-size: 14px;
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
 
   .chart-card {
-    padding: 20px;
+    padding: 15px;
   }
 
   .chart-wrapper {
-    height: 300px;
+    height: 240px;
+  }
+}
+
+/* Very small phone */
+@media (max-width: 480px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-wrapper {
+    height: 260px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .page-container {
+    background-attachment: scroll;
   }
 }

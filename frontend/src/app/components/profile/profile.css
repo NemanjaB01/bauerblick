@@ -4,10 +4,10 @@
 
 .page-container {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100vh;
   background-image: url('/assets/images/login_background.png');
-  background-size: cover;
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
@@ -31,16 +31,19 @@
    ============================================ */
 
 .content-area {
-  flex: 1;
+  margin-top: 70px;                  /* below topbar */
+  height: calc(100vh - 70px);        /* ✅ fixed viewport remaining space */
+  overflow-y: auto;                  /* ✅ scroll lives here */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* iOS smooth */
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin-top: 70px;
+  align-items: flex-start;           /* ✅ don’t vertically center on small screens */
+  padding: 30px 20px;
   position: relative;
   z-index: 2;
-  padding: 30px 20px;
-  overflow-y: auto;
 }
+
 
 .profile-content {
   width: 100%;
@@ -64,6 +67,8 @@
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.18);
   position: relative;
+  max-height: calc(100vh - 70px - 40px);
+  overflow: auto;
 }
 
 .profile-grid {
@@ -952,27 +957,75 @@ input.changed:focus {
     transform: translateY(0);
   }
 }
+.profile-scale-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  transform-origin: top center;
+}
+
+/* Only apply scaling on small height screens */
+@media (max-height: 700px) {
+  .profile-scale-wrapper {
+    transform: scale(0.85);
+  }
+}
+
+@media (max-height: 600px) {
+  .profile-scale-wrapper {
+    transform: scale(0.75);
+  }
+}
 
 /* ============================================
    RESPONSIVE
    ============================================ */
+@media (max-height: 650px) {
 
-@media (max-width: 768px) {
-  .modal-content.discard-modal {
-    padding: 30px 25px;
-    width: 90vw;
+  .profile-card {
+    padding: clamp(15px, 2vh, 25px);
   }
 
-  .discard-header h2 {
-    font-size: 20px;
+  .profile-title {
+    font-size: clamp(18px, 2.5vh, 26px);
   }
 
-  .modal-buttons {
-    flex-direction: column;
+  .header-icon {
+    width: clamp(35px, 5vh, 56px);
+    height: auto;
   }
 
-  .cancel-button,
-  .confirm-discard-button {
-    width: 100%;
+  .profile-avatar {
+    width: clamp(70px, 10vh, 110px);
+    height: clamp(70px, 10vh, 110px);
+  }
+
+  label {
+    font-size: clamp(12px, 1.8vh, 13px);
+  }
+
+  input {
+    padding: clamp(6px, 1.5vh, 10px);
+    font-size: clamp(12px, 1.8vh, 14px);
+  }
+
+  .section-header h3 {
+    font-size: clamp(13px, 2vh, 15px);
+  }
+
+  .action-buttons {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .discard-btn,
+  .save-btn {
+    padding: clamp(8px, 1.8vh, 12px);
+    font-size: clamp(12px, 2vh, 14px);
+  }
+
+  .back-button {
+    padding: clamp(8px, 1.5vh, 14px) clamp(16px, 2vh, 28px);
+    font-size: clamp(14px, 2vh, 18px);
   }
 }

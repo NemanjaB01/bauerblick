@@ -11,8 +11,9 @@
   justify-content: flex-start;
   align-items: center;
   perspective: 1500px;
-  margin-left: 200px;
-  margin-top: 250px;
+  /* FIX: flexible margins instead of fixed 200px/250px */
+  margin-left: clamp(40px, 12vw, 200px);
+  margin-top: clamp(80px, 16vw, 250px);
 }
 
 .fields-wrapper {
@@ -393,14 +394,12 @@
 
 /* ============================================
    MODAL OVERLAY & BASE STYLES
+   FIX: 100vw/100vh → 100%/100% + inset:0
    ============================================ */
 
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;                  /* FIX: replaces top/left/width/height */
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
@@ -416,6 +415,7 @@
   border-radius: 24px;
   padding: 45px 50px;
   width: 650px;
+  max-width: 90%;            /* FIX: prevent overflow */
   box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.4),
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
@@ -658,6 +658,7 @@
   font-style: italic;
   margin: 0;
 }
+
 /* ============================================
    DEVELOPER CONTROLS
    ============================================ */
@@ -790,7 +791,7 @@
 }
 
 /* ============================================
-   READY BADGE - STRONGER GLOW VERSION
+   READY BADGE
    ============================================ */
 
 .ready-badge {
@@ -864,6 +865,7 @@
 .field.ready {
   transform-style: preserve-3d;
 }
+
 /* ============================================
    HARVEST MODAL
    ============================================ */
@@ -874,6 +876,7 @@
 
 .harvest-modal {
   border-color: #FFD700;
+  max-width: 90%;            /* FIX: prevent overflow */
   box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.4),
     0 0 20px rgba(255, 215, 0, 0.3);
@@ -1020,6 +1023,7 @@
   content: '🌾 ';
   margin-right: 5px;
 }
+
 /* ============================================
    GROWING STAGE
    ============================================ */
@@ -1106,8 +1110,7 @@
 }
 
 /* ============================================
-   PUMPKIN FIELD: 2x2 grid (4 plants only)
-   for both growing and ready stages
+   PUMPKIN FIELD
    ============================================ */
 
 .field[data-field].growing .plants-container:has(.plant-icon[src*="pumpkin"]) {

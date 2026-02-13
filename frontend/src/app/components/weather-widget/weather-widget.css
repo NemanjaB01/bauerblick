@@ -301,3 +301,9 @@
     font-size: 56px;
   }
 }
+
+@media (max-width: 1400px) {
+  .weather-icon-large {
+    margin-left: 10px;       /* was 50px — shift left when scaled */
+  }
+}

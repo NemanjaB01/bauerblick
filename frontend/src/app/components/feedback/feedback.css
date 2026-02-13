@@ -1,11 +1,12 @@
 .page-container {
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;        /* was height: 100vh */
+  width: 100%;
 
   background-image: url('/assets/images/background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
 
   display: flex;
   flex-direction: column;
@@ -14,9 +15,9 @@
 .body-container {
   display: flex;
   margin-top: 70px;
-  height: calc(100vh - 70px);
+  min-height: calc(100vh - 70px);
   width: 100%;
-  overflow: hidden;
+  overflow: hidden;          /* no scroll here */
 }
 
 .sidebar {
@@ -29,30 +30,16 @@
   display: flex;
   gap: 40px;
   padding: 40px 40px 40px 20px;
-  overflow-y: auto;
+  overflow-y: auto;          /* scroll here — stays to the right of sidebar */
   overflow-x: hidden;
   align-items: flex-start;
+  position: relative;
 }
-
 .content-area::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  background: linear-gradient(to bottom,
-  transparent 0%,
-  rgba(139, 195, 74, 0.3) 20%,
-  rgba(104, 159, 56, 0.4) 50%,
-  rgba(85, 139, 47, 0.5) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
-
 .feedback-container {
-  padding: 20px 0 0 80px;
+  padding: 20px 20px 0 40px;   /* was 20px 0 0 80px */
   min-height: 100%;
   position: relative;
   z-index: 1;
@@ -80,10 +67,11 @@
   position: relative;
   overflow: hidden;
   display: flex;
-  gap: 55px;
-  height: 220px;
   border: 4px solid transparent;
-  width: calc(35% - 15px);
+  width: calc(35% - 15px);     /* was 35% — gives cards more room */
+  min-width: 280px;            /* ADD — prevents them getting too small when zoomed */
+  min-height: 220px;
+  gap: 30px;
   flex-shrink: 0;
 }
 
@@ -948,7 +936,7 @@
 .reset-all-container {
   position: absolute;
   top: 20px;
-  right: 80px;
+  right: 40px;          /* was 80px */
   z-index: 10;
 }
 

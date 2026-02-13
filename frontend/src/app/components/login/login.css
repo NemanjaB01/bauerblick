@@ -4,8 +4,7 @@
 .page-container {
   position: relative;
   width: 100vw;
-  height: 100vh;
-
+  min-height: 100vh;
   background-image: url('/assets/images/login_background.png');
   background-size: cover;
   background-position: center;
@@ -34,6 +33,7 @@
 .content-area {
   flex: 1;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   position: relative;
   z-index: 2;
@@ -248,3 +248,69 @@ input.error-input:focus {
   padding-left: 4px;
   font-weight: 600;
 }
+
+@media (max-height: 500px) {
+
+  .login-card {
+    width: 360px;
+    padding: 25px;
+  }
+
+  .login-title {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  .login-icon {
+    width: 60px;
+  }
+
+  label {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  input {
+    padding: 10px;
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+
+  .signin-btn {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .signup-row {
+    font-size: 13px;
+    margin-top: 15px;
+  }
+}
+
+
+@media (max-height: 430px) {
+
+  .login-card {
+    width: 320px;
+    padding: 18px;
+  }
+
+  .login-title {
+    font-size: 20px;
+  }
+
+  .login-icon {
+    width: 50px;
+  }
+
+  input {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .signin-btn {
+    font-size: 14px;
+  }
+}
+
+
